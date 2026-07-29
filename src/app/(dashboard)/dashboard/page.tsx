@@ -7,6 +7,7 @@ import { buildVimshottari, dashaAt, formatDashaChain } from '@/lib/astro/dasha';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { toBirthQueryString } from '@/lib/astro/query';
 import { deleteBirthProfile, setResearchConsent } from '@/lib/account/actions';
+import { ResearchProfileForm } from '@/components/account/ResearchProfileForm';
 import type { BirthProfile, Profile } from '@/lib/supabase/types';
 
 export const metadata = { title: 'Your charts', robots: { index: false } };
@@ -15,6 +16,8 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   const profile = (await getProfile()) as Profile & {
     research_consent: boolean;
+    health_research_consent: boolean;
+    research_subject_key: string | null;
   };
 
   const supabase = await createClient();
@@ -24,6 +27,23 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false });
 
   const charts = (data as BirthProfile[] | null) ?? [];
+
+  // The person's own contributed row, so the life event form comes back filled
+  // in rather than blank every visit. Readable here only because the query is
+  // keyed by their own subject key.
+  let lifeEvents = null;
+  if (profile.research_consent && profile.research_subject_key) {
+    const { data: row } = await supabase
+      .from('research_charts')
+      .select(
+        'gender, marital_status, marriage_year, children_count, first_child_year, ' +
+          'education_level, occupation_category, career_change_years, ' +
+          'relocation_years, major_health_years',
+      )
+      .eq('subject_key', profile.research_subject_key)
+      .maybeSingle();
+    lifeEvents = row as never;
+  }
 
   return (
     <div>
@@ -101,6 +121,25 @@ export default async function DashboardPage() {
             Save preference
           </button>
         </form>
+
+        {profile.research_consent && (
+          <>
+            <div className="rule-gold my-8" />
+            <h3 className="font-display text-base" style={{ color: 'var(--color-gold-200)' }}>
+              A little more, if you are willing
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Chart positions alone can only show what is common. To test whether
+              a classical rule actually holds, the research needs something to
+              test it against. Every field below is optional, and you can change
+              or clear any of them at any time.
+            </p>
+            <ResearchProfileForm
+              values={lifeEvents}
+              healthConsent={profile.health_research_consent}
+            />
+          </>
+        )}
       </section>
     </div>
   );

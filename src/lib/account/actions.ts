@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { castChart } from '@/lib/astro/chart';
 import { buildResearchRow } from '@/lib/research/capture';
+import { parseYears } from '@/lib/research/vocab';
 
 export interface AccountState {
   error?: string;
@@ -216,4 +217,107 @@ async function contributeResearch(userId: string, input: ContributionInput) {
     // own data is the thing that matters here.
     console.error('[research] contribution failed', error);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Life events
+// ---------------------------------------------------------------------------
+
+const lifeEventsSchema = z.object({
+  gender: z.string().optional(),
+  marital_status: z.string().optional(),
+  marriage_year: z.coerce.number().int().min(1800).max(2400).optional().nullable(),
+  children_count: z.coerce.number().int().min(0).max(30).optional().nullable(),
+  first_child_year: z.coerce.number().int().min(1800).max(2400).optional().nullable(),
+  education_level: z.string().optional(),
+  occupation_category: z.string().optional(),
+});
+
+/**
+ * Save the optional life details that let the research set test a claim
+ * rather than only describe distributions.
+ *
+ * Writes nothing unless the person has opted into research, and writes health
+ * years only if they have also given the separate health consent.
+ */
+export async function saveLifeEvents(
+  _prev: AccountState,
+  formData: FormData,
+): Promise<AccountState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Please sign in first.' };
+
+  const healthConsent = formData.get('health_consent') === 'on';
+
+  // Record the health consent decision before writing anything, so that
+  // withdrawing it clears the stored years through the database trigger.
+  await supabase
+    .from('profiles')
+    .update({ health_research_consent: healthConsent })
+    .eq('id', user.id);
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('research_consent, research_subject_key')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const p = profile as
+    | { research_consent: boolean; research_subject_key: string | null }
+    | null;
+
+  if (!p?.research_consent || !p.research_subject_key) {
+    return {
+      error:
+        'Turn on research sharing above first, then these details can be saved.',
+    };
+  }
+
+  const parsed = lifeEventsSchema.safeParse({
+    gender: formData.get('gender') || undefined,
+    marital_status: formData.get('marital_status') || undefined,
+    marriage_year: formData.get('marriage_year') || null,
+    children_count: formData.get('children_count') || null,
+    first_child_year: formData.get('first_child_year') || null,
+    education_level: formData.get('education_level') || undefined,
+    occupation_category: formData.get('occupation_category') || undefined,
+  });
+
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+
+  const { error } = await supabase
+    .from('research_charts')
+    .update({
+      gender: d.gender || null,
+      marital_status: d.marital_status || null,
+      marriage_year: d.marriage_year ?? null,
+      children_count: d.children_count ?? null,
+      first_child_year: d.first_child_year ?? null,
+      education_level: d.education_level || null,
+      occupation_category: d.occupation_category || null,
+      career_change_years: parseYears(formData.get('career_change_years') as string),
+      relocation_years: parseYears(formData.get('relocation_years') as string),
+      // Health years are written only with the separate consent. Without it
+      // the array is cleared rather than left behind.
+      major_health_years: healthConsent
+        ? parseYears(formData.get('major_health_years') as string)
+        : [],
+      life_events_updated_at: new Date().toISOString(),
+    })
+    .eq('subject_key', p.research_subject_key);
+
+  if (error) {
+    return {
+      error:
+        'Could not save those details. Save a chart first, so there is a chart to attach them to.',
+    };
+  }
+
+  revalidatePath('/dashboard');
+  return { message: 'Details saved. Thank you, this is genuinely useful.' };
 }
