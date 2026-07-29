@@ -36,11 +36,13 @@ export async function getRegions(): Promise<Region[]> {
  * The region to price in, resolved in this order:
  *
  *   1. the visitor's explicit choice, from the currency switcher;
- *   2. the region listing their detected country;
- *   3. the region marked default;
- *   4. whatever region exists.
+ *   2. the region that lists their detected country;
+ *   3. a catch-all region, when the country is known but listed nowhere;
+ *   4. the region marked default;
+ *   5. whatever region exists.
  *
- * The last two steps matter: a visitor whose country cannot be determined, * a VPN, a privacy browser, a crawler, still sees a price rather than a gap.
+ * The last steps matter: a visitor whose country cannot be determined at all,
+ * a VPN, a privacy browser, a crawler, still sees a price rather than a gap.
  */
 export async function resolveRegion(): Promise<Region | null> {
   const regions = await getRegions();
@@ -55,9 +57,26 @@ export async function resolveRegion(): Promise<Region | null> {
   }
 
   const country = cookieStore.get('va_country')?.value ?? (await detectCountry());
+
   if (country) {
-    const match = regions.find((r) => r.country_codes.includes(country));
-    if (match) return match;
+    const listed = regions.find((r) => r.country_codes.includes(country));
+    if (listed) return listed;
+
+    /*
+      Known country, listed nowhere: use the catch-all if one exists.
+
+      This step is easy to miss and expensive to get wrong. A catch-all region
+      carries no country codes on purpose, so matching only on explicit codes
+      never selects it and every foreign visitor falls through to the default,
+      which would show someone in the United States the Indian price.
+
+      The default is excluded here, because a default with no country codes is
+      the home market rather than a catch-all.
+    */
+    const catchAll = regions.find(
+      (r) => r.country_codes.length === 0 && !r.is_default,
+    );
+    if (catchAll) return catchAll;
   }
 
   return regions.find((r) => r.is_default) ?? regions[0];

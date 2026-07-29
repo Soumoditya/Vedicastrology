@@ -1,5 +1,6 @@
 import { Footer } from '@/components/site/Footer';
 import { Header } from '@/components/site/Header';
+import { getRegions, resolveRegion } from '@/lib/pricing/region';
 
 /**
  * Applies the stored theme before the first paint.
@@ -20,11 +21,14 @@ const themeScript = `
 })();
 `;
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  // Fetched once here rather than in every page that shows a price.
+  const [regions, currentRegion] = await Promise.all([getRegions(), resolveRegion()]);
+
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      <Header />
+      <Header regions={regions} currentRegion={currentRegion} />
       <main className="flex-1">{children}</main>
       <Footer />
     </>

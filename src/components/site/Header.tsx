@@ -7,8 +7,16 @@ import { useEffect, useState } from 'react';
 import { NAV_LINKS, SITE } from '@/lib/site';
 import { Wordmark } from './Wordmark';
 import { ThemeToggle } from './ThemeToggle';
+import { CurrencySwitcher } from './CurrencySwitcher';
+import type { Region } from '@/lib/supabase/types';
 
-export function Header() {
+export function Header({
+  regions = [],
+  currentRegion = null,
+}: {
+  regions?: Region[];
+  currentRegion?: Region | null;
+}) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,6 +72,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <CurrencySwitcher regions={regions} current={currentRegion} />
           <ThemeToggle />
 
           <Link
