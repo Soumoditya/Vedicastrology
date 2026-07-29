@@ -1,26 +1,304 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Vedic Astrologey — design tokens
+
+   "Midnight & Gold": an indigo-black night sky, antique gold leaf, and a
+   parchment tone for long-form reading. The gold is deliberately desaturated
+   (#C9A227 rather than a bright yellow) so it reads as leaf and ink rather
+   than as a highlighter.
+   ========================================================================== */
+
+@theme {
+  /* -- Ink: the night sky ------------------------------------------------ */
+  --color-ink-950: #05050c;
+  --color-ink-900: #0a0a16;
+  --color-ink-850: #0e0e1e;
+  --color-ink-800: #131328;
+  --color-ink-700: #1b1b38;
+  --color-ink-600: #26264c;
+  --color-ink-500: #343463;
+
+  /* -- Gold: leaf, not highlighter --------------------------------------- */
+  --color-gold-50: #fbf6e6;
+  --color-gold-100: #f5e9c4;
+  --color-gold-200: #ecd89a;
+  --color-gold-300: #e0c470;
+  --color-gold-400: #d4b04e;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a8851d;
+  --color-gold-700: #836717;
+  --color-gold-800: #5e4a11;
+
+  /* -- Saffron: the warm accent, used sparingly -------------------------- */
+  --color-saffron-300: #f3ab6f;
+  --color-saffron-400: #ec8f45;
+  --color-saffron-500: #e0742a;
+  --color-saffron-600: #c25c1c;
+
+  /* -- Parchment: long-form reading surfaces ----------------------------- */
+  --color-parchment-50: #fdfaf3;
+  --color-parchment-100: #f7f1e3;
+  --color-parchment-200: #ece2cc;
+  --color-parchment-300: #dccfae;
+
+  /* -- Semantic chart colours -------------------------------------------- */
+  --color-benefic: #6fc7a8;
+  --color-malefic: #e07a7a;
+  --color-graha-neutral: #9aa4c8;
+
+  /* -- Typography --------------------------------------------------------- */
+  --font-display: var(--font-marcellus), 'Iowan Old Style', Georgia, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-quote: var(--font-cormorant), Georgia, serif;
+
+  /* -- Motion ------------------------------------------------------------- */
+  /* A single easing curve used everywhere, so movement feels like one hand. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ==========================================================================
+   Theme surfaces
+   ========================================================================== */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --surface: var(--color-ink-900);
+  --surface-raised: var(--color-ink-850);
+  --surface-sunken: var(--color-ink-950);
+  --border-subtle: color-mix(in oklab, var(--color-gold-500) 16%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-gold-500) 34%, transparent);
+  --text-primary: #ece7db;
+  --text-secondary: #a9a394;
+  --text-muted: #6f6a5e;
+
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light mode keeps the gold but swaps the sky for parchment, so the brand
+   survives the switch instead of becoming a different site. */
+[data-theme='light'] {
+  --surface: var(--color-parchment-50);
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--color-parchment-100);
+  --border-subtle: color-mix(in oklab, var(--color-gold-700) 20%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-gold-700) 42%, transparent);
+  --text-primary: #241f16;
+  --text-secondary: #5b5344;
+  --text-muted: #8c8474;
+
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-gold-500) 30%, transparent);
+  color: var(--text-primary);
+}
+
+/* Focus ring — visible, gold, and never removed. */
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+@utility font-quote {
+  font-family: var(--font-quote);
+}
+
+/* Gold gradient text, for headline accents only. */
+@utility text-gold-leaf {
+  background: linear-gradient(
+    135deg,
+    var(--color-gold-200) 0%,
+    var(--color-gold-500) 45%,
+    var(--color-gold-300) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* A hairline gold rule that fades at both ends. */
+@utility rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-600) 20%,
+    var(--color-gold-400) 50%,
+    var(--color-gold-600) 80%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
+/* Card surface used across services, posts and tool panels. */
+@utility surface-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface-raised) 92%, var(--color-gold-500) 3%),
+    var(--surface-raised)
+  );
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+}
+
+/* ==========================================================================
+   Ambient background: a still star field.
+
+   Rendered as layered radial-gradient sheets rather than hundreds of DOM
+   nodes, so it costs nothing to scroll past.
+   ========================================================================== */
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 245, 220, 0.7), transparent),
+    radial-gradient(1px 1px at 75% 15%, rgba(255, 245, 220, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 45% 65%, rgba(255, 245, 220, 0.6), transparent),
+    radial-gradient(1px 1px at 88% 78%, rgba(255, 245, 220, 0.45), transparent),
+    radial-gradient(1px 1px at 12% 85%, rgba(255, 245, 220, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 62% 42%, rgba(255, 245, 220, 0.4), transparent),
+    radial-gradient(1px 1px at 33% 8%, rgba(255, 245, 220, 0.55), transparent),
+    radial-gradient(1px 1px at 95% 45%, rgba(255, 245, 220, 0.35), transparent),
+    radial-gradient(1px 1px at 8% 55%, rgba(255, 245, 220, 0.4), transparent),
+    radial-gradient(1px 1px at 55% 90%, rgba(255, 245, 220, 0.35), transparent);
+  opacity: 0.55;
+}
+
+[data-theme='light'] .starfield {
+  display: none;
+}
+
+/* A slow breathing glow behind the hero and the chart. */
+@keyframes aura {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.05);
+  }
+}
+
+.aura {
+  animation: aura 9s var(--ease-in-out-soft) infinite;
+}
+
+/* ==========================================================================
+   Long-form reading — blog posts and reports.
+   ========================================================================== */
+
+.prose-vedic {
+  color: var(--text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose-vedic h2 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.25;
+  margin: 2.5rem 0 0.875rem;
+  color: var(--color-gold-200);
+}
+
+.prose-vedic h3 {
+  font-family: var(--font-display);
+  font-size: 1.3125rem;
+  margin: 2rem 0 0.625rem;
+  color: var(--color-gold-300);
+}
+
+.prose-vedic p {
+  margin: 0 0 1.125rem;
+}
+
+.prose-vedic a {
+  color: var(--color-gold-300);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.prose-vedic blockquote {
+  font-family: var(--font-quote);
+  font-size: 1.375rem;
+  font-style: italic;
+  border-left: 2px solid var(--color-gold-600);
+  padding-left: 1.25rem;
+  margin: 1.75rem 0;
+  color: var(--text-secondary);
+}
+
+.prose-vedic ul,
+.prose-vedic ol {
+  margin: 0 0 1.125rem 1.25rem;
+}
+
+.prose-vedic li {
+  margin-bottom: 0.5rem;
+}
+
+.prose-vedic ul li {
+  list-style: none;
+  position: relative;
+}
+
+.prose-vedic ul li::before {
+  content: '◆';
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-gold-600);
+  font-size: 0.6em;
+  top: 0.5em;
+}
+
+.prose-vedic ol {
+  list-style: decimal;
 }
