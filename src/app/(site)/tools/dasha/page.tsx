@@ -11,6 +11,7 @@ import {
 import { NAKSHATRA_NAMES } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { Reveal } from '@/components/motion/Reveal';
 import type { DashaPeriod } from '@/lib/astro/types';
 
@@ -26,6 +27,10 @@ export const dynamic = 'force-dynamic';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function DashaPage({ searchParams }: { searchParams: SearchParams }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('dasha', '/tools/dasha');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   if (!hasBirthQuery(params)) {

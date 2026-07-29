@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { computePanchang } from '@/lib/astro/panchang';
 import { RASHI_NAMES_EN, NAKSHATRA_DEITY, NAKSHATRA_SYMBOL } from '@/lib/astro/constants';
 import { PlacePicker } from '@/components/forms/PlacePicker';
+import { gateFor } from '@/components/site/FeatureGate';
 import { POPULAR_PLACES } from '@/lib/geo/geocode';
 import { timezoneFor } from '@/lib/astro/time';
 import type { TimeWindow } from '@/lib/astro/types';
@@ -27,6 +28,10 @@ export default async function PanchangPage({
 }: {
   searchParams: SearchParams;
 }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('panchang', '/tools/panchang');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   const lat = Number(params.lat ?? KOLKATA.latitude);

@@ -47,12 +47,24 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl" style={{ color: 'var(--text-primary)' }}>
-        {profile.display_name ? `Welcome back, ${profile.display_name}` : 'Your charts'}
-      </h1>
-      <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-        Everything you save is here whenever you come back.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl" style={{ color: 'var(--text-primary)' }}>
+            {profile.display_name ? `Welcome back, ${profile.display_name}` : 'Your charts'}
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Everything you save is here whenever you come back.
+          </p>
+        </div>
+
+        <Link
+          href="/dashboard/settings"
+          className="rounded-full border px-4 py-2 text-xs"
+          style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+        >
+          Settings
+        </Link>
+      </div>
 
       {charts.length === 0 ? (
         <div className="surface-card mt-8 p-6">

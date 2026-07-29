@@ -5,6 +5,7 @@ import { matchCharts } from '@/lib/astro/matching';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { birthQuerySchema } from '@/lib/astro/query';
 import { MatchForm } from '@/components/forms/MatchForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
     'Ashtakoot Guna Milan across all eight koots, with Mangal dosha and its ' +
     'classical cancellations. Free and accurate.',
 };
+
+export const dynamic = 'force-dynamic';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -61,6 +64,10 @@ export default async function MatchingPage({
 }: {
   searchParams: SearchParams;
 }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('matching', '/tools/matching');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   const bride = parsePerson(params, 'a');

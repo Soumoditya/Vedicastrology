@@ -7,6 +7,7 @@ import { mangalDosha } from '@/lib/astro/matching';
 import { GRAHA_ABBR, RASHI_NAMES_EN, RASHI_SYMBOLS } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { Reveal } from '@/components/motion/Reveal';
 import type { YogaResult } from '@/lib/astro/types';
 
@@ -22,6 +23,10 @@ export const dynamic = 'force-dynamic';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function YogaPage({ searchParams }: { searchParams: SearchParams }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('yogas', '/tools/yogas');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   if (!hasBirthQuery(params)) {

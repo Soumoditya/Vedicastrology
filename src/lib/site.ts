@@ -27,6 +27,7 @@ export const NAV_LINKS = [
 export const TOOL_LINKS = [
   {
     href: '/tools/kundli',
+    feature: 'kundli',
     label: 'Birth Chart',
     sanskrit: 'Kundli',
     description:
@@ -34,6 +35,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/panchang',
+    feature: 'panchang',
     label: 'Panchang',
     sanskrit: 'Pañcāṅga',
     description:
@@ -41,6 +43,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/dasha',
+    feature: 'dasha',
     label: 'Dasha Periods',
     sanskrit: 'Vimśottarī',
     description:
@@ -48,6 +51,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/transits',
+    feature: 'transits',
     label: 'Transits',
     sanskrit: 'Gochara',
     description:
@@ -55,6 +59,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/matching',
+    feature: 'matching',
     label: 'Compatibility',
     sanskrit: 'Guṇa Milan',
     description:
@@ -62,6 +67,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/yogas',
+    feature: 'yogas',
     label: 'Yogas and Doshas',
     sanskrit: 'Yoga · Doṣa',
     description:
@@ -69,6 +75,7 @@ export const TOOL_LINKS = [
   },
   {
     href: '/tools/nakshatra',
+    feature: 'nakshatra',
     label: 'Nakshatra Finder',
     sanskrit: 'Nakṣatra',
     description:

@@ -321,3 +321,154 @@ export async function saveLifeEvents(
   revalidatePath('/dashboard');
   return { message: 'Details saved. Thank you, this is genuinely useful.' };
 }
+
+// ---------------------------------------------------------------------------
+// Settings and notifications
+// ---------------------------------------------------------------------------
+
+const settingsSchema = z.object({
+  chart_style: z.enum(['north', 'south']),
+  ayanamsa: z.string().min(1),
+  house_system: z.string().min(1),
+  node_type: z.enum(['mean', 'true']),
+  language: z.enum(['en', 'hi', 'bn']),
+  theme: z.enum(['dark', 'light', 'system']),
+  timezone: z.string().optional(),
+});
+
+/**
+ * Save account settings.
+ *
+ * Upserted rather than updated, because somebody who has never opened this
+ * page has no row. The alternative, creating a row for everyone at signup,
+ * would fill the table with copies of the defaults.
+ */
+export async function saveSettings(
+  _prev: AccountState,
+  formData: FormData,
+): Promise<AccountState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Please sign in.' };
+
+  const parsed = settingsSchema.safeParse({
+    chart_style: formData.get('chart_style'),
+    ayanamsa: formData.get('ayanamsa'),
+    house_system: formData.get('house_system'),
+    node_type: formData.get('node_type'),
+    language: formData.get('language'),
+    theme: formData.get('theme'),
+    timezone: formData.get('timezone') || undefined,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Those settings were not valid.' };
+  }
+
+  const { error } = await supabase.from('user_settings').upsert(
+    {
+      user_id: user.id,
+      ...parsed.data,
+      timezone: parsed.data.timezone ?? null,
+    },
+    { onConflict: 'user_id' },
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/dashboard/settings');
+  revalidatePath('/tools/kundli');
+
+  return { message: 'Settings saved.' };
+}
+
+const notificationSchema = z.object({
+  email_enabled: z.coerce.boolean(),
+  whatsapp_enabled: z.coerce.boolean(),
+  sms_enabled: z.coerce.boolean(),
+  phone: z.string().optional(),
+  daily_reading: z.coerce.boolean(),
+  weekly_reading: z.coerce.boolean(),
+  monthly_reading: z.coerce.boolean(),
+  transit_alerts: z.coerce.boolean(),
+  newsletter: z.coerce.boolean(),
+  send_hour: z.coerce.number().int().min(0).max(23),
+});
+
+export async function saveNotificationPreferences(
+  _prev: AccountState,
+  formData: FormData,
+): Promise<AccountState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Please sign in.' };
+
+  const bool = (name: string) => formData.get(name) === 'on';
+
+  const parsed = notificationSchema.safeParse({
+    email_enabled: bool('email_enabled'),
+    whatsapp_enabled: bool('whatsapp_enabled'),
+    sms_enabled: bool('sms_enabled'),
+    phone: formData.get('phone') || undefined,
+    daily_reading: bool('daily_reading'),
+    weekly_reading: bool('weekly_reading'),
+    monthly_reading: bool('monthly_reading'),
+    transit_alerts: bool('transit_alerts'),
+    newsletter: bool('newsletter'),
+    send_hour: formData.get('send_hour') ?? 7,
+  });
+
+  if (!parsed.success) {
+    return { error: 'Those preferences were not valid.' };
+  }
+
+  const phone = parsed.data.phone?.trim() || null;
+
+  // A messaging channel cannot be switched on without somewhere to send to.
+  // Silently storing an enabled channel with no number would produce a queue
+  // full of undeliverable rows later.
+  if ((parsed.data.whatsapp_enabled || parsed.data.sms_enabled) && !phone) {
+    return { error: 'Add a phone number before turning on WhatsApp or SMS.' };
+  }
+
+  const { data: existing } = await supabase
+    .from('notification_preferences')
+    .select('whatsapp_opt_in_at, sms_opt_in_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const now = new Date().toISOString();
+
+  const { error } = await supabase.from('notification_preferences').upsert(
+    {
+      user_id: user.id,
+      ...parsed.data,
+      phone,
+      /*
+        Consent is stamped the first time a channel is turned on and kept
+        thereafter, so switching it off and on again does not rewrite history.
+        A boolean alone cannot show when somebody agreed to be messaged, and
+        for WhatsApp that record is the thing being asked for.
+      */
+      whatsapp_opt_in_at: parsed.data.whatsapp_enabled
+        ? (existing?.whatsapp_opt_in_at ?? now)
+        : null,
+      sms_opt_in_at: parsed.data.sms_enabled
+        ? (existing?.sms_opt_in_at ?? now)
+        : null,
+    },
+    { onConflict: 'user_id' },
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/dashboard/settings');
+
+  return { message: 'Preferences saved.' };
+}

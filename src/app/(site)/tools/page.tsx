@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { TOOL_LINKS } from '@/lib/site';
+import { canUseAll } from '@/lib/features/flags';
 
 export const metadata: Metadata = {
   title: 'Free Vedic Astrology Tools',
@@ -10,7 +11,18 @@ export const metadata: Metadata = {
     'nakshatra finder, calculated with the Swiss Ephemeris. Free, no account.',
 };
 
-export default function ToolsPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function ToolsPage() {
+  /*
+    One query for the lot. A tool switched off disappears entirely, since
+    listing something that refuses to open is worse than not listing it. A tool
+    that merely needs an account is still listed, with a mark, because that is
+    an invitation rather than a dead end.
+  */
+  const access = await canUseAll(TOOL_LINKS.map((t) => t.feature));
+  const tools = TOOL_LINKS.filter((t) => access[t.feature].reason !== 'disabled');
+
   return (
     <div className="relative">
       <div className="starfield" aria-hidden />
@@ -40,7 +52,7 @@ export default function ToolsPage() {
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {TOOL_LINKS.map((tool) => (
+          {tools.map((tool) => (
             <Link
               key={tool.href}
               href={tool.href}
@@ -55,12 +67,27 @@ export default function ToolsPage() {
                     'linear-gradient(90deg, transparent, var(--color-gold-400), transparent)',
                 }}
               />
-              <p
-                className="font-quote text-sm italic"
-                style={{ color: 'var(--color-gold-600)' }}
-              >
-                {tool.sanskrit}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <p
+                  className="font-quote text-sm italic"
+                  style={{ color: 'var(--color-gold-600)' }}
+                >
+                  {tool.sanskrit}
+                </p>
+                {!access[tool.feature].allowed && (
+                  <span
+                    className="rounded-full border px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.14em]"
+                    style={{
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--color-gold-500)',
+                    }}
+                  >
+                    {access[tool.feature].reason === 'needs_premium'
+                      ? 'Members'
+                      : 'Account'}
+                  </span>
+                )}
+              </div>
               <h2
                 className="font-display mt-1 text-xl"
                 style={{ color: 'var(--text-primary)' }}

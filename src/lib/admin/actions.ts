@@ -277,3 +277,50 @@ export async function deleteRegion(formData: FormData): Promise<void> {
   revalidatePath('/admin/regions');
   redirect('/admin/regions');
 }
+
+// ---------------------------------------------------------------------------
+// Feature flags
+// ---------------------------------------------------------------------------
+
+const flagSchema = z.object({
+  key: z.string().min(1),
+  tier: z.enum(['free', 'account', 'premium']),
+  enabled: z.coerce.boolean(),
+});
+
+/**
+ * Move one capability between tiers, or switch it off.
+ *
+ * Revalidates the whole site rather than a single path, because a flag can be
+ * read on any page and a stale cached copy of one page is exactly the sort of
+ * half-applied change that makes gating feel broken.
+ */
+export async function saveFeatureFlag(
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await requireAdmin();
+
+  const parsed = flagSchema.safeParse({
+    key: formData.get('key'),
+    tier: formData.get('tier'),
+    enabled: formData.get('enabled') === 'on',
+  });
+
+  if (!parsed.success) {
+    return { error: 'That was not a valid change.' };
+  }
+
+  const { key, tier, enabled } = parsed.data;
+
+  const { error } = await supabase
+    .from('feature_flags')
+    .update({ tier, enabled })
+    .eq('key', key);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/', 'layout');
+
+  return { message: 'Saved.' };
+}

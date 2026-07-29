@@ -17,8 +17,11 @@ import {
 import { formatDms, formatPosition } from '@/lib/astro/zodiac';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
 import { getUser } from '@/lib/supabase/server';
+import { chartStyleFor, getSettings } from '@/lib/account/settings';
+import { allowed } from '@/lib/features/flags';
 import {
   ChartWorkspace,
   type WorkspaceHouse,
@@ -32,6 +35,8 @@ export const metadata: Metadata = {
     'divisional charts and Vimshottari dasha. Free, no account needed.',
 };
 
+export const dynamic = 'force-dynamic';
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function KundliPage({
@@ -39,6 +44,10 @@ export default async function KundliPage({
 }: {
   searchParams: SearchParams;
 }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('kundli', '/tools/kundli');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   if (!hasBirthQuery(params)) {
@@ -55,6 +64,10 @@ export default async function KundliPage({
   const { birth, settings, displayName } = parsed;
   const chart = castChart(birth, { settings });
   const user = await getUser();
+  const [userSettings, canSwitchStyle] = await Promise.all([
+    getSettings(),
+    allowed('south_indian_chart'),
+  ]);
   const zone = chart.meta.timezone;
 
   // Divisional charts.
@@ -180,7 +193,12 @@ export default async function KundliPage({
 
         {/* Charts */}
         <section className="mb-14">
-          <ChartWorkspace vargas={vargas} houses={houses} />
+          <ChartWorkspace
+            vargas={vargas}
+            houses={houses}
+            initialStyle={chartStyleFor(userSettings)}
+            canSwitchStyle={canSwitchStyle}
+          />
         </section>
 
         {/* Planet table */}

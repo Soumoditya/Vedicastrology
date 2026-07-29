@@ -14,6 +14,7 @@ import {
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { formatDms, NAKSHATRA_SPAN } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -28,6 +29,10 @@ export const dynamic = 'force-dynamic';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function NakshatraPage({ searchParams }: { searchParams: SearchParams }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('nakshatra', '/tools/nakshatra');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   if (!hasBirthQuery(params)) {

@@ -287,6 +287,78 @@ export function VedicChart({
           </g>
         )}
 
+        {/*
+          The South Indian ascendant marker.
+
+          In this style the signs are fixed and the houses move, so the chart
+          is unreadable without knowing which cell is the lagna. The convention
+          is a diagonal drawn across that cell's top left corner, and that is
+          what is drawn here rather than a tick, because a reader of South
+          Indian charts is looking for the diagonal.
+        */}
+        {style === 'south-indian' &&
+          (() => {
+            const lagna = geometry.cells.find((c) => c.house === 1);
+            if (!lagna) return null;
+
+            const xs = lagna.polygon.map((p) => p.x);
+            const ys = lagna.polygon.map((p) => p.y);
+            const x = Math.min(...xs);
+            const y = Math.min(...ys);
+            const size = Math.max(...xs) - x;
+
+            const cut = size * 0.32;
+
+            return (
+              <g>
+                {/* A faint wash so the lagna cell reads at a glance, before
+                    anyone has to look for the diagonal. */}
+                <polygon
+                  points={polygonToPoints(lagna.polygon)}
+                  fill="var(--color-gold-500)"
+                  opacity="0.07"
+                />
+                <line
+                  x1={x}
+                  y1={y + cut}
+                  x2={x + cut}
+                  y2={y}
+                  stroke="var(--color-gold-300)"
+                  strokeWidth="0.7"
+                  strokeLinecap="round"
+                  opacity="0.9"
+                />
+
+                {/* The open centre is part of this style, and leaving it blank
+                    wastes the one place a South Indian chart has room to say
+                    what it is. */}
+                <text
+                  x="50"
+                  y="47"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="4.4"
+                  fill="var(--color-gold-400)"
+                  opacity="0.85"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  {data.title ?? 'Rashi'}
+                </text>
+                <text
+                  x="50"
+                  y="54"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="3.2"
+                  fill="var(--text-muted)"
+                  opacity="0.8"
+                >
+                  {RASHI_NAMES_EN[data.ascendantRashi]} lagna
+                </text>
+              </g>
+            );
+          })()}
+
         {/* Hit areas last, so they sit above everything and stay clickable. */}
         <g>
           {geometry.cells.map((cell) => {

@@ -251,7 +251,15 @@ export function southIndianGeometry(ascendantRashi: number): ChartGeometry {
       // Houses are counted from whichever cell holds the ascendant.
       house: ((rashi - ascendantRashi + 12) % 12) + 1,
       polygon,
-      numberAt: { x: x + 4, y: y + 6 },
+      /*
+        Top right, not top left.
+
+        The lagna is marked in this style by a diagonal across the ascendant
+        cell's top left corner, which is exactly where a numeral in that corner
+        would sit. Putting every sign number on the opposite side keeps the
+        marker legible and the numbers consistent from cell to cell.
+      */
+      numberAt: { x: x + CELL - 4, y: y + 6 },
       contentAt: centroid(polygon),
       capacity: 5,
     };

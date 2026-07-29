@@ -13,6 +13,7 @@ import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { formatDms } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { gateFor } from '@/components/site/FeatureGate';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -31,6 +32,10 @@ export default async function TransitsPage({
 }: {
   searchParams: SearchParams;
 }) {
+  // Checked before any work: a page about to refuse should not cast a chart.
+  const gate = await gateFor('transits', '/tools/transits');
+  if (gate) return gate;
+
   const params = await searchParams;
 
   if (!hasBirthQuery(params)) {

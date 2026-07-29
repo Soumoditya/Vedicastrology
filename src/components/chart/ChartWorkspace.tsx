@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { VedicChart } from './VedicChart';
+import { VedicChart, type ChartStyle } from './VedicChart';
 import { ChartLegend } from './ChartLegend';
 import type { ChartRenderData } from '@/lib/chart-render/geometry';
 import {
@@ -30,6 +30,10 @@ export interface WorkspaceHouse {
 export interface ChartWorkspaceProps {
   vargas: WorkspaceVarga[];
   houses: WorkspaceHouse[];
+  /** From the visitor's saved settings, or the default when they have none. */
+  initialStyle?: ChartStyle;
+  /** False hides the switch entirely, when the capability is gated. */
+  canSwitchStyle?: boolean;
 }
 
 /**
@@ -38,42 +42,91 @@ export interface ChartWorkspaceProps {
  * Holds the two pieces of state the chart itself should not own: which
  * divisional chart is on screen, and which house the visitor has selected.
  */
-export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
+export function ChartWorkspace({
+  vargas,
+  houses,
+  initialStyle = 'north-indian',
+  canSwitchStyle = true,
+}: ChartWorkspaceProps) {
   const [activeCode, setActiveCode] = useState(vargas[0]?.code ?? 'D1');
   const [selected, setSelected] = useState<number | null>(null);
+  const [chartStyle, setChartStyle] = useState<ChartStyle>(initialStyle);
 
   const active = vargas.find((v) => v.code === activeCode) ?? vargas[0];
   const detail = selected ? houses.find((h) => h.house === selected) : null;
 
   return (
     <div className="space-y-5">
-      {/* Divisional chart selector */}
-      <div className="flex flex-wrap gap-1.5">
-        {vargas.map((v) => {
-          const isActive = v.code === activeCode;
-          return (
-            <button
-              key={v.code}
-              type="button"
-              onClick={() => {
-                setActiveCode(v.code);
-                setSelected(null);
-              }}
-              title={v.signification}
-              className="rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-300"
-              style={{
-                borderColor: isActive ? 'var(--border-strong)' : 'var(--border-subtle)',
-                background: isActive
-                  ? 'color-mix(in oklab, var(--color-gold-500) 14%, transparent)'
-                  : 'transparent',
-                color: isActive ? 'var(--color-gold-200)' : 'var(--text-secondary)',
-                transitionTimingFunction: 'var(--ease-out-soft)',
-              }}
-            >
-              {v.code}
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Divisional chart selector */}
+        <div className="flex flex-wrap gap-1.5">
+          {vargas.map((v) => {
+            const isActive = v.code === activeCode;
+            return (
+              <button
+                key={v.code}
+                type="button"
+                onClick={() => {
+                  setActiveCode(v.code);
+                  setSelected(null);
+                }}
+                title={v.signification}
+                className="rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-300"
+                style={{
+                  borderColor: isActive ? 'var(--border-strong)' : 'var(--border-subtle)',
+                  background: isActive
+                    ? 'color-mix(in oklab, var(--color-gold-500) 14%, transparent)'
+                    : 'transparent',
+                  color: isActive ? 'var(--color-gold-200)' : 'var(--text-secondary)',
+                  transitionTimingFunction: 'var(--ease-out-soft)',
+                }}
+              >
+                {v.code}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Chart style. Two long-standing regional conventions for drawing the
+            same data, not a preference about which is correct. */}
+        {canSwitchStyle && (
+          <div
+            className="flex overflow-hidden rounded-full border text-xs"
+            style={{ borderColor: 'var(--border-subtle)' }}
+            role="radiogroup"
+            aria-label="Chart style"
+          >
+            {(
+              [
+                ['north-indian', 'North'],
+                ['south-indian', 'South'],
+              ] as const
+            ).map(([value, label]) => {
+              const isActive = chartStyle === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={isActive}
+                  onClick={() => {
+                    setChartStyle(value);
+                    setSelected(null);
+                  }}
+                  className="px-3 py-1.5 transition-colors duration-300"
+                  style={{
+                    background: isActive
+                      ? 'color-mix(in oklab, var(--color-gold-500) 14%, transparent)'
+                      : 'transparent',
+                    color: isActive ? 'var(--color-gold-200)' : 'var(--text-secondary)',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -105,8 +158,9 @@ export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
               }}
             />
             <VedicChart
-              key={active.code}
+              key={`${active.code}-${chartStyle}`}
               data={active.data}
+              style={chartStyle}
               showDegrees={active.code === 'D1'}
               onSelectHouse={setSelected}
               selectedHouse={selected}
@@ -174,9 +228,9 @@ export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
                 Reading the chart
               </p>
               <p className="mt-2.5 leading-relaxed">
-                In the North Indian style the houses never move, the first
-                house is always the diamond at the top. What changes from chart
-                to chart is the rashi number written inside each one.
+                {chartStyle === 'north-indian'
+                  ? 'In the North Indian style the houses never move, the first house is always the diamond at the top. What changes from chart to chart is the rashi number written inside each one.'
+                  : 'In the South Indian style the signs never move, Aries is always the same square. What changes is which one holds the ascendant, marked by the diagonal, and the houses are counted clockwise from there.'}
               </p>
               <p className="mt-2.5 leading-relaxed">
                 Select any house to see its sign, its lord, which grahas sit

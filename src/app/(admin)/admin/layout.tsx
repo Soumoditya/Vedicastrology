@@ -23,6 +23,7 @@ const NAV = [
   { href: '/admin/testimonials', label: 'Testimonials' },
   { href: '/admin/enquiries', label: 'Enquiries' },
   { href: '/admin/research', label: 'Research' },
+  { href: '/admin/features', label: 'Features' },
 ];
 
 /**

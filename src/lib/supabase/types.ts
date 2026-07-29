@@ -168,3 +168,130 @@ export interface SiteSettings {
 export interface ServiceWithPrice extends Service {
   price: (ServicePrice & { region: Region }) | null;
 }
+
+// ---------------------------------------------------------------------------
+// Membership, settings and notifications
+//
+// Mirrors `supabase/migrations/20260729001300_membership_and_settings.sql`.
+// ---------------------------------------------------------------------------
+
+export type FeatureTier = 'free' | 'account' | 'premium';
+
+export type SubscriptionStatus =
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'cancelled'
+  | 'expired';
+
+export type NotificationChannel = 'email' | 'whatsapp' | 'sms';
+
+export type NotificationState =
+  | 'queued'
+  | 'sending'
+  | 'sent'
+  | 'failed'
+  | 'cancelled';
+
+export interface FeatureFlag {
+  key: string;
+  label: string;
+  description: string | null;
+  tier: FeatureTier;
+  enabled: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  code: string;
+  name: string;
+  summary: string | null;
+  benefits: string[];
+  billing_interval: 'month' | 'year';
+  trial_days: number;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlanPrice {
+  id: string;
+  plan_id: string;
+  region_id: string;
+  amount: number;
+  compare_at: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string | null;
+  status: SubscriptionStatus;
+  current_period_start: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  cancelled_at: string | null;
+  provider: string | null;
+  provider_subscription_id: string | null;
+  provider_customer_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserSettings {
+  user_id: string;
+  chart_style: 'north' | 'south';
+  ayanamsa: string;
+  house_system: string;
+  node_type: 'mean' | 'true';
+  language: 'en' | 'hi' | 'bn';
+  theme: 'dark' | 'light' | 'system';
+  timezone: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationPreferences {
+  user_id: string;
+  email_enabled: boolean;
+  whatsapp_enabled: boolean;
+  sms_enabled: boolean;
+  phone: string | null;
+  whatsapp_opt_in_at: string | null;
+  sms_opt_in_at: string | null;
+  daily_reading: boolean;
+  weekly_reading: boolean;
+  monthly_reading: boolean;
+  transit_alerts: boolean;
+  newsletter: boolean;
+  send_hour: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QueuedNotification {
+  id: string;
+  user_id: string | null;
+  channel: NotificationChannel;
+  destination: string;
+  template: string;
+  payload: Record<string, unknown>;
+  state: NotificationState;
+  scheduled_for: string;
+  attempts: number;
+  last_error: string | null;
+  sent_at: string | null;
+  dedupe_key: string | null;
+  created_at: string;
+}
+
+/** A plan together with the price applicable to the current visitor. */
+export interface PlanWithPrice extends SubscriptionPlan {
+  price: (PlanPrice & { region: Region }) | null;
+}
