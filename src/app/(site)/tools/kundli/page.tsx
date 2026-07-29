@@ -17,6 +17,8 @@ import {
 import { formatDms, formatPosition } from '@/lib/astro/zodiac';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
+import { SaveChartButton } from '@/components/chart/SaveChartButton';
+import { getUser } from '@/lib/supabase/server';
 import {
   ChartWorkspace,
   type WorkspaceHouse,
@@ -52,6 +54,7 @@ export default async function KundliPage({
 
   const { birth, settings, displayName } = parsed;
   const chart = castChart(birth, { settings });
+  const user = await getUser();
   const zone = chart.meta.timezone;
 
   // Divisional charts.
@@ -156,6 +159,22 @@ export default async function KundliPage({
             label="Current dasha"
             value={active ? active.maha.lord : 'None'}
             detail={active?.antar ? `Antar: ${active.antar.lord}` : undefined}
+          />
+        </section>
+
+        <section className="mb-12">
+          <SaveChartButton
+            signedIn={Boolean(user)}
+            defaultLabel={displayName ?? 'My chart'}
+            birth={{
+              date: `${birth.year}-${String(birth.month).padStart(2, '0')}-${String(birth.day).padStart(2, '0')}`,
+              time: `${String(birth.hour).padStart(2, '0')}:${String(birth.minute).padStart(2, '0')}`,
+              timeUnknown: birth.timeUnknown ?? false,
+              timezone: chart.meta.timezone,
+              placeName: birth.place.name,
+              latitude: birth.place.latitude,
+              longitude: birth.place.longitude,
+            }}
           />
         </section>
 
