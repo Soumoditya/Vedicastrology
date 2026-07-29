@@ -28,7 +28,8 @@ export async function GET() {
     'birth_time_known', 'timezone', 'utc_offset_minutes', 'latitude', 'longitude',
     'place_country', 'gender', 'ascendant_rashi', 'ascendant_degree',
     'ascendant_nakshatra', 'sun_rashi', 'moon_rashi', 'moon_nakshatra', 'moon_pada',
-    'birth_dasha_lord', 'yogas', 'ayanamsa', 'house_system', 'node_type',
+    'birth_dasha_lord', 'yogas', 'doshas', 'manglik', 'manglik_cancelled',
+    'kalsarpa_type', 'kalsarpa_partial', 'ayanamsa', 'house_system', 'node_type',
     'engine_version', 'source', 'created_at',
   ];
 
@@ -37,7 +38,17 @@ export async function GET() {
     `${g}_lon`, `${g}_rashi`, `${g}_house`, `${g}_nakshatra`, `${g}_dignity`, `${g}_retro`,
   ]);
 
-  const header = [...base, ...grahaColumns];
+  /*
+    Sarvashtakavarga expanded into twelve columns rather than one cell.
+    The whole reason to export it is to sort and pivot on a sign's strength,
+    and "28 31 24 ..." in one cell supports neither.
+  */
+  const rashiShort = [
+    'ar', 'ta', 'ge', 'cn', 'le', 'vi', 'li', 'sc', 'sg', 'cp', 'aq', 'pi',
+  ];
+  const sarvaColumns = rashiShort.map((r) => `sav_${r}`);
+
+  const header = [...base, ...grahaColumns, ...sarvaColumns];
   const lines = [header.join(',')];
 
   for (const row of rows) {
@@ -53,6 +64,9 @@ export async function GET() {
         csvCell(p?.nak), csvCell(p?.dignity), csvCell(p?.retro),
       );
     }
+
+    const sarva = (row.sarvashtakavarga as number[] | null) ?? [];
+    for (let rashi = 0; rashi < 12; rashi++) values.push(csvCell(sarva[rashi]));
 
     lines.push(values.join(','));
   }
@@ -72,6 +86,8 @@ export async function GET() {
 /** Quote a value for CSV, escaping embedded quotes. */
 function csvCell(value: unknown): string {
   if (value === null || value === undefined) return '';
-  const text = Array.isArray(value) ? value.join(' ') : String(value);
+  // Semicolons, not spaces: yoga names are themselves multi-word, so a space
+  // separated list cannot be split back apart.
+  const text = Array.isArray(value) ? value.join('; ') : String(value);
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }

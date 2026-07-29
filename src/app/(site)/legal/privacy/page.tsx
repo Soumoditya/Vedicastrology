@@ -94,9 +94,16 @@ export default function PrivacyPage() {
           </p>
           <p>What a contribution contains:</p>
           <ul>
-            <li>Birth date, time and coordinates</li>
-            <li>The country of birth, and nothing narrower</li>
+            <li>Birth date and time</li>
+            <li>
+              Coordinates rounded to a tenth of a degree, an area about eleven
+              kilometres across, and the country of birth
+            </li>
             <li>The calculated chart: positions, houses, dignities, divisional placements</li>
+            <li>
+              What the chart forms: yogas, afflictions and strength scores,
+              stored as names and numbers
+            </li>
             <li>
               Anything you chose to add yourself, such as relationship status,
               education or field of work
@@ -106,7 +113,7 @@ export default function PrivacyPage() {
           <ul>
             <li>Your name or email</li>
             <li>Your account identifier</li>
-            <li>The town or city, only the country</li>
+            <li>The town or city, or coordinates precise enough to imply one</li>
             <li>Anything that links the chart back to you</li>
           </ul>
           <p>

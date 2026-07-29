@@ -21,11 +21,28 @@ interface Tally {
 export default async function AdminResearch() {
   const supabase = await createClient();
 
-  const [{ count }, ascendants, nakshatras, dashas, consenting] = await Promise.all([
+  const [
+    { count },
+    ascendants,
+    nakshatras,
+    dashas,
+    yogas,
+    doshas,
+    kalsarpaTypes,
+    manglik,
+    consenting,
+  ] = await Promise.all([
     supabase.from('research_charts').select('*', { count: 'exact', head: true }),
     tally(supabase, 'ascendant_rashi'),
     tally(supabase, 'moon_nakshatra'),
     tally(supabase, 'birth_dasha_lord'),
+    arrayTally(supabase, 'yogas'),
+    arrayTally(supabase, 'doshas'),
+    tally(supabase, 'kalsarpa_type'),
+    supabase
+      .from('research_charts')
+      .select('*', { count: 'exact', head: true })
+      .eq('manglik', true),
     supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -33,6 +50,7 @@ export default async function AdminResearch() {
   ]);
 
   const total = count ?? 0;
+  const manglikCount = manglik.count ?? 0;
 
   return (
     <div>
@@ -45,9 +63,13 @@ export default async function AdminResearch() {
         contribution immediately, enforced in the database rather than in code.
       </p>
 
-      <div className="mt-7 grid gap-3 sm:grid-cols-3">
+      <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Charts in the set" value={total} />
         <Stat label="People opted in" value={consenting.count ?? 0} />
+        <Stat
+          label="Manglik"
+          value={total > 0 ? `${Math.round((manglikCount / total) * 100)}%` : '0%'}
+        />
         <Stat label="Export" value="CSV" href="/api/admin/research" />
       </div>
 
@@ -73,6 +95,14 @@ export default async function AdminResearch() {
           <Distribution
             title="Dasha at birth"
             rows={dashas}
+            total={total}
+            label={(k) => String(k)}
+          />
+          <Distribution title="Yogas" rows={yogas} total={total} label={(k) => String(k)} />
+          <Distribution title="Afflictions" rows={doshas} total={total} label={(k) => String(k)} />
+          <Distribution
+            title="Kalsarpa form"
+            rows={kalsarpaTypes}
             total={total}
             label={(k) => String(k)}
           />
@@ -103,6 +133,32 @@ async function tally(
     const value = row[column];
     if (value === null || value === undefined) continue;
     counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Tally a text array column.
+ *
+ * Counts charts, not entries: a chart carrying a yoga twice still counts once,
+ * so a percentage means "this share of charts have it" rather than something
+ * that can exceed a hundred.
+ */
+async function arrayTally(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  column: string,
+): Promise<Tally[]> {
+  const { data } = await supabase.from('research_charts').select(column).limit(5000);
+  if (!data) return [];
+
+  const counts = new Map<string, number>();
+  for (const row of data as unknown as Record<string, string[] | null>[]) {
+    for (const value of new Set(row[column] ?? [])) {
+      counts.set(value, (counts.get(value) ?? 0) + 1);
+    }
   }
 
   return [...counts.entries()]

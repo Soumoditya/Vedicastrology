@@ -61,6 +61,13 @@ export const TOOL_LINKS = [
       'Ashtakoot matching across all eight koots, with Mangal dosha and its cancellations.',
   },
   {
+    href: '/tools/yogas',
+    label: 'Yogas and Doshas',
+    sanskrit: 'Yoga · Doṣa',
+    description:
+      'Every combination your chart forms with the reason it was found, plus Manglik, Kalsarpa and Ashtakavarga.',
+  },
+  {
     href: '/tools/nakshatra',
     label: 'Nakshatra Finder',
     sanskrit: 'Nakṣatra',

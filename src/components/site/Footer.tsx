@@ -47,7 +47,7 @@ export function Footer() {
           </div>
 
           <FooterColumn title="Free tools">
-            {TOOL_LINKS.slice(0, 5).map((t) => (
+            {TOOL_LINKS.map((t) => (
               <FooterLink key={t.href} href={t.href}>
                 {t.label}
               </FooterLink>

@@ -1,7 +1,10 @@
 import 'server-only';
 
+import { ashtakavarga } from '@/lib/astro/ashtakavarga';
 import { buildVarga, COMMON_VARGAS } from '@/lib/astro/divisional';
 import { GRAHA_ABBR } from '@/lib/astro/constants';
+import { mangalDosha } from '@/lib/astro/matching';
+import { detectYogas } from '@/lib/astro/yogas';
 import type { Chart } from '@/lib/astro/types';
 
 /**
@@ -43,6 +46,12 @@ export interface ResearchRow {
   planets: unknown;
   vargas: unknown;
   yogas: string[];
+  doshas: string[];
+  manglik: boolean;
+  manglik_cancelled: boolean;
+  kalsarpa_type: string | null;
+  kalsarpa_partial: boolean;
+  sarvashtakavarga: number[];
   gender: string | null;
   ayanamsa: string;
   house_system: string;
@@ -93,6 +102,19 @@ export function buildResearchRow({
     nature: p.functionalNature,
   }));
 
+  /*
+    Names only, deduplicated. The engine's full findings carry the reason each
+    one fired, which is the right thing to show a person reading their own
+    chart and the wrong thing to store here: a research row wants a value it can
+    be grouped by, not a paragraph.
+
+    Benefic and malefic go in separate columns rather than one, because almost
+    every question worth asking treats them differently.
+  */
+  const report = detectYogas(chart);
+  const manglik = mangalDosha(chart);
+  const av = ashtakavarga(chart);
+
   const vargas: Record<string, number[]> = {};
   for (const code of COMMON_VARGAS) {
     if (code === 'D1') continue;
@@ -110,8 +132,21 @@ export function buildResearchRow({
     birth_time_known: timeKnown,
     timezone: chart.meta.timezone,
     utc_offset_minutes: chart.meta.utcOffsetMinutes,
-    latitude: Number(chart.meta.place.latitude.toFixed(4)),
-    longitude: Number(chart.meta.place.longitude.toFixed(4)),
+    /*
+      Rounded to a tenth of a degree, roughly an eleven kilometre grid.
+
+      Four decimal places, which is what this stored before, locates a birth to
+      about eleven metres. That is a house. It sat directly under a comment
+      saying the exact place name is withheld because it narrows a person too
+      far, while storing something far sharper than the name. A tenth of a
+      degree keeps every regional question answerable and identifies nobody.
+
+      Nothing is lost for chart work either: the graha positions were computed
+      from the full precision coordinates before this rounding, and it is the
+      positions that get stored.
+    */
+    latitude: Number(chart.meta.place.latitude.toFixed(1)),
+    longitude: Number(chart.meta.place.longitude.toFixed(1)),
     place_country: countryFromPlace(chart.meta.place.name),
     ascendant_rashi: chart.ascendant.rashi,
     ascendant_degree: Number(chart.ascendant.degreeInRashi.toFixed(3)),
@@ -123,8 +158,13 @@ export function buildResearchRow({
     birth_dasha_lord: chart.byGraha.Moon.nakshatraLord,
     planets,
     vargas,
-    // Populated once the yoga rule engine lands.
-    yogas: [],
+    yogas: [...new Set(report.yogas.map((y) => y.name))],
+    doshas: [...new Set(report.doshas.map((d) => d.name))],
+    manglik: manglik.present,
+    manglik_cancelled: manglik.cancelled,
+    kalsarpa_type: report.kalsarpa.present ? report.kalsarpa.typeName : null,
+    kalsarpa_partial: report.kalsarpa.partial,
+    sarvashtakavarga: av.sarva,
     gender: gender ?? null,
     ayanamsa: chart.meta.settings.ayanamsa,
     house_system: chart.meta.settings.houseSystem,
