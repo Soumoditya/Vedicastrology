@@ -35,7 +35,7 @@ export default async function PanchangPage({
   const timezone = (params.tz as string) ?? timezoneFor(lat, lon);
 
   // Default to today *at the chosen place*, which may already be tomorrow
-  // there — the whole point of a panchang is that it is local.
+  // there, the whole point of a panchang is that it is local.
   const today = DateTime.now().setZone(timezone);
   const dateStr = (params.d as string) ?? today.toFormat('yyyy-MM-dd');
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -44,7 +44,7 @@ export default async function PanchangPage({
   const p = computePanchang({ year, month, day }, place);
 
   const fmt = (d: Date | null | undefined) =>
-    d ? DateTime.fromJSDate(d).setZone(timezone).toFormat('HH:mm') : '—';
+    d ? DateTime.fromJSDate(d).setZone(timezone).toFormat('HH:mm') : 'None';
 
   const fmtWindow = (w: TimeWindow | null) =>
     w ? `${fmt(w.start)} – ${fmt(w.end)}` : 'Not observed today';
@@ -174,7 +174,7 @@ export default async function PanchangPage({
             <Fact label="Moonset" value={fmt(p.moonset)} />
           </div>
           <p className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-            Sunrise uses the Hindu convention — the centre of the Sun’s disc,
+            Sunrise uses the Hindu convention, the centre of the Sun’s disc,
             without atmospheric refraction. Western almanacs use the upper limb
             with refraction and will read two to four minutes earlier.
           </p>
@@ -215,7 +215,7 @@ export default async function PanchangPage({
               label="Brahma Muhurta"
               value={fmtWindow(p.muhurta.brahmaMuhurta)}
               tone="good"
-              note="Before dawn — best for study, meditation and practice."
+              note="Before dawn, best for study, meditation and practice."
             />
           </div>
         </section>

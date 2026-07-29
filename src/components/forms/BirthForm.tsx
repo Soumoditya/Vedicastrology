@@ -12,7 +12,7 @@ export interface BirthFormProps {
   submitLabel?: string;
   /** Pre-fill from an existing chart, when refining a result. */
   initial?: Partial<BirthFormValues>;
-  /** Ask for a name — used on saved charts, skipped on quick tools. */
+  /** Ask for a name, used on saved charts, skipped on quick tools. */
   askName?: boolean;
   compact?: boolean;
 }
@@ -135,7 +135,7 @@ export function BirthForm({
           I don’t know the time of birth
           <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>
             The chart is still cast, but the ascendant, houses and dasha dates
-            cannot be relied on — everything affected is marked.
+            cannot be relied on, everything affected is marked.
           </span>
         </span>
       </label>
@@ -235,7 +235,7 @@ function PlaceField({
         setOpen(true);
         setHighlighted(0);
       } catch {
-        // Aborted or offline — leave the previous suggestions in place.
+        // Aborted or offline, leave the previous suggestions in place.
       } finally {
         setLoading(false);
       }

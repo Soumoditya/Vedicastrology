@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Vedic Astrologey — core schema
+-- Vedic Astrologey, core schema
 --
 -- Covers identity, saved birth data, the commerce tables (services, regions,
 -- per-region prices), the blog, testimonials, enquiries and site settings.

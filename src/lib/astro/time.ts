@@ -9,7 +9,7 @@ import { toJulianDay } from './ephemeris';
  *
  * This is the least glamorous module in the engine and the one most likely to
  * be wrong elsewhere. A chart cast from the wrong UT is wrong in every single
- * value it produces, and the error is invisible — the output still looks like a
+ * value it produces, and the error is invisible, the output still looks like a
  * perfectly reasonable chart.
  *
  * Three cases routinely break naive implementations:
@@ -27,7 +27,7 @@ import { toJulianDay } from './ephemeris';
 
 export type OffsetMode =
   | 'civil'
-  /** Local mean time from longitude — used by some astrologers for old charts. */
+  /** Local mean time from longitude, used by some astrologers for old charts. */
   | 'lmt'
   /** Caller supplies the offset explicitly, overriding all lookup. */
   | 'manual';
@@ -56,7 +56,7 @@ export interface TimeResolution {
   note?: string;
 }
 
-/** IANA zone for a coordinate. Offline — no network call, no API key. */
+/** IANA zone for a coordinate. Offline, no network call, no API key. */
 export function timezoneFor(latitude: number, longitude: number): string {
   try {
     return tzLookup(latitude, longitude);
@@ -142,7 +142,7 @@ export function resolveTime(
   const nonExistent = dt.hour !== hour || dt.minute !== minute;
 
   // The wall-clock time is ambiguous when a later instant maps to the same
-  // local reading — i.e. clocks went back. Half-hour shifts exist (Lord Howe),
+  // local reading, i.e. clocks went back. Half-hour shifts exist (Lord Howe),
   // so both step sizes are checked.
   const wall = (d: DateTime) => d.toFormat('yyyy-MM-dd HH:mm');
   const ambiguous =
@@ -152,7 +152,7 @@ export function resolveTime(
     );
 
   if (ambiguous) {
-    // Take the first occurrence — the standard convention.
+    // Take the first occurrence, the standard convention.
     const earlier = dt.toUTC().minus({ minutes: 60 }).setZone(zone);
     if (wall(earlier) === wall(dt)) dt = earlier;
   }

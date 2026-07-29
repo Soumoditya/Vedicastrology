@@ -42,7 +42,7 @@ jobs:
 
       # The ephemeris data files are what give full precision. If they ever
       # stop being committed the engine silently drops to its lower-precision
-      # fallback, which no test would catch — so their presence is asserted.
+      # fallback, which no test would catch, so their presence is asserted.
       - name: Verify ephemeris data files are present
         run: |
           test -f ephe/sepl_18.se1 || { echo "Missing ephe/sepl_18.se1"; exit 1; }

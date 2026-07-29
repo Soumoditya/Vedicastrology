@@ -7,7 +7,7 @@ export const metadata = { title: 'Admin', robots: { index: false } };
 export default async function AdminHome() {
   const supabase = await createClient();
 
-  // Counts only — head:true skips fetching the rows themselves.
+  // Counts only, head:true skips fetching the rows themselves.
   const [services, regions, posts, testimonials, enquiries] = await Promise.all([
     supabase.from('services').select('*', { count: 'exact', head: true }),
     supabase.from('regions').select('*', { count: 'exact', head: true }),
@@ -56,7 +56,7 @@ export default async function AdminHome() {
           </h2>
           <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
             You have no services yet. Add one, then set its price for each region
-            you sell in. India and International are set up already — add more
+            you sell in. India and International are set up already, add more
             from the Regions screen whenever you need them.
           </p>
           <Link

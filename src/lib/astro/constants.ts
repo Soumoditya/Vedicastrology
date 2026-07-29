@@ -143,7 +143,7 @@ export const GRAHAS = [
 
 export type Graha = (typeof GRAHAS)[number];
 
-/** Optional outer planets — not used in classical judgement, shown on request. */
+/** Optional outer planets, not used in classical judgement, shown on request. */
 export const OUTER_GRAHAS = ['Uranus', 'Neptune', 'Pluto'] as const;
 export type OuterGraha = (typeof OUTER_GRAHAS)[number];
 
@@ -195,7 +195,7 @@ export const GRAHA_GLYPH: Record<AnyGraha, string> = {
 /**
  * Natural benefics and malefics.
  * Mercury is conditional (benefic alone, malefic with malefics) and the Moon is
- * conditional on paksha — both are resolved at runtime in `dignity.ts`, so the
+ * conditional on paksha, both are resolved at runtime in `dignity.ts`, so the
  * value here is only the default classification.
  */
 export const NATURAL_BENEFIC: Record<Graha, boolean> = {
@@ -273,7 +273,7 @@ export const MOOLATRIKONA: Record<Graha, [number, number, number] | null> = {
 };
 
 /**
- * Naisargika Maitri — natural, permanent friendship between grahas.
+ * Naisargika Maitri, natural, permanent friendship between grahas.
  * Rahu and Ketu are given the commonly used Parashari set.
  */
 export const NATURAL_FRIENDS: Record<Graha, Graha[]> = {
@@ -303,7 +303,7 @@ export const NATURAL_ENEMIES: Record<Graha, Graha[]> = {
 /**
  * Special aspects (graha drishti), counted in whole signs from the graha.
  * Every graha aspects the 7th. Mars, Jupiter and Saturn have extra aspects.
- * Rahu and Ketu are given 5/7/9 — widely used, though not universal.
+ * Rahu and Ketu are given 5/7/9, widely used, though not universal.
  */
 export const SPECIAL_ASPECTS: Record<Graha, number[]> = {
   Sun: [7],
@@ -458,7 +458,7 @@ export const NAKSHATRA_SYMBOL = [
   'Fish',
 ] as const;
 
-/** Gana — temperament grouping, used in Guna Milan. */
+/** Gana, temperament grouping, used in Guna Milan. */
 export const NAKSHATRA_GANA = [
   'Deva',
   'Manushya',
@@ -489,7 +489,7 @@ export const NAKSHATRA_GANA = [
   'Deva',
 ] as const;
 
-/** Yoni — animal symbol, used in Guna Milan. */
+/** Yoni, animal symbol, used in Guna Milan. */
 export const NAKSHATRA_YONI = [
   'Horse',
   'Elephant',
@@ -520,7 +520,7 @@ export const NAKSHATRA_YONI = [
   'Elephant',
 ] as const;
 
-/** Nadi — constitutional grouping, the highest-weighted koot in Guna Milan. */
+/** Nadi, constitutional grouping, the highest-weighted koot in Guna Milan. */
 export const NAKSHATRA_NADI = [
   'Adi',
   'Madhya',
@@ -728,13 +728,13 @@ export const BHAVA_SIGNIFICATIONS = [
   'Loss, expenditure, foreign lands, liberation, sleep',
 ] as const;
 
-/** Kendra (angular) houses — 1, 4, 7, 10 as zero-based indices. */
+/** Kendra (angular) houses, 1, 4, 7, 10 as zero-based indices. */
 export const KENDRA_HOUSES = [0, 3, 6, 9];
-/** Trikona (trine) houses — 1, 5, 9. */
+/** Trikona (trine) houses, 1, 5, 9. */
 export const TRIKONA_HOUSES = [0, 4, 8];
-/** Dusthana (difficult) houses — 6, 8, 12. */
+/** Dusthana (difficult) houses, 6, 8, 12. */
 export const DUSTHANA_HOUSES = [5, 7, 11];
-/** Upachaya (growing) houses — 3, 6, 10, 11. */
+/** Upachaya (growing) houses, 3, 6, 10, 11. */
 export const UPACHAYA_HOUSES = [2, 5, 9, 10];
-/** Maraka (death-inflicting) houses — 2, 7. */
+/** Maraka (death-inflicting) houses, 2, 7. */
 export const MARAKA_HOUSES = [1, 6];

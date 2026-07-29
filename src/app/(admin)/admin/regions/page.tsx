@@ -21,7 +21,7 @@ export default async function AdminRegions() {
         can switch currency themselves at any time.
       </p>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-        Add as many as you like — a region is just a row here, so selling in a
+        Add as many as you like, a region is just a row here, so selling in a
         new market never needs a code change.
       </p>
 
@@ -39,7 +39,7 @@ export default async function AdminRegions() {
                 <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                   {region.country_codes.length > 0
                     ? region.country_codes.join(', ')
-                    : 'Catch-all — everyone not matched by another region'}
+                    : 'Catch-all, everyone not matched by another region'}
                 </p>
               </div>
 

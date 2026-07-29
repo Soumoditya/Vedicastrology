@@ -29,7 +29,7 @@ const NAV = [
  *
  * The middleware only checks that someone is signed in, because verifying the
  * role there would mean a database round trip on every single request. This is
- * where the role is actually checked — and behind it, row level security would
+ * where the role is actually checked, and behind it, row level security would
  * refuse the queries regardless, so a mistake here cannot expose data.
  */
 export default async function AdminLayout({

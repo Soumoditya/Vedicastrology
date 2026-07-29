@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { VedicChart } from './VedicChart';
+import { ChartLegend } from './ChartLegend';
 import type { ChartRenderData } from '@/lib/chart-render/geometry';
 import {
   BHAVA_NAMES,
@@ -112,13 +113,7 @@ export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
             />
           </div>
 
-          <p
-            className="mt-8 text-center text-xs"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            Numbers are rashis — 1 is Aries, 12 is Pisces. Select any house for
-            detail.
-          </p>
+          <ChartLegend />
         </div>
 
         {/* Detail panel */}
@@ -154,10 +149,10 @@ export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
                 <Row label="Occupied by">
                   {detail.occupants.length
                     ? detail.occupants.map((o) => o.label).join(', ')
-                    : '—'}
+                    : 'None'}
                 </Row>
                 <Row label="Aspected by">
-                  {detail.aspectedBy.length ? detail.aspectedBy.join(', ') : '—'}
+                  {detail.aspectedBy.length ? detail.aspectedBy.join(', ') : 'None'}
                 </Row>
               </dl>
 
@@ -179,7 +174,7 @@ export function ChartWorkspace({ vargas, houses }: ChartWorkspaceProps) {
                 Reading the chart
               </p>
               <p className="mt-2.5 leading-relaxed">
-                In the North Indian style the houses never move — the first
+                In the North Indian style the houses never move, the first
                 house is always the diamond at the top. What changes from chart
                 to chart is the rashi number written inside each one.
               </p>

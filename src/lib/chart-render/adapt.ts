@@ -6,7 +6,7 @@ import type { ChartRenderData, RenderGraha } from './geometry';
  * Adapters from engine output to render data.
  *
  * Kept deliberately thin and free of `server-only` imports so the rendering
- * layer stays usable on the client — the server computes a chart, serialises
+ * layer stays usable on the client, the server computes a chart, serialises
  * it, and the browser draws it without recomputing anything.
  */
 
@@ -39,8 +39,8 @@ export function chartToRenderData(chart: Chart, title = 'Rashi (D1)'): ChartRend
 }
 
 /**
- * Divisional charts carry no meaningful degree — a graha's position within a
- * varga sign is not used in judgement — so degrees are omitted rather than
+ * Divisional charts carry no meaningful degree, a graha's position within a
+ * varga sign is not used in judgement, so degrees are omitted rather than
  * shown as a number that looks precise but means nothing.
  */
 export function vargaToRenderData(

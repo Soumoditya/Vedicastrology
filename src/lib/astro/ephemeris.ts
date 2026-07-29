@@ -16,7 +16,7 @@ const C = sweph.constants;
 /**
  * Swiss Ephemeris reads its data files from disk. Vercel places the bundled
  * files relative to the function's working directory, while local dev runs from
- * the project root — so we probe a few candidates rather than assuming one.
+ * the project root, so we probe a few candidates rather than assuming one.
  */
 function resolveEphePath(): string | null {
   const candidates = [
@@ -30,7 +30,7 @@ function resolveEphePath(): string | null {
     try {
       if (fs.existsSync(path.join(dir, 'sepl_18.se1'))) return dir;
     } catch {
-      // Unreadable candidate — try the next one.
+      // Unreadable candidate, try the next one.
     }
   }
   return null;
@@ -49,7 +49,7 @@ function init(): void {
   } else {
     // Moshier mode needs no data files. It agrees with the full Swiss
     // Ephemeris to well under an arc-second, so the site stays correct even if
-    // the data files ever fail to deploy — it just loses a little precision.
+    // the data files ever fail to deploy, it just loses a little precision.
     usingDataFiles = false;
     if (process.env.NODE_ENV !== 'test') {
       console.warn(
@@ -205,7 +205,7 @@ export interface RawPosition {
 /**
  * Raw sidereal position of a single body.
  *
- * Ketu is not a body Swiss Ephemeris knows about — it is always exactly 180°
+ * Ketu is not a body Swiss Ephemeris knows about, it is always exactly 180°
  * from Rahu, so it is derived rather than looked up.
  */
 export function calcBody(
@@ -257,7 +257,7 @@ export function calcBody(
 const HOUSE_CODE: Record<HouseSystem, string> = {
   whole_sign: 'W',
   equal: 'E',
-  sripati: 'O', // Porphyry — Sripati cusps are Porphyry cusps
+  sripati: 'O', // Porphyry, Sripati cusps are Porphyry cusps
   placidus: 'P',
   koch: 'K',
   campanus: 'C',
@@ -319,7 +319,7 @@ export type RiseEvent = 'rise' | 'set';
  *
  * `hinduConvention` applies the disc-centre, no-refraction rule used by Indian
  * panchang makers. Western almanacs use the upper-limb-with-refraction rule,
- * which shifts sunrise by roughly two to four minutes — enough to change the
+ * which shifts sunrise by roughly two to four minutes, enough to change the
  * tithi or nakshatra reported for a day, so it matters.
  */
 export function calcRiseSet(

@@ -88,7 +88,7 @@ export function VedicChart({
 
             `userSpaceOnUse` is required, not stylistic. With the default
             `objectBoundingBox` units, an element whose bounding box has zero
-            width or height is not painted at all — and the four sides of the
+            width or height is not painted at all, and the four sides of the
             outer square are axis-aligned, so they are exactly that. Using
             object bounding box units silently erases the square while leaving
             the diagonals visible.
@@ -184,16 +184,29 @@ export function VedicChart({
             const isAscendant = cell.house === 1;
             const grahas = house.grahas;
 
-            // Crowded houses drop the degree and tighten the leading rather
-            // than spilling outside the cell.
-            const crowded = grahas.length > cell.capacity;
-            const lineHeight = crowded ? 4.2 : 5.2;
-            const startY =
-              cell.contentAt.y - ((grahas.length - 1) * lineHeight) / 2;
+            // A stellium can put six or more grahas in one house. Stacking them
+            // all in a single column runs straight out of the cell, so past the
+            // cell's capacity the labels move to two columns, the type shrinks
+            // to a floor, and degrees are dropped. Corner triangles hold less
+            // than the central rhombi, which is what `capacity` encodes.
+            const twoColumns = grahas.length > cell.capacity;
+            const columns = twoColumns ? 2 : 1;
+            const rows = Math.ceil(grahas.length / columns);
+
+            const fontSize = twoColumns ? 3 : grahas.length > 3 ? 3.5 : 4;
+            const lineHeight = fontSize * 1.3;
+            const columnWidth = fontSize * 3.1;
+
+            // Degrees are the first thing to go: the sign a graha occupies
+            // matters far more than its exact degree when reading a crowded
+            // house, and keeping them would force the type below legibility.
+            const withDegrees = showDegrees && !twoColumns && grahas.length <= 3;
+
+            const startY = cell.contentAt.y - ((rows - 1) * lineHeight) / 2;
 
             return (
               <g key={`content-${cell.house}`}>
-                {/* Rashi numeral — the sign occupying this house. */}
+                {/* Rashi numeral, the sign occupying this house. */}
                 <text
                   x={cell.numberAt.x}
                   y={cell.numberAt.y}
@@ -212,15 +225,23 @@ export function VedicChart({
 
                 {/* Grahas. */}
                 {grahas.map((g, i) => {
-                  const y = startY + i * lineHeight;
+                  // Fill column by column so a two column layout reads down
+                  // the left side first, the way a list normally would.
+                  const column = Math.floor(i / rows);
+                  const row = i % rows;
+
+                  const x =
+                    cell.contentAt.x + (column - (columns - 1) / 2) * columnWidth;
+                  const y = startY + row * lineHeight;
+
                   return (
                     <text
                       key={g.graha}
-                      x={cell.contentAt.x}
+                      x={x}
                       y={y}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fontSize={crowded ? '3.5' : '4'}
+                      fontSize={fontSize}
                       fill={grahaColor(g)}
                       fontWeight={500}
                       style={{
@@ -230,14 +251,18 @@ export function VedicChart({
                     >
                       {g.abbr}
                       {g.retrograde && (
-                        <tspan fontSize="2.6" dy="-1.2" opacity="0.85">
+                        <tspan
+                          fontSize={fontSize * 0.65}
+                          dy={-fontSize * 0.3}
+                          opacity="0.85"
+                        >
                           ℞
                         </tspan>
                       )}
-                      {showDegrees && !crowded && g.degree !== undefined && (
+                      {withDegrees && g.degree !== undefined && (
                         <tspan
                           fontSize="2.7"
-                          dy={g.retrograde ? '1.2' : '0'}
+                          dy={g.retrograde ? fontSize * 0.3 : 0}
                           dx="0.6"
                           opacity="0.6"
                         >
@@ -252,7 +277,7 @@ export function VedicChart({
           })}
         </g>
 
-        {/* Ascendant marker — a small gold tick on the first house. */}
+        {/* Ascendant marker, a small gold tick on the first house. */}
         {style === 'north-indian' && (
           <g opacity="0.9" filter={`url(#${uid}-soft)`}>
             <path

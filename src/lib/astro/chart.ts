@@ -35,7 +35,7 @@ export interface CastOptions extends ResolveOptions {
  *
  * Order matters here: time must be resolved before anything else, the Sun is
  * needed before combustion can be judged, and every graha's sign must be known
- * before dignity can be settled — because dignity depends on where the
+ * before dignity can be settled, because dignity depends on where the
  * dispositor sits.
  */
 export function castChart(birth: BirthData, options: CastOptions = {}): Chart {
@@ -166,12 +166,12 @@ export function castChart(birth: BirthData, options: CastOptions = {}): Chart {
 // Derived helpers
 // ---------------------------------------------------------------------------
 
-/** Rashi (Moon sign) — the sign most Vedic prediction is read from. */
+/** Rashi (Moon sign), the sign most Vedic prediction is read from. */
 export function moonRashi(chart: Chart): number {
   return chart.byGraha.Moon.rashi;
 }
 
-/** Janma nakshatra — the Moon's nakshatra at birth. */
+/** Janma nakshatra, the Moon's nakshatra at birth. */
 export function janmaNakshatra(chart: Chart): number {
   return chart.byGraha.Moon.nakshatra;
 }

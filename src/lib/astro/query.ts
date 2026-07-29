@@ -20,7 +20,7 @@ export const birthQuerySchema = z.object({
   tz: z.string().optional(),
   place: z.string().default('Unknown place'),
   name: z.string().optional(),
-  /** Birth time not known — the chart is cast but flagged throughout. */
+  /** Birth time not known, the chart is cast but flagged throughout. */
   unknown: z.coerce.boolean().optional(),
   ay: z
     .enum([

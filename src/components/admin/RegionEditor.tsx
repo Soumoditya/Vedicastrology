@@ -10,8 +10,8 @@ const empty: ActionState = {};
 /**
  * Add or edit a pricing region.
  *
- * This is the screen that keeps pricing out of the code. A new market — the
- * UK, the Gulf, Australia — is a row here, not a deployment.
+ * This is the screen that keeps pricing out of the code. A new market, the
+ * UK, the Gulf, Australia, is a row here, not a deployment.
  */
 export function RegionEditor({ region }: { region?: Region }) {
   const [state, action, pending] = useActionState(saveRegion, empty);
@@ -106,7 +106,7 @@ export function RegionEditor({ region }: { region?: Region }) {
           className={input}
         />
         <p className="mt-1.5 text-[0.7rem] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-          Separate them however you like — commas, spaces or new lines all work.
+          Separate them however you like, commas, spaces or new lines all work.
           Leave this empty to make the region a catch-all for everyone whose
           country isn’t listed anywhere else.
         </p>

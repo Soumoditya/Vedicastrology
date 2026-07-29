@@ -127,7 +127,7 @@ export function ServiceEditor({
 
       {/*
         Prices live in their own form so they save independently of the copy
-        above — editing a price should not require re-submitting the whole
+        above, editing a price should not require re-submitting the whole
         description, and vice versa. Nested forms are invalid HTML, so these
         are siblings.
       */}
@@ -164,7 +164,7 @@ function PriceGrid({
         Price in each region
       </h2>
       <p className="mt-1.5 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-        Leave a box empty to not sell this service in that region — visitors
+        Leave a box empty to not sell this service in that region, visitors
         there see your default region’s price instead. Nothing is converted:
         each figure is exactly what you type.
       </p>

@@ -15,7 +15,7 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
         aria-hidden
         className="shrink-0"
       >
-        {/* Twelve rays — one per rashi. */}
+        {/* Twelve rays, one per rashi. */}
         <g stroke="var(--color-gold-500)" strokeWidth="1" strokeLinecap="round">
           {Array.from({ length: 12 }, (_, i) => {
             const angle = (i * 30 * Math.PI) / 180;

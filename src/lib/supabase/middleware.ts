@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Refreshes the auth session on every request.
  *
  * Server Components cannot write cookies, so without this the access token
- * would expire and never renew — signing people out mid-visit. The middleware
+ * would expire and never renew, signing people out mid-visit. The middleware
  * is the one place in the request lifecycle that can both read and set them.
  */
 export async function updateSession(request: NextRequest) {

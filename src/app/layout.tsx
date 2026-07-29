@@ -6,9 +6,9 @@ import { SITE } from '@/lib/site';
 
 /**
  * Type pairing:
- *   Marcellus — a Roman capital face, for display. Gives the site its voice.
- *   Inter — for interface and body copy, where legibility outranks character.
- *   Cormorant Garamond — italic, for pull quotes and Sanskrit terms only.
+ *   Marcellus, a Roman capital face, for display. Gives the site its voice.
+ *   Inter, for interface and body copy, where legibility outranks character.
+ *   Cormorant Garamond, italic, for pull quotes and Sanskrit terms only.
  */
 const marcellus = Marcellus({
   weight: '400',
@@ -34,7 +34,7 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — Vedic Astrology, Charts & Readings`,
+    default: `${SITE.name}, Vedic Astrology, Charts & Readings`,
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE.name,
-    title: `${SITE.name} — Vedic Astrology, Charts & Readings`,
+    title: `${SITE.name}, Vedic Astrology, Charts & Readings`,
     description: SITE.description,
   },
   twitter: { card: 'summary_large_image' },

@@ -90,8 +90,8 @@ export interface DashaOptions {
 /**
  * Build the Vimshottari dasha tree for a chart.
  *
- * `birthDate` must be the UTC instant of birth — the same instant the chart was
- * cast for — so that dasha boundaries line up with the chart.
+ * `birthDate` must be the UTC instant of birth, the same instant the chart was
+ * cast for, so that dasha boundaries line up with the chart.
  */
 export function buildVimshottari(
   chart: Chart,
@@ -182,7 +182,7 @@ export function formatDashaChain(active: ActiveDasha): string {
 }
 
 /**
- * Upcoming period changes after a given moment — the dates a client actually
+ * Upcoming period changes after a given moment, the dates a client actually
  * wants to know about.
  */
 export function upcomingDashaChanges(

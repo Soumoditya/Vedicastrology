@@ -3,7 +3,7 @@
  *
  * Hand-written rather than generated, so the shapes the application actually
  * uses stay readable and documented. They mirror
- * `supabase/migrations/20260729000100_core_schema.sql` — if you change the
+ * `supabase/migrations/20260729000100_core_schema.sql`, if you change the
  * schema, change this too.
  */
 

@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/dashboard';
 
-  // Only ever redirect within this site — `next` arrives from the URL, so an
+  // Only ever redirect within this site, `next` arrives from the URL, so an
   // unchecked value would make this an open redirect off the back of a genuine
   // sign-in.
   const destination = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';

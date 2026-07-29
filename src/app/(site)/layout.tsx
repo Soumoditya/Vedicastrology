@@ -5,7 +5,7 @@ import { Header } from '@/components/site/Header';
  * Applies the stored theme before the first paint.
  *
  * Without this the page would render dark, then snap to light for anyone who
- * chose light mode — a visible flash on every navigation. It has to be inline
+ * chose light mode, a visible flash on every navigation. It has to be inline
  * and synchronous to run ahead of paint.
  */
 const themeScript = `

@@ -1,6 +1,6 @@
 # Vedic Astrologey
 
-Vedic astrology platform — accurate birth charts, panchang, dasha periods and
+Vedic astrology platform, accurate birth charts, panchang, dasha periods and
 transit readings, with services, pricing and a journal.
 
 ## Why the calculations can be trusted
@@ -8,7 +8,7 @@ transit readings, with services, pricing and a journal.
 Positions come from the [Swiss Ephemeris](https://www.astro.com/swisseph/) with
 its full-precision data files bundled (`ephe/`, 1.8 MB, covering 1800–2400 CE).
 If those files are ever missing from a deployment the engine falls back to the
-built-in Moshier ephemeris, which agrees to under 0.3 arc-seconds — so a
+built-in Moshier ephemeris, which agrees to under 0.3 arc-seconds, so a
 deployment mishap costs precision, not correctness.
 
 Three things that are commonly got wrong and are handled here:
@@ -18,8 +18,8 @@ Three things that are commonly got wrong and are handled here:
   that are wrong in every value while still looking entirely plausible. Offsets
   come from the IANA database, including worldwide daylight saving and the
   ambiguous or non-existent local times that occur at a transition.
-- **Sunrise convention.** Panchang uses the Hindu rule — centre of the disc, no
-  refraction — not the Western upper-limb-with-refraction rule. The two differ
+- **Sunrise convention.** Panchang uses the Hindu rule, centre of the disc, no
+  refraction, not the Western upper-limb-with-refraction rule. The two differ
   by two to four minutes, regularly enough to change which tithi a day is named
   for.
 - **Divisional charts.** Each varga has its own rule for where the count begins,
@@ -62,8 +62,7 @@ results behind.
 ## Pricing
 
 Regions are rows in the database, not code. Each has a currency and a list of
-country codes, and each service carries one hand-entered price per region —
-nothing is converted at an exchange rate. Selling into a new market is a row in
+country codes, and each service carries one hand-entered price per region, nothing is converted at an exchange rate. Selling into a new market is a row in
 the admin panel, not a deployment.
 
 ## Licence

@@ -3,7 +3,7 @@
 /**
  * A drawn yantra for the hero.
  *
- * Deliberately *not* a real chart — presenting a fabricated chart as if it were
+ * Deliberately *not* a real chart, presenting a fabricated chart as if it were
  * someone's would be dishonest, and a generic one would say nothing. This is a
  * geometric figure in the same visual language: twelve rashi divisions, the
  * nakshatra ring, and the interlocking triangles found in classical yantras.
@@ -106,7 +106,7 @@ export function Yantra() {
         <circle cx="200" cy="200" r="26" strokeWidth="1" />
       </g>
 
-      {/* Bindu — the still point at the centre */}
+      {/* Bindu, the still point at the centre */}
       <circle cx="200" cy="200" r="4" fill="var(--color-gold-200)" />
     </svg>
   );

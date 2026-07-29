@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ results: merged.slice(0, 10) });
   } catch {
     // A geocoding outage should degrade to the built-in list, not break the
-    // form — the visitor can still find any major Indian city.
+    // form, the visitor can still find any major Indian city.
     return NextResponse.json({ results: local, degraded: true });
   }
 }

@@ -15,7 +15,7 @@ import type {
  *
  * Prices are never converted. Each one is a figure typed by hand in the admin
  * panel for a specific region, because a consultation sold in India is not the
- * same product, commercially, as the same consultation sold abroad — and an
+ * same product, commercially, as the same consultation sold abroad, and an
  * exchange rate would produce odd-looking numbers that undercut the pricing
  * decision.
  */
@@ -40,8 +40,7 @@ export async function getRegions(): Promise<Region[]> {
  *   3. the region marked default;
  *   4. whatever region exists.
  *
- * The last two steps matter: a visitor whose country cannot be determined —
- * a VPN, a privacy browser, a crawler — still sees a price rather than a gap.
+ * The last two steps matter: a visitor whose country cannot be determined, * a VPN, a privacy browser, a crawler, still sees a price rather than a gap.
  */
 export async function resolveRegion(): Promise<Region | null> {
   const regions = await getRegions();
@@ -121,7 +120,7 @@ export async function getServiceBySlug(
  * Attach the applicable price to a service.
  *
  * Falls back to the default region's price when the visitor's own region has
- * none set — better to show a real price in another currency, clearly
+ * none set, better to show a real price in another currency, clearly
  * labelled, than to show nothing at all.
  */
 function withRegionalPrice(
@@ -146,7 +145,7 @@ function withRegionalPrice(
  * Format an amount for display.
  *
  * Indian rupees use the `en-IN` locale so grouping follows the lakh/crore
- * convention — ₹1,20,000 rather than ₹120,000, which reads as wrong to an
+ * convention, ₹1,20,000 rather than ₹120,000, which reads as wrong to an
  * Indian customer.
  */
 export function formatPrice(amount: number, currency: string): string {

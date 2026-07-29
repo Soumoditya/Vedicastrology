@@ -37,7 +37,7 @@ export async function createClient() {
 }
 
 /**
- * Service-role client — bypasses row level security entirely.
+ * Service-role client, bypasses row level security entirely.
  *
  * Reserved for work that genuinely has no acting user: recording a payment
  * webhook, or a scheduled job. Never call this in response to input from a

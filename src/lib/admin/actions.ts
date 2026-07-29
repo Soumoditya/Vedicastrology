@@ -83,7 +83,7 @@ export async function saveService(
     summary: data.summary ?? null,
     description: data.description ?? null,
     duration_minutes: data.duration_minutes ?? null,
-    // One deliverable per line — a plain textarea is far easier to edit than a
+    // One deliverable per line, a plain textarea is far easier to edit than a
     // repeating field, and this is the only transformation it needs.
     deliverables: (data.deliverables ?? '')
       .split('\n')
@@ -125,7 +125,7 @@ export async function deleteService(formData: FormData): Promise<void> {
  * Save the price grid for one service.
  *
  * The form posts a field per region. A blank field means "no price in this
- * region", which deletes the row rather than storing zero — zero would display
+ * region", which deletes the row rather than storing zero, zero would display
  * as a free consultation.
  */
 export async function saveServicePrices(
@@ -224,7 +224,7 @@ export async function saveRegion(
     name: parsed.data.name.trim(),
     currency: parsed.data.currency,
     symbol: parsed.data.symbol.trim(),
-    // Accepts "GB, IE, FR" or "GB IE FR" or one per line — whatever is easiest
+    // Accepts "GB, IE, FR" or "GB IE FR" or one per line, whatever is easiest
     // to paste in.
     country_codes: (parsed.data.country_codes ?? '')
       .split(/[\s,]+/)

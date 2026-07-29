@@ -62,7 +62,7 @@ export async function signUp(
 
   return {
     message:
-      'Check your inbox — we have sent you a link to confirm your address.',
+      'Check your inbox, we have sent you a link to confirm your address.',
   };
 }
 
@@ -84,7 +84,7 @@ export async function signIn(
 
   if (error) {
     // Supabase deliberately does not distinguish "no such account" from "wrong
-    // password", and neither do we — saying which would let anyone test
+    // password", and neither do we, saying which would let anyone test
     // whether a given address has an account here.
     return { error: 'That email and password do not match an account.' };
   }
@@ -112,7 +112,7 @@ export async function signInWithMagicLink(
 
   if (error) return { error: error.message };
 
-  return { message: 'Check your inbox — your sign-in link is on its way.' };
+  return { message: 'Check your inbox, your sign-in link is on its way.' };
 }
 
 export async function signOut() {
@@ -126,8 +126,7 @@ export async function signOut() {
  * Only ever redirect within this site.
  *
  * `next` comes from the query string, so without this check an attacker could
- * craft a link that signs someone in and then bounces them to another domain —
- * an open redirect, and a convincing one because the first hop is genuine.
+ * craft a link that signs someone in and then bounces them to another domain, * an open redirect, and a convincing one because the first hop is genuine.
  */
 function safeNext(next: string): string {
   if (!next.startsWith('/') || next.startsWith('//')) return '/dashboard';

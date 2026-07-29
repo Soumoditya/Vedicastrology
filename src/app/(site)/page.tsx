@@ -3,331 +3,447 @@ import Link from 'next/link';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { SITE, TOOL_LINKS } from '@/lib/site';
 import { Yantra } from '@/components/site/Yantra';
+import { Parallax, Reveal } from '@/components/motion/Reveal';
 
 export default function HomePage() {
   return (
     <>
-      {/* ---------------------------------------------------------------- Hero */}
-      <section className="relative overflow-hidden">
-        <div className="starfield" aria-hidden />
+      <Reveal />
+      <Parallax selector="#hero-yantra" strength={0.14} />
 
-        {/* Warm glow rising from behind the yantra. */}
+      {/* ================================================================ Hero */}
+      <section className="relative min-h-[92vh] overflow-hidden">
+        <div className="starfield starfield-slow" aria-hidden />
+
+        {/* Light source behind the figure. */}
         <div
           aria-hidden
-          className="aura pointer-events-none absolute left-1/2 top-0 -z-10 h-[38rem] w-[38rem]
-                     -translate-x-1/2 -translate-y-1/3 rounded-full blur-3xl"
+          className="aura pointer-events-none absolute right-[-10%] top-[-8%] -z-10 h-[46rem] w-[46rem] rounded-full blur-[120px]"
           style={{
             background:
-              'radial-gradient(circle, color-mix(in oklab, var(--color-gold-500) 18%, transparent), transparent 65%)',
+              'radial-gradient(circle, color-mix(in oklab, var(--color-gold-500) 26%, transparent), transparent 62%)',
+          }}
+        />
+        {/* A cold counter-light, so the warm side has something to read against. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-[-20%] left-[-15%] -z-10 h-[36rem] w-[36rem] rounded-full blur-[130px]"
+          style={{
+            background:
+              'radial-gradient(circle, color-mix(in oklab, var(--color-ink-500) 55%, transparent), transparent 65%)',
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-20 pt-16 sm:pb-28 sm:pt-24">
-          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
-            <div>
-              <p
-                className="text-xs uppercase tracking-[0.3em]"
-                style={{ color: 'var(--color-gold-600)' }}
-              >
-                Jyotiṣa · The science of light
-              </p>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-20 lg:grid-cols-[1.15fr_1fr] lg:gap-8 lg:pt-28">
+          <div>
+            <p className="eyebrow" data-reveal>
+              Jyotisa, the science of light
+            </p>
 
-              <h1
-                className="font-display mt-5 text-[2.6rem] leading-[1.08] sm:text-6xl"
-                style={{ color: 'var(--text-primary)' }}
+            {/*
+              The typographic centrepiece. Very large, tight leading, with the
+              second line carrying the gold. Scale is what makes a page feel
+              designed rather than assembled.
+            */}
+            <h1
+              className="font-display mt-6 text-[clamp(2.75rem,8vw,5.25rem)] leading-[0.98]"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <span className="block" data-reveal style={{ '--reveal-delay': '60ms' } as React.CSSProperties}>
+                Your chart,
+              </span>
+              <span
+                className="text-gold-leaf block"
+                data-reveal
+                style={{ '--reveal-delay': '160ms' } as React.CSSProperties}
               >
-                Read your chart
-                <br />
-                <span className="text-gold-leaf">as it truly stands.</span>
-              </h1>
+                calculated properly.
+              </span>
+            </h1>
 
-              <p
-                className="mt-6 max-w-md text-base leading-relaxed"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Classical Vedic astrology, calculated with the Swiss Ephemeris
-                to the arc-second — not estimated. Cast your birth chart free,
-                or sit down with me for a reading that takes your whole chart
-                into account.
-              </p>
+            <p
+              className="mt-8 max-w-md text-[1.0625rem] leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+              data-reveal
+            >
+              Most chart sites round the numbers and hope. This one uses the
+              Swiss Ephemeris, applies the time zone that was actually in force
+              on the day you were born, and shows you its working.
+            </p>
 
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/tools/kundli"
-                  className="group relative overflow-hidden rounded-lg px-6 py-3.5 text-sm font-medium"
+            <div
+              className="mt-10 flex flex-wrap items-center gap-4"
+              data-reveal
+              style={{ '--reveal-delay': '80ms' } as React.CSSProperties}
+            >
+              <Link href="/tools/kundli" className="group relative overflow-hidden rounded-full">
+                <span
+                  className="relative z-10 block px-8 py-4 text-sm font-medium tracking-wide"
+                  style={{ color: '#150e00' }}
+                >
+                  Cast my chart, free
+                </span>
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
                   style={{
                     background:
-                      'linear-gradient(135deg, var(--color-gold-500), var(--color-gold-600))',
-                    color: '#160f00',
+                      'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500) 55%, var(--color-gold-400))',
                   }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -translate-x-full transition-transform duration-[900ms] group-hover:translate-x-full"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+                  }}
+                />
+              </Link>
+
+              <Link
+                href="/services"
+                className="group flex items-center gap-2 text-sm transition-colors duration-300"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <span className="border-b pb-0.5" style={{ borderColor: 'var(--border-strong)' }}>
+                  Sit down with me instead
+                </span>
+                <span
+                  aria-hidden
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                  style={{ color: 'var(--color-gold-400)' }}
                 >
-                  <span className="relative z-10">Cast my chart — free</span>
+                  →
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          <div id="hero-yantra" className="relative mx-auto w-full max-w-lg will-change-transform">
+            <Yantra />
+          </div>
+        </div>
+
+        {/* Scroll cue. Small, quiet, and it stops once you have scrolled. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 lg:block"
+        >
+          <div
+            className="h-12 w-px"
+            style={{
+              background:
+                'linear-gradient(180deg, transparent, var(--color-gold-500), transparent)',
+            }}
+          />
+        </div>
+      </section>
+
+      {/* ========================================================= Proof band */}
+      <section
+        className="relative border-y"
+        style={{ background: 'var(--surface-sunken)' }}
+      >
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-5 lg:grid-cols-4">
+          <Fact figure="1″" label="Positions accurate to the arc-second" />
+          <Fact figure="16" label="Divisional charts, not just the navamsa" />
+          <Fact figure="1906" label="Historical Indian time offsets applied" />
+          <Fact figure="0" label="Cost to cast your chart" />
+        </div>
+      </section>
+
+      {/* ============================================================== Tools */}
+      <section className="mx-auto max-w-6xl px-5 py-28">
+        <div className="grid gap-12 lg:grid-cols-[22rem_1fr] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <p className="eyebrow" data-reveal>
+              Free to use
+            </p>
+            <h2
+              className="font-display mt-5 text-[clamp(2rem,4vw,3rem)] leading-[1.05]"
+              style={{ color: 'var(--text-primary)' }}
+              data-reveal
+            >
+              Study your own chart first.
+            </h2>
+            <p
+              className="mt-6 text-[0.9375rem] leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+              data-reveal
+            >
+              These run the same calculations I use in a paid reading. They are
+              free because a chart you can check yourself is worth more than one
+              you are asked to take on trust. No account, no email.
+            </p>
+          </div>
+
+          {/*
+            An editorial list rather than a grid of equal cards. Numbered rows
+            with a rule between them read as considered; a four by two grid of
+            identical boxes reads as filler.
+          */}
+          <ul>
+            {TOOL_LINKS.map((tool, i) => (
+              <li key={tool.href} data-reveal style={{ '--reveal-delay': `${i * 60}ms` } as React.CSSProperties}>
+                <Link
+                  href={tool.href}
+                  className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 border-t py-7 transition-colors duration-500 sm:gap-6"
+                >
+                  <span
+                    className="font-display text-sm tabular-nums"
+                    style={{ color: 'var(--color-gold-600)' }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+
+                  <span className="min-w-0">
+                    <span className="flex flex-wrap items-baseline gap-x-3">
+                      <span
+                        className="font-display text-2xl transition-colors duration-300 group-hover:text-[var(--color-gold-200)]"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {tool.label}
+                      </span>
+                      <span
+                        className="font-quote text-base italic"
+                        style={{ color: 'var(--color-gold-500)' }}
+                      >
+                        {tool.sanskrit}
+                      </span>
+                    </span>
+                    <span
+                      className="mt-2 block max-w-lg text-sm leading-relaxed"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {tool.description}
+                    </span>
+                  </span>
+
                   <span
                     aria-hidden
-                    className="absolute inset-0 -translate-x-full transition-transform duration-700
-                               group-hover:translate-x-full"
+                    className="translate-x-0 text-lg transition-transform duration-500 group-hover:translate-x-2"
                     style={{
-                      background:
-                        'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+                      color: 'var(--color-gold-400)',
+                      transitionTimingFunction: 'var(--ease-out-expo)',
                     }}
-                  />
+                  >
+                    →
+                  </span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-                <Link
-                  href="/services"
-                  className="rounded-lg border px-6 py-3.5 text-sm transition-colors duration-300"
-                  style={{
-                    borderColor: 'var(--border-strong)',
-                    color: 'var(--color-gold-200)',
-                  }}
-                >
-                  Book a consultation
-                </Link>
-              </div>
+      {/* =========================================================== Accuracy */}
+      <section className="relative overflow-hidden border-y" style={{ background: 'var(--surface-sunken)' }}>
+        <div className="starfield" aria-hidden />
 
-              <dl className="mt-12 grid max-w-md grid-cols-3 gap-5">
-                <Stat value="Arc-second" label="Ephemeris precision" />
-                <Stat value="16" label="Divisional charts" />
-                <Stat value="1800–2400" label="Years covered" />
-              </dl>
-            </div>
+        <div className="relative mx-auto max-w-6xl px-5 py-28">
+          <p className="eyebrow" data-reveal>
+            Why the numbers hold up
+          </p>
 
-            {/* The yantra stands in for a chart without pretending to be one. */}
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-              <Yantra />
-            </div>
+          <h2
+            className="font-display mt-6 max-w-3xl text-[clamp(1.875rem,4vw,3rem)] leading-[1.08]"
+            style={{ color: 'var(--text-primary)' }}
+            data-reveal
+          >
+            A wrong chart still looks like a
+            <span style={{ color: 'var(--color-gold-300)' }}> perfectly good chart</span>.
+          </h2>
+
+          <p
+            className="mt-6 max-w-2xl text-[1.0625rem] leading-relaxed"
+            style={{ color: 'var(--text-secondary)' }}
+            data-reveal
+          >
+            That is the whole problem. Nothing on screen tells you the ascendant
+            was computed from the wrong moment. Three places it usually goes
+            wrong, and what happens here instead:
+          </p>
+
+          <div className="mt-16 grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            <Pillar
+              index="i"
+              title="The ephemeris"
+              delay={0}
+            >
+              Positions come from the Swiss Ephemeris with its full precision
+              data files, the same source serious Indian software uses. Not a
+              simplified orbital approximation.
+            </Pillar>
+
+            <Pillar index="ii" title="The moment" delay={90}>
+              India ran on +05:21:10 before 1906, and +06:30 through the war
+              years. Assume +05:30 and every older chart is quietly wrong. The
+              offset actually in force that day is applied here.
+            </Pillar>
+
+            <Pillar index="iii" title="The sunrise" delay={180}>
+              Panchang uses the Hindu rule, centre of the disc, no refraction.
+              That differs from the Western rule by a few minutes, often enough
+              to change which tithi a day belongs to.
+            </Pillar>
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------ Quick cast */}
-      <section className="relative border-y" style={{ background: 'var(--surface-sunken)' }}>
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-          <div>
-            <p
-              className="text-xs uppercase tracking-[0.26em]"
-              style={{ color: 'var(--color-gold-600)' }}
-            >
-              Start here
-            </p>
+      {/* ========================================================= Quick cast */}
+      <section className="mx-auto max-w-6xl px-5 py-28">
+        <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
+          <div data-reveal="left">
+            <p className="eyebrow">Ten seconds</p>
             <h2
-              className="font-display mt-3 text-3xl"
+              className="font-display mt-5 text-[clamp(2rem,4vw,3rem)] leading-[1.05]"
               style={{ color: 'var(--text-primary)' }}
             >
-              Your chart in about ten seconds
+              Start with your own.
             </h2>
             <p
-              className="mt-4 max-w-md text-sm leading-relaxed"
+              className="mt-6 max-w-md text-[0.9375rem] leading-relaxed"
               style={{ color: 'var(--text-secondary)' }}
             >
-              No account, no email, nothing to pay. Enter your birth details and
-              you’ll get the full rashi chart, your nakshatra, every divisional
-              chart and your running dasha period.
+              Your birth details, and you get the full rashi chart, your
+              nakshatra and pada, every divisional chart, and the dasha period
+              you are running right now.
             </p>
             <p
-              className="mt-4 max-w-md text-sm leading-relaxed"
+              className="mt-4 max-w-md text-[0.9375rem] leading-relaxed"
               style={{ color: 'var(--text-muted)' }}
             >
-              Don’t know your birth time? That’s fine — cast it anyway. The
-              chart will show clearly which parts you can rely on and which you
-              can’t.
+              Do not know your birth time? Cast it anyway. The chart will mark
+              clearly which parts you can rely on and which you cannot, rather
+              than presenting a guess as fact.
             </p>
           </div>
 
-          <div className="surface-card p-6 sm:p-7">
+          <div className="surface-card p-7 sm:p-9" data-reveal="scale">
             <BirthForm action="/tools/kundli" submitLabel="Cast my chart" />
           </div>
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- Tools */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="mb-10 max-w-2xl">
-          <p
-            className="text-xs uppercase tracking-[0.26em]"
-            style={{ color: 'var(--color-gold-600)' }}
-          >
-            Free tools
-          </p>
-          <h2
-            className="font-display mt-3 text-3xl"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Everything you need to study your own chart
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            These are the same calculations I use in a paid reading. They’re
-            free because a chart you can see for yourself is worth more than one
-            you’re asked to take on trust.
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {TOOL_LINKS.map((tool) => (
-            <Link
-              key={tool.href}
-              href={tool.href}
-              className="surface-card group relative overflow-hidden p-5 transition-all duration-500"
-              style={{ transitionTimingFunction: 'var(--ease-out-soft)' }}
-            >
-              <div
-                aria-hidden
-                className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                style={{
-                  background:
-                    'linear-gradient(90deg, transparent, var(--color-gold-400), transparent)',
-                }}
-              />
-              <p
-                className="font-quote text-sm italic"
-                style={{ color: 'var(--color-gold-600)' }}
-              >
-                {tool.sanskrit}
-              </p>
-              <h3
-                className="font-display mt-1 text-lg"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {tool.label}
-              </h3>
-              <p
-                className="mt-2 text-sm leading-relaxed"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                {tool.description}
-              </p>
-              <span
-                className="mt-4 inline-flex items-center gap-1.5 text-xs transition-transform duration-300 group-hover:translate-x-0.5"
-                style={{ color: 'var(--color-gold-400)' }}
-              >
-                Open
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
-                  <path
-                    d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------- Accuracy */}
-      <section className="relative border-y" style={{ background: 'var(--surface-sunken)' }}>
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <div className="mb-10 max-w-2xl">
-            <p
-              className="text-xs uppercase tracking-[0.26em]"
-              style={{ color: 'var(--color-gold-600)' }}
-            >
-              Why the numbers can be trusted
-            </p>
-            <h2
-              className="font-display mt-3 text-3xl"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Most chart sites are quietly wrong
-            </h2>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-3">
-            <Pillar title="The right ephemeris">
-              Positions come from the Swiss Ephemeris — the same source serious
-              Indian software uses — with its full-precision data files, not a
-              simplified approximation.
-            </Pillar>
-            <Pillar title="The right time">
-              India ran on +05:21:10 before 1906 and on +06:30 through the war
-              years. Sites that assume +05:30 get every older chart wrong, in a
-              way that still looks plausible. Historical offsets are applied
-              here automatically.
-            </Pillar>
-            <Pillar title="The right sunrise">
-              Panchang uses the Hindu convention — centre of the disc, no
-              refraction. That differs from the Western rule by a few minutes,
-              which is often enough to change which tithi a day belongs to.
-            </Pillar>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- Closing */}
-      <section className="mx-auto max-w-3xl px-5 py-24 text-center">
-        <blockquote
-          className="font-quote text-2xl italic leading-relaxed sm:text-3xl"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          “A chart does not tell you what will happen. It tells you what you are
-          working with.”
-        </blockquote>
-
-        <div className="rule-gold mx-auto mt-10 max-w-xs" />
-
-        <p className="mt-10 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Ready for a proper reading of your chart?
-        </p>
-        <Link
-          href="/services"
-          className="mt-5 inline-block rounded-lg px-7 py-3.5 text-sm font-medium"
+      {/* ============================================================ Closing */}
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="aura pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px]"
           style={{
             background:
-              'linear-gradient(135deg, var(--color-gold-500), var(--color-gold-600))',
-            color: '#160f00',
+              'radial-gradient(circle, color-mix(in oklab, var(--color-gold-500) 20%, transparent), transparent 65%)',
           }}
-        >
-          See consultations
-        </Link>
+        />
 
-        <p className="mt-8 text-xs" style={{ color: 'var(--text-muted)' }}>
-          Or follow along on Instagram at{' '}
-          <a
-            href={SITE.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--color-gold-400)' }}
+        <div className="mx-auto max-w-3xl px-5 py-32 text-center">
+          <blockquote
+            className="font-quote text-[clamp(1.5rem,3.4vw,2.375rem)] italic leading-[1.35]"
+            style={{ color: 'var(--text-primary)' }}
+            data-reveal
           >
-            @{SITE.instagram}
-          </a>
-        </p>
+            “A chart does not tell you what will happen. It tells you what you
+            are working with.”
+          </blockquote>
+
+          <div className="rule-gold mx-auto mt-12 max-w-[14rem]" />
+
+          <p
+            className="mt-12 text-[0.9375rem]"
+            style={{ color: 'var(--text-secondary)' }}
+            data-reveal
+          >
+            When you want the whole chart read properly, not a paragraph
+            generated from your sun sign.
+          </p>
+
+          <Link
+            href="/services"
+            className="group mt-7 inline-flex items-center gap-2.5 rounded-full border px-8 py-4 text-sm transition-colors duration-500"
+            style={{
+              borderColor: 'var(--border-strong)',
+              color: 'var(--color-gold-200)',
+            }}
+            data-reveal
+          >
+            See what a reading involves
+            <span
+              aria-hidden
+              className="transition-transform duration-500 group-hover:translate-x-1.5"
+            >
+              →
+            </span>
+          </Link>
+
+          <p className="mt-10 text-xs" style={{ color: 'var(--text-muted)' }}>
+            Day to day thoughts on{' '}
+            <a
+              href={SITE.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4"
+              style={{ color: 'var(--color-gold-400)' }}
+            >
+              Instagram
+            </a>
+          </p>
+        </div>
       </section>
     </>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+/** A single figure in the proof band. Large numeral, small caption. */
+function Fact({ figure, label }: { figure: string; label: string }) {
   return (
-    <div>
-      <dt
-        className="font-display text-lg"
+    <div
+      className="border-l px-5 py-10 first:border-l-0 lg:px-7 lg:py-14"
+      data-reveal
+    >
+      <p
+        className="font-display text-[clamp(2rem,4vw,3.25rem)] leading-none"
         style={{ color: 'var(--color-gold-300)' }}
       >
-        {value}
-      </dt>
-      <dd
-        className="mt-0.5 text-[0.7rem] leading-tight"
+        {figure}
+      </p>
+      <p
+        className="mt-3 max-w-[14rem] text-[0.8125rem] leading-snug"
         style={{ color: 'var(--text-muted)' }}
       >
         {label}
-      </dd>
+      </p>
     </div>
   );
 }
 
-function Pillar({ title, children }: { title: string; children: React.ReactNode }) {
+function Pillar({
+  index,
+  title,
+  delay,
+  children,
+}: {
+  index: string;
+  title: string;
+  delay: number;
+  children: React.ReactNode;
+}) {
   return (
-    <div>
+    <div data-reveal style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}>
+      <p
+        className="font-quote text-lg italic"
+        style={{ color: 'var(--color-gold-500)' }}
+      >
+        {index}
+      </p>
       <h3
-        className="font-display text-lg"
-        style={{ color: 'var(--color-gold-200)' }}
+        className="font-display mt-2 text-xl"
+        style={{ color: 'var(--color-gold-100)' }}
       >
         {title}
       </h3>
       <p
-        className="mt-2.5 text-sm leading-relaxed"
+        className="mt-3 text-[0.9375rem] leading-relaxed"
         style={{ color: 'var(--text-secondary)' }}
       >
         {children}

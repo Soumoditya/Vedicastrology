@@ -35,7 +35,7 @@ export function exaltationRashi(graha: Graha): number {
   return Math.floor(EXALTATION_DEG[graha] / 30);
 }
 
-/** Rashi in which a graha is debilitated — always opposite its exaltation. */
+/** Rashi in which a graha is debilitated, always opposite its exaltation. */
 export function debilitationRashi(graha: Graha): number {
   return (exaltationRashi(graha) + 6) % 12;
 }
@@ -54,7 +54,7 @@ export function naturalRelation(from: Graha, to: Graha): NaturalRelation {
 }
 
 /**
- * Tatkalika Maitri — temporary relationship, decided purely by where the two
+ * Tatkalika Maitri, temporary relationship, decided purely by where the two
  * grahas sit relative to each other in this particular chart.
  * The 2nd, 3rd, 4th, 10th, 11th and 12th from a graha are its temporary
  * friends; the rest are temporary enemies.
@@ -75,7 +75,7 @@ export type CompoundRelation =
   | 'great_enemy';
 
 /**
- * Panchadha Maitri — the five-fold compound relationship, combining the
+ * Panchadha Maitri, the five-fold compound relationship, combining the
  * permanent natural relationship with the temporary one.
  */
 export function compoundRelation(
@@ -159,7 +159,7 @@ export const DIGNITY_LABEL: Record<Dignity, string> = {
   enemy: 'Enemy’s sign',
   great_enemy: 'Great enemy’s sign',
   debilitated: 'Debilitated',
-  none: '—',
+  none: 'None',
 };
 
 // ---------------------------------------------------------------------------
@@ -167,7 +167,7 @@ export const DIGNITY_LABEL: Record<Dignity, string> = {
 // ---------------------------------------------------------------------------
 
 /**
- * Astangata — a graha too close to the Sun to be seen, and traditionally held
+ * Astangata, a graha too close to the Sun to be seen, and traditionally held
  * to lose its power to give results.
  */
 export function isCombust(
@@ -206,7 +206,7 @@ export function aspectedHouses(graha: AnyGraha, house: number): number[] {
 /**
  * Functional benefic or malefic status for a given ascendant.
  *
- * This is what actually decides how a graha behaves in a chart — a natural
+ * This is what actually decides how a graha behaves in a chart, a natural
  * malefic owning a trine can be the best graha present, and a natural benefic
  * owning the 3rd and 6th can be the worst.
  *
@@ -238,7 +238,7 @@ export function functionalNature(
   const ownsMalefic = ownedHouses.some((h) => DUSTHANA_OWNERSHIP.includes(h));
   const ownsEighthOrTwelfth = ownedHouses.some((h) => h === 8 || h === 12);
 
-  // Yogakaraka — a single graha ruling both an angle and a trine.
+  // Yogakaraka, a single graha ruling both an angle and a trine.
   if (ownsTrikona && ownsKendra && ownedHouses.length > 1) return 'benefic';
 
   if (ownsTrikona) return 'benefic';
@@ -253,7 +253,7 @@ export function functionalNature(
 }
 
 /**
- * Yogakaraka test — a graha owning both a kendra and a trikona from the
+ * Yogakaraka test, a graha owning both a kendra and a trikona from the
  * ascendant. For most ascendants there is exactly one, and it is the single
  * most useful graha in the chart.
  */

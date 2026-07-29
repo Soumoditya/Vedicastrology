@@ -136,7 +136,7 @@ export interface PlanetPosition extends ZodiacPosition {
   combust: boolean;
   /**
    * Functional nature relative to this specific ascendant, which is what
-   * actually matters in judgement — as opposed to the natural benefic/malefic
+   * actually matters in judgement, as opposed to the natural benefic/malefic
    * classification.
    */
   functionalNature: 'benefic' | 'malefic' | 'neutral';
@@ -164,7 +164,7 @@ export interface HousePosition {
 // ---------------------------------------------------------------------------
 
 export interface ChartMeta {
-  /** Julian day in Universal Time — the canonical instant for all calculation. */
+  /** Julian day in Universal Time, the canonical instant for all calculation. */
   julianDayUT: number;
   /** The UTC instant, as an ISO 8601 string. */
   utcISO: string;
@@ -174,7 +174,7 @@ export interface ChartMeta {
   timezone: string;
   /**
    * True when the offset came from a historical rule rather than the modern
-   * one — for example India's 1942–45 wartime +06:30. Surfaced in the UI so a
+   * one, for example India's 1942–45 wartime +06:30. Surfaced in the UI so a
    * user can see why an old chart differs from other sites.
    */
   historicalOffset: boolean;
@@ -318,7 +318,7 @@ export interface SadeSatiResult {
   currentPhase: SadeSatiPhase | null;
   /** All past and future phases within the window examined. */
   phases: SadeSatiPhase[];
-  /** Small panoti — Saturn's 4th/8th transit from the Moon. */
+  /** Small panoti, Saturn's 4th/8th transit from the Moon. */
   dhaiya: { active: boolean; type: 'kantaka' | 'ashtama' | null };
 }
 

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Free Vedic Astrology Tools',
   description:
     'Birth chart, panchang, dasha periods, transits, compatibility and ' +
-    'nakshatra finder — calculated with the Swiss Ephemeris. Free, no account.',
+    'nakshatra finder, calculated with the Swiss Ephemeris. Free, no account.',
 };
 
 export default function ToolsPage() {

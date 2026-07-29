@@ -22,7 +22,7 @@ create policy profiles_update_own on profiles
 create policy profiles_admin_all on profiles
   for all to authenticated using (is_admin()) with check (is_admin());
 
--- birth_profiles — strictly private to their owner.
+-- birth_profiles, strictly private to their owner.
 create policy birth_profiles_own on birth_profiles
   for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
@@ -78,7 +78,7 @@ create policy post_tags_public_read on post_tags
 create policy post_tags_admin_all on post_tags
   for all to authenticated using (is_admin()) with check (is_admin());
 
--- testimonials — anyone may submit, but only as 'pending'. The WITH CHECK makes
+-- testimonials, anyone may submit, but only as 'pending'. The WITH CHECK makes
 -- self-approval impossible rather than merely discouraged.
 create policy testimonials_public_read on testimonials
   for select to anon, authenticated using (status = 'approved');
@@ -89,7 +89,7 @@ create policy testimonials_read_own on testimonials
 create policy testimonials_admin_all on testimonials
   for all to authenticated using (is_admin()) with check (is_admin());
 
--- enquiries — submitted by anyone, readable only by their author and admins.
+-- enquiries, submitted by anyone, readable only by their author and admins.
 create policy enquiries_insert on enquiries
   for insert to anon, authenticated with check (status = 'new');
 create policy enquiries_read_own on enquiries
@@ -97,7 +97,7 @@ create policy enquiries_read_own on enquiries
 create policy enquiries_admin_all on enquiries
   for all to authenticated using (is_admin()) with check (is_admin());
 
--- orders — no client writes. Payments will be recorded server-side through the
+-- orders, no client writes. Payments will be recorded server-side through the
 -- service role, which bypasses RLS.
 create policy orders_read_own on orders
   for select to authenticated using (user_id = auth.uid());
@@ -109,7 +109,7 @@ create policy site_settings_public_read on site_settings
 create policy site_settings_admin_all on site_settings
   for all to authenticated using (is_admin()) with check (is_admin());
 
--- newsletter_subscribers — insert only. Deliberately no public select:
+-- newsletter_subscribers, insert only. Deliberately no public select:
 -- allowing reads would expose the whole subscriber list to anyone holding the
 -- publishable key.
 create policy newsletter_insert on newsletter_subscribers

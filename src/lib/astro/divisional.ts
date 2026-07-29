@@ -7,7 +7,7 @@ import { signDistance } from './zodiac';
  * Vargas (divisional charts).
  *
  * Every varga divides each sign into N parts and maps each part onto a sign.
- * What differs between them is only *where the count begins* — and that starting
+ * What differs between them is only *where the count begins*, and that starting
  * rule is exactly what generic implementations get wrong, because several vargas
  * key it off the sign's movable/fixed/dual quality or its odd/even parity rather
  * than the sign itself.
@@ -99,7 +99,7 @@ export const VARGAS: Record<VargaCode, VargaDefinition> = {
     name: 'Navamsa',
     divisions: 9,
     signification:
-      'Marriage, dharma and the inner strength of every graha — the most important varga after the rashi',
+      'Marriage, dharma and the inner strength of every graha, the most important varga after the rashi',
     // Movable from itself, fixed from the 9th, dual from the 5th.
     startSign: (rashi) => byQuality(rashi, rashi, (rashi + 8) % 12, (rashi + 4) % 12),
   },
@@ -159,7 +159,7 @@ export const VARGAS: Record<VargaCode, VargaDefinition> = {
     name: 'Trimsamsa',
     divisions: 30,
     signification: 'Misfortune, character and hidden weakness',
-    // The one varga with unequal divisions — see trimsamsa() below.
+    // The one varga with unequal divisions, see trimsamsa() below.
     startSign: (rashi) => rashi,
     custom: (rashi, deg) => trimsamsa(rashi, deg),
   },
@@ -185,7 +185,7 @@ export const VARGAS: Record<VargaCode, VargaDefinition> = {
     name: 'Shashtiamsa',
     divisions: 60,
     signification:
-      'The finest division — past-life merit and the deepest layer of the chart',
+      'The finest division, past-life merit and the deepest layer of the chart',
     startSign: (rashi) => rashi,
   },
 };
@@ -230,8 +230,7 @@ export function vargaRashi(longitude: number, code: VargaCode): number {
  * Build a complete divisional chart.
  *
  * The varga ascendant is derived from the natal ascendant's longitude using the
- * same rule as the grahas, and houses are then counted from it by whole sign —
- * which is the only house system meaningful in a varga.
+ * same rule as the grahas, and houses are then counted from it by whole sign, * which is the only house system meaningful in a varga.
  */
 export function buildVarga(chart: Chart, code: VargaCode): VargaChart {
   const def = VARGAS[code];
@@ -255,7 +254,7 @@ export function buildVarga(chart: Chart, code: VargaCode): VargaChart {
   };
 }
 
-/** The vargas shown by default — the shodasavarga subset in common use. */
+/** The vargas shown by default, the shodasavarga subset in common use. */
 export const COMMON_VARGAS: VargaCode[] = ['D1', 'D9', 'D10', 'D7', 'D12', 'D30', 'D60'];
 
 export const ALL_VARGAS: VargaCode[] = [
@@ -264,7 +263,7 @@ export const ALL_VARGAS: VargaCode[] = [
 ];
 
 /**
- * Vimshopaka Bala — a graha's strength weighted across six vargas.
+ * Vimshopaka Bala, a graha's strength weighted across six vargas.
  * A graha strong here delivers its promise; one strong only in the rashi chart
  * often does not.
  */

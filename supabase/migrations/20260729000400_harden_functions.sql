@@ -16,7 +16,7 @@ $$;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 -- is_admin is referenced by RLS policies, and Postgres evaluates policy
--- expressions with the privileges of the querying role — so `authenticated`
+-- expressions with the privileges of the querying role, so `authenticated`
 -- must retain execute or every admin policy would fail.
 --
 -- `anon` does not: no policy applying to anonymous visitors calls it, and an

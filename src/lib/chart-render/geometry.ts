@@ -3,8 +3,7 @@ import type { Dignity } from '../astro/types';
 
 /**
  * Chart rendering is kept separate from chart *calculation* so that the same
- * component can draw a natal chart, any divisional chart, or a transit chart —
- * and so a second visual style (South Indian) can be added by supplying another
+ * component can draw a natal chart, any divisional chart, or a transit chart, * and so a second visual style (South Indian) can be added by supplying another
  * geometry, with no change to the drawing code.
  */
 
@@ -76,7 +75,7 @@ const H = S / 2;
 const Q = S / 4;
 const T = (S * 3) / 4;
 
-/** Centroid of a polygon's vertices — adequate for these convex cells. */
+/** Centroid of a polygon's vertices, adequate for these convex cells. */
 function centroid(points: Point[]): Point {
   const x = points.reduce((sum, p) => sum + p.x, 0) / points.length;
   const y = points.reduce((sum, p) => sum + p.y, 0) / points.length;
@@ -91,7 +90,7 @@ function centroid(points: Point[]): Point {
  * rhombi at the centre of each edge (houses 1, 4, 7, 10) and eight triangles
  * in the corners.
  *
- * House positions are *fixed* — house 1 is always the top-centre rhombus. It
+ * House positions are *fixed*, house 1 is always the top-centre rhombus. It
  * is the rashi numeral inside each cell that changes from chart to chart. This
  * is the defining property of the North Indian style and the thing most often
  * got wrong by treating it like the South Indian chart, where signs are fixed
@@ -119,7 +118,7 @@ export const NORTH_INDIAN: ChartGeometry = {
   ],
 
   cells: [
-    // House 1 — top-centre rhombus.
+    // House 1, top-centre rhombus.
     {
       house: 1,
       polygon: [{ x: Q, y: Q }, { x: H, y: 0 }, { x: T, y: Q }, { x: H, y: H }],
@@ -127,7 +126,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: H, y: 20 },
       capacity: 4,
     },
-    // House 2 — top-left triangle.
+    // House 2, top-left triangle.
     {
       house: 2,
       polygon: [{ x: 0, y: 0 }, { x: H, y: 0 }, { x: Q, y: Q }],
@@ -135,7 +134,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 27, y: 15 },
       capacity: 3,
     },
-    // House 3 — upper-left triangle.
+    // House 3, upper-left triangle.
     {
       house: 3,
       polygon: [{ x: 0, y: 0 }, { x: Q, y: Q }, { x: 0, y: H }],
@@ -143,7 +142,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 15, y: 28 },
       capacity: 4,
     },
-    // House 4 — left-centre rhombus.
+    // House 4, left-centre rhombus.
     {
       house: 4,
       polygon: [{ x: 0, y: H }, { x: Q, y: Q }, { x: H, y: H }, { x: Q, y: T }],
@@ -151,7 +150,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 20, y: H },
       capacity: 4,
     },
-    // House 5 — lower-left triangle.
+    // House 5, lower-left triangle.
     {
       house: 5,
       polygon: [{ x: 0, y: H }, { x: Q, y: T }, { x: 0, y: S }],
@@ -159,7 +158,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 15, y: 72 },
       capacity: 4,
     },
-    // House 6 — bottom-left triangle.
+    // House 6, bottom-left triangle.
     {
       house: 6,
       polygon: [{ x: 0, y: S }, { x: Q, y: T }, { x: H, y: S }],
@@ -167,7 +166,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 27, y: 85 },
       capacity: 3,
     },
-    // House 7 — bottom-centre rhombus.
+    // House 7, bottom-centre rhombus.
     {
       house: 7,
       polygon: [{ x: H, y: S }, { x: Q, y: T }, { x: H, y: H }, { x: T, y: T }],
@@ -175,7 +174,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: H, y: 80 },
       capacity: 4,
     },
-    // House 8 — bottom-right triangle.
+    // House 8, bottom-right triangle.
     {
       house: 8,
       polygon: [{ x: H, y: S }, { x: T, y: T }, { x: S, y: S }],
@@ -183,7 +182,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 73, y: 85 },
       capacity: 3,
     },
-    // House 9 — lower-right triangle.
+    // House 9, lower-right triangle.
     {
       house: 9,
       polygon: [{ x: S, y: S }, { x: T, y: T }, { x: S, y: H }],
@@ -191,7 +190,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 85, y: 72 },
       capacity: 4,
     },
-    // House 10 — right-centre rhombus.
+    // House 10, right-centre rhombus.
     {
       house: 10,
       polygon: [{ x: S, y: H }, { x: T, y: T }, { x: H, y: H }, { x: T, y: Q }],
@@ -199,7 +198,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 80, y: H },
       capacity: 4,
     },
-    // House 11 — upper-right triangle.
+    // House 11, upper-right triangle.
     {
       house: 11,
       polygon: [{ x: S, y: H }, { x: T, y: Q }, { x: S, y: 0 }],
@@ -207,7 +206,7 @@ export const NORTH_INDIAN: ChartGeometry = {
       contentAt: { x: 85, y: 28 },
       capacity: 4,
     },
-    // House 12 — top-right triangle.
+    // House 12, top-right triangle.
     {
       house: 12,
       polygon: [{ x: S, y: 0 }, { x: T, y: Q }, { x: H, y: 0 }],

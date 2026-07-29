@@ -28,7 +28,7 @@ import { NAKSHATRA_SPAN } from './zodiac';
 import { timezoneFor } from './time';
 
 /**
- * Panchang — the five limbs of the Vedic day.
+ * Panchang, the five limbs of the Vedic day.
  *
  * Two things separate a correct panchang from an approximate one:
  *
@@ -38,7 +38,7 @@ import { timezoneFor } from './time';
  *      nakshatra a day is named for.
  *
  *   2. The Vedic day runs sunrise to sunrise, so the weekday and every element
- *      is read at sunrise — not at midnight.
+ *      is read at sunrise, not at midnight.
  *
  * Element end times are solved numerically against the ephemeris rather than
  * estimated from a mean motion, because the Moon's speed varies by roughly 15%
@@ -120,7 +120,7 @@ function solveCrossing(
 // The five limbs
 // ---------------------------------------------------------------------------
 
-/** Tithi — a lunar day, one thirtieth of a synodic month (12° of elongation). */
+/** Tithi, a lunar day, one thirtieth of a synodic month (12° of elongation). */
 export function computeTithi(jd: number, ayanamsa: AyanamsaName) {
   const angle = elongation(jd, ayanamsa);
   const index = Math.floor(angle / 12); // 0–29
@@ -169,7 +169,7 @@ export function computeNakshatra(jd: number, ayanamsa: AyanamsaName) {
   };
 }
 
-/** Yoga — from the combined longitude of Sun and Moon. */
+/** Yoga, from the combined longitude of Sun and Moon. */
 export function computeYoga(jd: number, ayanamsa: AyanamsaName): PanchangElement {
   const angle = yogaAngle(jd, ayanamsa);
   const exact = angle / NAKSHATRA_SPAN;
@@ -191,7 +191,7 @@ export function computeYoga(jd: number, ayanamsa: AyanamsaName): PanchangElement
 }
 
 /**
- * Karana — half a tithi, so 60 in a lunar month.
+ * Karana, half a tithi, so 60 in a lunar month.
  *
  * Four are fixed and occur once each per month; the other seven repeat eight
  * times. The cycle is: Kimstughna, then Bava…Vishti eight times over, then
@@ -237,7 +237,7 @@ function nthEighth(sunrise: Date, sunset: Date, part: number): TimeWindow {
 }
 
 /**
- * Abhijit — the eighth of the fifteen muhurtas of daylight, straddling local
+ * Abhijit, the eighth of the fifteen muhurtas of daylight, straddling local
  * noon. Traditionally the most auspicious window of the day, and not observed
  * on Wednesdays.
  */
@@ -249,7 +249,7 @@ function abhijit(sunrise: Date, sunset: Date, weekday: number): TimeWindow | nul
   return { start, end: new Date(start.getTime() + muhurta) };
 }
 
-/** Brahma muhurta — the two muhurtas (96 minutes) before sunrise. */
+/** Brahma muhurta, the two muhurtas (96 minutes) before sunrise. */
 function brahmaMuhurta(sunrise: Date): TimeWindow {
   const end = new Date(sunrise.getTime() - 48 * 60_000);
   return { start: new Date(sunrise.getTime() - 96 * 60_000), end };
@@ -314,7 +314,7 @@ export function computePanchang(
   const karana = computeKarana(referenceJd, ayanamsa);
 
   // The Vedic weekday is the local civil weekday of the day this sunrise opens.
-  // It must come from the local date, not from the Julian Day — sunrise in
+  // It must come from the local date, not from the Julian Day, sunrise in
   // India falls on the *previous* UT date, so deriving it from UT is off by one.
   const weekday = new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
 
@@ -356,7 +356,7 @@ export function computePanchang(
 }
 
 // ---------------------------------------------------------------------------
-// Hora — the planetary hour
+// Hora, the planetary hour
 // ---------------------------------------------------------------------------
 
 export interface Hora {
@@ -371,8 +371,7 @@ export interface Hora {
  * The twenty-four horas of a Vedic day.
  *
  * The first hora after sunrise belongs to the lord of the weekday, and the
- * sequence then follows the Chaldean order. Day and night horas are unequal —
- * each is a twelfth of its own half — which is why they are built separately.
+ * sequence then follows the Chaldean order. Day and night horas are unequal, * each is a twelfth of its own half, which is why they are built separately.
  */
 export function computeHoras(
   sunrise: Date,
@@ -410,7 +409,7 @@ export function computeHoras(
   return horas;
 }
 
-/** Number of whole days between two Julian Days — used when stepping dates. */
+/** Number of whole days between two Julian Days, used when stepping dates. */
 export function addDays(jd: number, days: number): number {
   return jd + days;
 }

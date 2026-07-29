@@ -16,7 +16,7 @@ export interface PlacePickerProps {
 
 /**
  * A standalone place chooser, for tools that need a location but no birth
- * details — the panchang, the transit calendar, muhurta.
+ * details, the panchang, the transit calendar, muhurta.
  *
  * Shares the same lookup endpoint as the birth form, so the built-in Indian
  * city list answers instantly here too.
@@ -51,7 +51,7 @@ export function PlacePicker({
         setOpen(true);
         setHighlighted(0);
       } catch {
-        // Aborted or offline — keep whatever is on screen.
+        // Aborted or offline, keep whatever is on screen.
       }
     }, 220);
 

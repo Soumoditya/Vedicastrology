@@ -2,7 +2,7 @@
  * Single source of truth for brand details.
  *
  * Kept in one place so the Instagram handle, contact routes and copy can be
- * changed without hunting through components — and later moved into the
+ * changed without hunting through components, and later moved into the
  * admin-editable site settings without touching call sites.
  */
 export const SITE = {

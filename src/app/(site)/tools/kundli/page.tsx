@@ -122,7 +122,7 @@ export default async function KundliPage({
           <Notice tone="warn">
             The birth time wasn’t known, so this chart is cast for noon. The
             grahas’ signs and nakshatras are reliable, but the ascendant, the
-            houses and all dasha dates are not — treat them as provisional.
+            houses and all dasha dates are not, treat them as provisional.
           </Notice>
         )}
 
@@ -154,7 +154,7 @@ export default async function KundliPage({
           />
           <SummaryCard
             label="Current dasha"
-            value={active ? active.maha.lord : '—'}
+            value={active ? active.maha.lord : 'None'}
             detail={active?.antar ? `Antar: ${active.antar.lord}` : undefined}
           />
         </section>
@@ -229,12 +229,12 @@ export default async function KundliPage({
                           </Tag>
                         )}
                         {p.combust && (
-                          <Tag tone="danger" title="Combust — too close to the Sun">
+                          <Tag tone="danger" title="Combust, too close to the Sun">
                             Astangata
                           </Tag>
                         )}
                         {!p.retrograde && !p.combust && (
-                          <span style={{ color: 'var(--text-muted)' }}>—</span>
+                          <span style={{ color: 'var(--text-muted)' }}>None</span>
                         )}
                       </span>
                     </Td>
@@ -301,7 +301,7 @@ export default async function KundliPage({
           </div>
         </section>
 
-        {/* Provenance — worth stating plainly, since accuracy is the point. */}
+        {/* Provenance, worth stating plainly, since accuracy is the point. */}
         <section
           className="surface-card px-5 py-4 text-xs leading-relaxed"
           style={{ color: 'var(--text-muted)' }}
@@ -354,7 +354,7 @@ function KundliIntro({ error }: { error?: string }) {
             className="mx-auto mt-4 max-w-lg text-sm leading-relaxed sm:text-base"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Cast an accurate Vedic chart in the North Indian style — with
+            Cast an accurate Vedic chart in the North Indian style, with
             nakshatras, dignities, divisional charts and your Vimshottari dasha.
             No account needed.
           </p>
@@ -374,7 +374,7 @@ function KundliIntro({ error }: { error?: string }) {
           className="mt-6 text-center text-xs leading-relaxed"
           style={{ color: 'var(--text-muted)' }}
         >
-          Computed with the Swiss Ephemeris and the Lahiri ayanamsa — the same
+          Computed with the Swiss Ephemeris and the Lahiri ayanamsa, the same
           basis used by classical Indian software. Historical time zones,
           including India’s wartime and pre-1906 offsets, are applied
           automatically.

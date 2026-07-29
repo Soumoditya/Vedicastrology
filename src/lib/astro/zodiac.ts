@@ -95,7 +95,7 @@ export function formatPosition(longitude: number, withSeconds = true): string {
   return `${RASHI_NAMES_EN[rashi]} ${formatDms(degreeInRashi, withSeconds)}`;
 }
 
-/** e.g. `Tula 9°50'` — the Sanskrit form, for the traditional presentation. */
+/** e.g. `Tula 9°50'`, the Sanskrit form, for the traditional presentation. */
 export function formatPositionSa(longitude: number, withSeconds = false): string {
   const { rashi, degreeInRashi } = describeLongitude(longitude);
   return `${RASHI_NAMES[rashi]} ${formatDms(degreeInRashi, withSeconds)}`;
