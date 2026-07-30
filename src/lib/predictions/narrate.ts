@@ -54,6 +54,12 @@ or manifest.
 Do not flatter the reader.
 `.trim();
 
+const LANGUAGE_NAME: Record<string, string> = {
+  en: 'English',
+  hi: 'Hindi, in Devanagari script',
+  bn: 'Bengali, in Bengali script',
+};
+
 /**
  * Turn a set of signals into prose.
  *
@@ -66,11 +72,14 @@ export async function narrate({
   editorial,
   audience = 'the person whose chart this is',
   maxWords,
+  language = 'en',
 }: {
   signals: SignalSet;
   editorial?: string;
   audience?: string;
   maxWords?: number;
+  /** Written directly in this language. Translating afterwards reads worse. */
+  language?: 'en' | 'hi' | 'bn';
 }): Promise<Narration> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { status: 'unavailable', text: null, safety: null };
@@ -95,6 +104,10 @@ ${SAFETY_INSTRUCTIONS}
 
 You are given findings from a Vedic astrology engine. Write a ${signals.period.name}
 reading for ${audience}, of about ${words} words.
+
+Write it in ${LANGUAGE_NAME[language] ?? 'English'}. Sanskrit and Jyotish terms
+keep their usual form in that language rather than being translated into
+everyday words.
 
 Absolute constraint: every claim you make must come from the findings below.
 You may connect them, weigh them against each other and say which matters
@@ -136,11 +149,29 @@ Write the reading now. Prose only.
     );
 
     if (!response.ok) {
+      /*
+        Carry the provider's own message through. A bare status code sends you
+        looking in the wrong place: an invalid key, a model name that has been
+        retired and a quota refusal all arrive as 400 or 429, and only the body
+        distinguishes them.
+      */
+      const detail = await response
+        .text()
+        .then((body) => {
+          try {
+            const parsed = JSON.parse(body) as { error?: { message?: string } };
+            return parsed.error?.message ?? body.slice(0, 200);
+          } catch {
+            return body.slice(0, 200);
+          }
+        })
+        .catch(() => '');
+
       return {
         status: 'error',
         text: null,
         safety: null,
-        detail: `Model returned ${response.status}.`,
+        detail: `Model returned ${response.status}. ${detail}`.trim(),
         model: MODEL,
       };
     }

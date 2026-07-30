@@ -295,3 +295,48 @@ export interface QueuedNotification {
 export interface PlanWithPrice extends SubscriptionPlan {
   price: (PlanPrice & { region: Region }) | null;
 }
+
+// ---------------------------------------------------------------------------
+// Readings
+//
+// Mirrors `supabase/migrations/20260729001500_readings.sql`.
+// ---------------------------------------------------------------------------
+
+export type ReadingPeriod = 'day' | 'week' | 'month' | 'year' | 'dasha' | 'aspect';
+export type ReadingState = 'pending' | 'approved' | 'rejected' | 'published';
+
+/** One safety rule that fired, as stored on the reading. */
+export interface ReadingSafetyFinding {
+  id: string;
+  reason: string;
+  severity: 'block' | 'review';
+  excerpt: string;
+}
+
+export interface Reading {
+  id: string;
+  user_id: string;
+  birth_profile_id: string | null;
+  period: ReadingPeriod;
+  period_start: string;
+  period_end: string;
+  /** The signals it was written from, kept as the audit trail. */
+  signals: unknown;
+  body: string | null;
+  model: string | null;
+  state: ReadingState;
+  safety_findings: ReadingSafetyFinding[];
+  edited: boolean;
+  reviewed_at: string | null;
+  review_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InterpretationNote {
+  code: string;
+  label: string;
+  note: string;
+  created_at: string;
+  updated_at: string;
+}

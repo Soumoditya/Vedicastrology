@@ -57,13 +57,22 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <Link
-          href="/dashboard/settings"
-          className="rounded-full border px-4 py-2 text-xs"
-          style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
-        >
-          Settings
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/dashboard/readings"
+            className="rounded-full border px-4 py-2 text-xs"
+            style={{ borderColor: 'var(--border-subtle)', color: 'var(--color-gold-200)' }}
+          >
+            Readings
+          </Link>
+          <Link
+            href="/dashboard/settings"
+            className="rounded-full border px-4 py-2 text-xs"
+            style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+          >
+            Settings
+          </Link>
+        </div>
       </div>
 
       {charts.length === 0 ? (

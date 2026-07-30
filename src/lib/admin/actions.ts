@@ -324,3 +324,116 @@ export async function saveFeatureFlag(
 
   return { message: 'Saved.' };
 }
+
+// ---------------------------------------------------------------------------
+// Readings
+// ---------------------------------------------------------------------------
+
+const reviewSchema = z.object({
+  id: z.string().uuid(),
+  decision: z.enum(['publish', 'reject']),
+  body: z.string().optional(),
+  note: z.string().optional(),
+});
+
+/**
+ * Approve or reject a generated reading.
+ *
+ * Editing the text is part of the same action rather than a separate save,
+ * because in practice a reading is read, adjusted and released in one sitting,
+ * and a two step flow invites publishing the unedited version by accident.
+ *
+ * `edited` records that the words are yours. Worth knowing later when judging
+ * how well the writer is doing without you.
+ */
+export async function reviewReading(
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await requireAdmin();
+
+  const parsed = reviewSchema.safeParse({
+    id: formData.get('id'),
+    decision: formData.get('decision'),
+    body: formData.get('body') ?? undefined,
+    note: formData.get('note') ?? undefined,
+  });
+
+  if (!parsed.success) return { error: 'That was not a valid decision.' };
+
+  const { id, decision, body, note } = parsed.data;
+
+  const { data: existing } = await supabase
+    .from('readings')
+    .select('body')
+    .eq('id', id)
+    .maybeSingle();
+
+  const trimmed = body?.trim();
+  const changed = Boolean(trimmed) && trimmed !== (existing?.body ?? '').trim();
+
+  const { error } = await supabase
+    .from('readings')
+    .update({
+      state: decision === 'publish' ? 'published' : 'rejected',
+      body: trimmed || (existing?.body ?? null),
+      edited: changed,
+      reviewed_at: new Date().toISOString(),
+      review_note: note?.trim() || null,
+    })
+    .eq('id', id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/admin/readings');
+  revalidatePath('/dashboard/readings');
+
+  return { message: decision === 'publish' ? 'Published.' : 'Rejected.' };
+}
+
+const noteSchema = z.object({
+  code: z.string().min(3, 'A signal code is needed.'),
+  label: z.string().min(2, 'Give the note a name.'),
+  note: z.string().min(10, 'Write a little more than that.'),
+});
+
+/**
+ * Your own interpretation of a signal, handed to the writer.
+ *
+ * This is what stops the prose sounding like every other astrology site: the
+ * model expresses your reading of a rule rather than an average of the
+ * internet's.
+ */
+export async function saveInterpretationNote(
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await requireAdmin();
+
+  const parsed = noteSchema.safeParse({
+    code: formData.get('code'),
+    label: formData.get('label'),
+    note: formData.get('note'),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'That note was not valid.' };
+  }
+
+  const { error } = await supabase
+    .from('interpretation_notes')
+    .upsert(parsed.data, { onConflict: 'code' });
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/admin/interpretations');
+  return { message: 'Note saved.' };
+}
+
+export async function deleteInterpretationNote(formData: FormData): Promise<void> {
+  const supabase = await requireAdmin();
+  const code = formData.get('code') as string;
+  await supabase.from('interpretation_notes').delete().eq('code', code);
+  revalidatePath('/admin/interpretations');
+  redirect('/admin/interpretations');
+}

@@ -85,6 +85,32 @@ const PERIOD_DAYS: Record<PeriodName, number> = {
   year: 365,
 };
 
+/**
+ * "3rd", not "3th".
+ *
+ * These statements are handed to a writer and shown to a reader, so the
+ * grammar has to be right in both places. A malformed ordinal in the source
+ * text invites a malformed one in the prose.
+ */
+function ordinal(n: number): string {
+  const suffix =
+    n % 10 === 1 && n % 100 !== 11
+      ? 'st'
+      : n % 10 === 2 && n % 100 !== 12
+        ? 'nd'
+        : n % 10 === 3 && n % 100 !== 13
+          ? 'rd'
+          : 'th';
+  return `${n}${suffix}`;
+}
+
+/** "the 3rd and 6th", reading as a list rather than as bare numbers. */
+function ordinalList(numbers: number[]): string {
+  const parts = numbers.map(ordinal);
+  if (parts.length <= 1) return parts.join('');
+  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+}
+
 /** Houses a graha owns, counted from the ascendant. */
 function ownedHouses(chart: Chart, graha: AnyGraha): number[] {
   return chart.houses.filter((h) => h.lord === graha).map((h) => h.house);
@@ -155,9 +181,9 @@ export function extractSignals(
         kind: 'dasha',
         code: `dasha.${level.toLowerCase()}.${lord}`,
         statement:
-          `${level} of ${lord}. ${lord} sits in the ${position.house}th house in ` +
+          `${level} of ${lord}. ${lord} sits in the ${ordinal(position.house)} house in ` +
           `${RASHI_NAMES_EN[position.rashi]}, ${position.dignity}` +
-          (owns.length ? `, and rules the ${owns.join(' and ')}.` : '.'),
+          (owns.length ? `, and rules the ${ordinalList(owns)}.` : '.'),
         rule:
           'A dasha lord brings forward the affairs of the houses it rules and ' +
           'the house it occupies.',
@@ -227,8 +253,8 @@ export function extractSignals(
       kind: 'transit',
       code: `transit.${t.graha}.h${t.houseFromMoon}`,
       statement:
-        `${t.graha} transits ${RASHI_NAMES_EN[t.rashi]}, the ${t.houseFromMoon}th ` +
-        `from the natal Moon and the ${t.houseFromAscendant}th from the ascendant.${support}`,
+        `${t.graha} transits ${RASHI_NAMES_EN[t.rashi]}, the ${ordinal(t.houseFromMoon)} ` +
+        `from the natal Moon and the ${ordinal(t.houseFromAscendant)} from the ascendant.${support}`,
       rule: 'Gochara is read from the Moon, graded by the bindus the sign holds.',
       grahas: [t.graha],
       houses: [t.houseFromAscendant],
@@ -316,7 +342,7 @@ export function extractSignals(
       kind: 'strength',
       code: `strength.${verdict}.h${house}`,
       statement:
-        `${RASHI_NAMES_EN[entry.rashi]}, the ${house}th house, holds ${entry.bindus} ` +
+        `${RASHI_NAMES_EN[entry.rashi]}, the ${ordinal(house)} house, holds ${entry.bindus} ` +
         `Sarvashtakavarga bindus, which is ${verdict}. That house covers ` +
         `${BHAVA_SIGNIFICATIONS[house - 1].toLowerCase()}`,
       rule: 'Sarvashtakavarga grades a sign against an average of about 28.',
@@ -356,7 +382,7 @@ export function extractSignals(
     signals.push({
       kind: 'ingress',
       code: `ingress.${event.graha}.${event.rashi}`,
-      statement: `${event.description} on ${event.date.toISOString().slice(0, 10)}, the ${house}th house.`,
+      statement: `${event.description} on ${event.date.toISOString().slice(0, 10)}, the ${ordinal(house)} house.`,
       rule: 'A slow graha changing sign moves its effects to a different house.',
       grahas: [event.graha],
       houses: [house],
