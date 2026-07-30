@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Inter, Marcellus } from 'next/font/google';
+import {
+  Cormorant_Garamond,
+  Inter,
+  Marcellus,
+  Noto_Sans_Bengali,
+  Noto_Sans_Devanagari,
+} from 'next/font/google';
 
 import './globals.css';
 import { SITE } from '@/lib/site';
+import { getLocale } from '@/lib/i18n/server';
+import { HTML_LANG } from '@/lib/i18n/locales';
 
 /**
  * Type pairing:
@@ -28,6 +36,27 @@ const cormorant = Cormorant_Garamond({
   style: ['normal', 'italic'],
   subsets: ['latin'],
   variable: '--font-cormorant',
+  display: 'swap',
+});
+
+/*
+  Devanagari and Bengali need real coverage. Inter has none, so without these
+  the Hindi and Bengali interface falls back to whatever the device happens to
+  have, which on many Android phones is a poor match and on some desktops is
+  tofu boxes.
+
+  Loaded as CSS variables and applied by the `lang` attribute, so an English
+  reader never downloads either face.
+*/
+const devanagari = Noto_Sans_Devanagari({
+  subsets: ['devanagari'],
+  variable: '--font-devanagari',
+  display: 'swap',
+});
+
+const bengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  variable: '--font-bengali',
   display: 'swap',
 });
 
@@ -68,14 +97,21 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  /*
+    The `lang` attribute is not cosmetic. It selects the font stack below, drives
+    hyphenation, and decides how a screen reader pronounces the page. Devanagari
+    read aloud by an English voice is unusable.
+  */
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={HTML_LANG[locale]}
       suppressHydrationWarning
-      className={`${marcellus.variable} ${inter.variable} ${cormorant.variable} h-full`}
+      className={`${marcellus.variable} ${inter.variable} ${cormorant.variable} ${devanagari.variable} ${bengali.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

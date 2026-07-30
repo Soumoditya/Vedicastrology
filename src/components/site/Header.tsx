@@ -9,6 +9,8 @@ import { Wordmark } from './Wordmark';
 import { ThemeToggle } from './ThemeToggle';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { AccountLinks, AccountMenu, type AccountState } from './AccountMenu';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/locales';
 import type { Region } from '@/lib/supabase/types';
 
 const SIGNED_OUT: AccountState = { signedIn: false, displayName: null, isAdmin: false };
@@ -17,10 +19,15 @@ export function Header({
   regions = [],
   currentRegion = null,
   account = SIGNED_OUT,
+  locale = DEFAULT_LOCALE,
+  labels = {},
 }: {
   regions?: Region[];
   currentRegion?: Region | null;
   account?: AccountState;
+  locale?: Locale;
+  /** Translated navigation labels, resolved on the server. */
+  labels?: Record<string, string>;
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -63,7 +70,7 @@ export function Header({
                 className="relative px-3.5 py-2 text-sm transition-colors duration-200"
                 style={{ color: active ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
               >
-                {link.label}
+                {labels[link.href] ?? link.label}
                 {active && (
                   <span
                     aria-hidden
@@ -78,8 +85,9 @@ export function Header({
 
         <div className="flex items-center gap-2">
           <CurrencySwitcher regions={regions} current={currentRegion} />
+          <LanguageSwitcher current={locale} />
           <ThemeToggle />
-          <AccountMenu account={account} />
+          <AccountMenu account={account} labels={labels} />
 
           <Link
             href="/services"
@@ -91,13 +99,13 @@ export function Header({
               transitionTimingFunction: 'var(--ease-out-soft)',
             }}
           >
-            Book a reading
+            {labels['nav.book'] ?? 'Book a reading'}
           </Link>
 
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? labels['nav.menuClose'] ?? 'Close menu' : labels['nav.menuOpen'] ?? 'Open menu'}
             aria-expanded={menuOpen}
             className="grid h-9 w-9 place-items-center rounded-md md:hidden"
             style={{ color: 'var(--text-secondary)' }}
@@ -148,10 +156,10 @@ export function Header({
               className="block border-b py-3 text-sm last:border-0"
               style={{ color: 'var(--text-secondary)' }}
             >
-              {link.label}
+              {labels[link.href] ?? link.label}
             </Link>
           ))}
-          <AccountLinks account={account} />
+          <AccountLinks account={account} labels={labels} />
           <Link
             href="/services"
             className="mt-3 block rounded-lg py-3 text-center text-sm font-medium"
@@ -160,7 +168,7 @@ export function Header({
               color: '#160f00',
             }}
           >
-            Book a reading
+            {labels['nav.book'] ?? 'Book a reading'}
           </Link>
         </nav>
       </div>

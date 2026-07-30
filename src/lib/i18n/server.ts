@@ -1,0 +1,66 @@
+import 'server-only';
+
+import { cache } from 'react';
+import { cookies } from 'next/headers';
+
+import { getUser, createClient } from '@/lib/supabase/server';
+import { DICTIONARIES } from './dictionary';
+import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from './locales';
+
+/**
+ * Resolving the language, server side.
+ *
+ * Order, and the reason for it:
+ *
+ *   1. A signed-in person's saved setting, because they chose it deliberately
+ *      and it should follow them between devices.
+ *   2. The cookie, so the switch works with no account at all. Insisting on an
+ *      account to read the site in your own language would be absurd.
+ *   3. English.
+ *
+ * The Accept-Language header is deliberately not consulted. A visitor from
+ * India very often has a browser set to English while wanting Hindi, and the
+ * reverse, so guessing from it gets it wrong confidently. An explicit switch is
+ * better than a clever guess.
+ */
+export const getLocale = cache(async (): Promise<Locale> => {
+  const user = await getUser();
+
+  if (user) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('user_settings')
+      .select('language')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data && isLocale(data.language)) return data.language;
+  }
+
+  const store = await cookies();
+  const cookie = store.get(LOCALE_COOKIE)?.value;
+  if (isLocale(cookie)) return cookie;
+
+  return DEFAULT_LOCALE;
+});
+
+export type Translate = (key: string, fallback?: string) => string;
+
+/**
+ * The translator for this request.
+ *
+ * A missing key falls back to English and then to the key's own fallback
+ * argument, never to blank. A half-translated page is usable; a page of empty
+ * labels is not, and that is the failure mode a translation system has to
+ * refuse.
+ */
+export const getT = cache(async (): Promise<{ t: Translate; locale: Locale }> => {
+  const locale = await getLocale();
+  const dictionary = DICTIONARIES[locale];
+  const english = DICTIONARIES.en;
+
+  const t: Translate = (key, fallback) =>
+    dictionary[key] ?? english[key] ?? fallback ?? key;
+
+  return { t, locale };
+});

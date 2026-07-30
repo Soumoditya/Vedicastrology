@@ -22,8 +22,16 @@ export interface AccountState {
  * On a phone this lives in the mobile menu instead, because a dropdown inside a
  * dropdown is worse than a plain list.
  */
-export function AccountMenu({ account }: { account: AccountState }) {
+export function AccountMenu({
+  account,
+  labels = {},
+}: {
+  account: AccountState;
+  /** Translated, resolved on the server. Falls back to English. */
+  labels?: Record<string, string>;
+}) {
   const [open, setOpen] = useState(false);
+  const label = (key: string, fallback: string) => labels[key] ?? fallback;
   const wrapper = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,7 +59,7 @@ export function AccountMenu({ account }: { account: AccountState }) {
         className="hidden rounded-full px-3.5 py-2 text-xs font-medium transition-colors duration-200 sm:inline-block"
         style={{ color: 'var(--text-secondary)' }}
       >
-        Sign in
+        {label('nav.signIn', 'Sign in')}
       </Link>
     );
   }
@@ -67,7 +75,7 @@ export function AccountMenu({ account }: { account: AccountState }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Your account"
+        aria-label={label('nav.account', 'Your account')}
         className="grid h-8 w-8 place-items-center rounded-full border text-xs font-medium transition-colors duration-200"
         style={{
           borderColor: open ? 'var(--color-gold-500)' : 'var(--border-strong)',
@@ -98,14 +106,14 @@ export function AccountMenu({ account }: { account: AccountState }) {
             </p>
           )}
 
-          <MenuLink href="/dashboard">Your charts</MenuLink>
-          <MenuLink href="/dashboard/settings">Settings</MenuLink>
+          <MenuLink href="/dashboard">{label('nav.charts', 'Your charts')}</MenuLink>
+          <MenuLink href="/dashboard/settings">{label('nav.settings', 'Settings')}</MenuLink>
 
           {account.isAdmin && (
             <>
               <div className="my-1 h-px" style={{ background: 'var(--border-subtle)' }} />
               <MenuLink href="/admin" accent>
-                Admin panel
+                {label('nav.admin', 'Admin panel')}
               </MenuLink>
             </>
           )}
@@ -119,7 +127,7 @@ export function AccountMenu({ account }: { account: AccountState }) {
               className="block w-full px-3.5 py-2 text-left text-sm transition-colors duration-150"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Sign out
+              {label('nav.signOut', 'Sign out')}
             </button>
           </form>
         </div>
@@ -150,7 +158,15 @@ function MenuLink({
 }
 
 /** The same destinations as a plain list, for the mobile menu. */
-export function AccountLinks({ account }: { account: AccountState }) {
+export function AccountLinks({
+  account,
+  labels = {},
+}: {
+  account: AccountState;
+  labels?: Record<string, string>;
+}) {
+  const label = (key: string, fallback: string) => labels[key] ?? fallback;
+
   if (!account.signedIn) {
     return (
       <Link
@@ -158,7 +174,7 @@ export function AccountLinks({ account }: { account: AccountState }) {
         className="block border-b py-3 text-sm"
         style={{ color: 'var(--text-secondary)' }}
       >
-        Sign in or create an account
+        {label('nav.signInLong', 'Sign in or create an account')}
       </Link>
     );
   }
@@ -170,14 +186,14 @@ export function AccountLinks({ account }: { account: AccountState }) {
         className="block border-b py-3 text-sm"
         style={{ color: 'var(--text-secondary)' }}
       >
-        Your charts
+        {label('nav.charts', 'Your charts')}
       </Link>
       <Link
         href="/dashboard/settings"
         className="block border-b py-3 text-sm"
         style={{ color: 'var(--text-secondary)' }}
       >
-        Settings
+        {label('nav.settings', 'Settings')}
       </Link>
       {account.isAdmin && (
         <Link
@@ -185,7 +201,7 @@ export function AccountLinks({ account }: { account: AccountState }) {
           className="block border-b py-3 text-sm"
           style={{ color: 'var(--color-gold-300)' }}
         >
-          Admin panel
+          {label('nav.admin', 'Admin panel')}
         </Link>
       )}
       <form action={signOut}>
@@ -194,7 +210,7 @@ export function AccountLinks({ account }: { account: AccountState }) {
           className="block w-full border-b py-3 text-left text-sm"
           style={{ color: 'var(--text-muted)' }}
         >
-          Sign out
+          {label('nav.signOut', 'Sign out')}
         </button>
       </form>
     </>

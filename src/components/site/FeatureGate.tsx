@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
-import { canUse, refusalMessage } from '@/lib/features/flags';
+import { canUse, refusalKey } from '@/lib/features/flags';
+import { getT } from '@/lib/i18n/server';
 
 /**
  * A closed door, and a reason.
@@ -38,7 +39,7 @@ export async function gateFor(
   feature: string,
   next?: string,
 ): Promise<React.ReactElement | null> {
-  const access = await canUse(feature);
+  const [access, { t }] = await Promise.all([canUse(feature), getT()]);
 
   if (access.allowed) return null;
 
@@ -51,7 +52,7 @@ export async function gateFor(
         className="font-display mt-4 text-2xl leading-snug"
         style={{ color: 'var(--text-primary)' }}
       >
-        {refusalMessage(access)}
+        {t(refusalKey(access))}
       </p>
 
       {access.flag?.description && (
@@ -70,14 +71,14 @@ export async function gateFor(
               color: '#150e00',
             }}
           >
-            Create an account
+            {t('gate.createAccount')}
           </Link>
           <Link
             href={signInHref}
             className="rounded-full border px-5 py-2.5 text-sm"
             style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
-            Sign in
+            {t('nav.signIn')}
           </Link>
         </div>
       )}
@@ -91,7 +92,7 @@ export async function gateFor(
 
       <p className="mt-8 text-xs">
         <Link href="/tools" style={{ color: 'var(--color-gold-400)' }}>
-          Back to the free tools
+          {t('gate.backToTools')}
         </Link>
       </p>
     </div>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
+import { getT } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Free Vedic Astrology Tools',
@@ -20,8 +21,13 @@ export default async function ToolsPage() {
     that merely needs an account is still listed, with a mark, because that is
     an invitation rather than a dead end.
   */
-  const access = await canUseAll(TOOL_LINKS.map((t) => t.feature));
-  const tools = TOOL_LINKS.filter((t) => access[t.feature].reason !== 'disabled');
+  const [access, { t }] = await Promise.all([
+    canUseAll(TOOL_LINKS.map((tool) => tool.feature)),
+    getT(),
+  ]);
+  const tools = TOOL_LINKS.filter(
+    (tool) => access[tool.feature].reason !== 'disabled',
+  );
 
   return (
     <div className="relative">
@@ -33,21 +39,19 @@ export default async function ToolsPage() {
             className="text-xs uppercase tracking-[0.28em]"
             style={{ color: 'var(--color-gold-600)' }}
           >
-            Free tools
+            {t('tools.eyebrow')}
           </p>
           <h1
             className="font-display mt-3 text-4xl sm:text-5xl"
             style={{ color: 'var(--text-primary)' }}
           >
-            Study your own chart
+            {t('tools.heading')}
           </h1>
           <p
             className="mt-5 text-base leading-relaxed"
             style={{ color: 'var(--text-secondary)' }}
           >
-            These run the same calculations I use in a paid reading. They are
-            free because a chart you can check for yourself is worth more than
-            one you are asked to take on trust. Nothing here needs an account.
+            {t('tools.intro')}
           </p>
         </header>
 
@@ -83,8 +87,8 @@ export default async function ToolsPage() {
                     }}
                   >
                     {access[tool.feature].reason === 'needs_premium'
-                      ? 'Members'
-                      : 'Account'}
+                      ? t('tools.membersBadge')
+                      : t('tools.accountBadge')}
                   </span>
                 )}
               </div>
@@ -92,19 +96,19 @@ export default async function ToolsPage() {
                 className="font-display mt-1 text-xl"
                 style={{ color: 'var(--text-primary)' }}
               >
-                {tool.label}
+                {t(`tool.${tool.feature}.label`, tool.label)}
               </h2>
               <p
                 className="mt-2.5 text-sm leading-relaxed"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {tool.description}
+                {t(`tool.${tool.feature}.description`, tool.description)}
               </p>
               <span
                 className="mt-5 inline-flex items-center gap-1.5 text-xs transition-transform duration-300 group-hover:translate-x-0.5"
                 style={{ color: 'var(--color-gold-400)' }}
               >
-                Open
+                {t('tools.open')}
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
                   <path
                     d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"

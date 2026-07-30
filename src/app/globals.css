@@ -553,3 +553,63 @@ body::after {
     color: inherit !important;
   }
 }
+
+/* ==========================================================================
+   Indic scripts
+
+   Selected by the document language rather than by a class, so it follows the
+   `lang` attribute the layout already sets and applies to everything including
+   text this stylesheet has never heard of.
+
+   The display face is Latin only, so headings in Hindi or Bengali fall back to
+   the same Noto face as the body. A Roman capital face has nothing to say about
+   Devanagari, and pairing it badly looks worse than not pairing it at all.
+   ========================================================================== */
+:root:lang(hi) body,
+:root:lang(hi) .font-display,
+:root:lang(hi) .font-quote {
+  font-family: var(--font-devanagari), var(--font-inter), system-ui, sans-serif;
+}
+
+:root:lang(bn) body,
+:root:lang(bn) .font-display,
+:root:lang(bn) .font-quote {
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+}
+
+/*
+  Both scripts carry ascenders and descenders that Latin does not, and Bengali
+  hangs from a headline rather than sitting on a baseline. Tight leading set for
+  Latin display type clips them, so it is loosened, and the letter-spacing used
+  on small Latin caps is removed entirely: Devanagari and Bengali are joined
+  scripts and tracking them apart breaks the conjuncts.
+*/
+:root:lang(hi) .font-display,
+:root:lang(bn) .font-display {
+  line-height: 1.35;
+}
+
+/*
+  No letter-spacing, anywhere, in either script.
+
+  Devanagari and Bengali are joined scripts: tracking the letters apart splits
+  conjuncts and renders words as loose fragments. Latin small caps want the
+  tracking, so it is set generously throughout, and every one of those has to be
+  undone here. Targeting the utility classes as well as the named ones, because
+  the tracking is applied both ways across the site and missing either leaves
+  broken text on some pages only.
+*/
+:root:lang(hi) .eyebrow,
+:root:lang(bn) .eyebrow,
+:root:lang(hi) [class*='tracking-'],
+:root:lang(bn) [class*='tracking-'],
+:root:lang(hi) [class*='uppercase'],
+:root:lang(bn) [class*='uppercase'] {
+  letter-spacing: normal !important;
+  text-transform: none;
+}
+
+:root:lang(hi) .eyebrow,
+:root:lang(bn) .eyebrow {
+  font-size: 0.8125rem;
+}

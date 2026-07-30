@@ -123,16 +123,22 @@ export async function canUseAll(
   return Object.fromEntries(entries);
 }
 
-/** Wording for a refusal, so every gate in the site says the same thing. */
-export function refusalMessage(access: FeatureAccess): string {
+/**
+ * The dictionary key for a refusal.
+ *
+ * A key rather than a sentence, so every gate on the site says the same thing
+ * in whichever language the visitor is reading. Centralising it here is what
+ * makes translating all of them a single change.
+ */
+export function refusalKey(access: FeatureAccess): string {
   switch (access.reason) {
     case 'needs_account':
-      return 'This one needs an account. It is free to make and takes a moment.';
+      return 'gate.needsAccount';
     case 'needs_premium':
-      return 'This is part of membership.';
+      return 'gate.needsPremium';
     case 'disabled':
-      return 'This is turned off for now. It will be back.';
+      return 'gate.disabled';
     default:
-      return 'This is not available.';
+      return 'gate.unavailable';
   }
 }

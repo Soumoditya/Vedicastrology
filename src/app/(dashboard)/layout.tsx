@@ -4,6 +4,7 @@ import { Footer } from '@/components/site/Footer';
 import { Header } from '@/components/site/Header';
 import { getRegions, resolveRegion } from '@/lib/pricing/region';
 import { getProfile } from '@/lib/supabase/server';
+import { getT } from '@/lib/i18n/server';
 
 /**
  * The dashboard had no layout at all.
@@ -24,15 +25,40 @@ const themeScript = `
 })();
 `;
 
+/** Nav labels, keyed by href so the Header does not need to know the dictionary. */
+async function navLabels() {
+  const { t, locale } = await getT();
+  return {
+    locale,
+    labels: {
+      '/tools': t('nav.tools'),
+      '/services': t('nav.services'),
+      '/blog': t('nav.journal'),
+      '/about': t('nav.about'),
+      'nav.book': t('nav.book'),
+      'nav.signIn': t('nav.signIn'),
+      'nav.signInLong': t('nav.signInLong'),
+      'nav.charts': t('nav.charts'),
+      'nav.settings': t('nav.settings'),
+      'nav.admin': t('nav.admin'),
+      'nav.signOut': t('nav.signOut'),
+      'nav.account': t('nav.account'),
+      'nav.menuOpen': t('nav.menuOpen'),
+      'nav.menuClose': t('nav.menuClose'),
+    },
+  };
+}
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [profile, regions, currentRegion] = await Promise.all([
+  const [profile, regions, currentRegion, nav] = await Promise.all([
     getProfile(),
     getRegions(),
     resolveRegion(),
+    navLabels(),
   ]);
 
   // Row level security would refuse the queries anyway, but failing here sends
@@ -50,6 +76,8 @@ export default async function DashboardLayout({
           displayName: profile.display_name,
           isAdmin: profile.role === 'admin',
         }}
+        locale={nav.locale}
+        labels={nav.labels}
       />
       <main className="flex-1">
         <div className="mx-auto max-w-5xl px-5 py-12 sm:py-16">{children}</div>
