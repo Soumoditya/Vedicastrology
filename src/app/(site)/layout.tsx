@@ -1,6 +1,7 @@
 import { Footer } from '@/components/site/Footer';
 import { Header } from '@/components/site/Header';
 import { getRegions, resolveRegion } from '@/lib/pricing/region';
+import { getProfile } from '@/lib/supabase/server';
 
 /**
  * Applies the stored theme before the first paint.
@@ -23,12 +24,24 @@ const themeScript = `
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   // Fetched once here rather than in every page that shows a price.
-  const [regions, currentRegion] = await Promise.all([getRegions(), resolveRegion()]);
+  const [regions, currentRegion, profile] = await Promise.all([
+    getRegions(),
+    resolveRegion(),
+    getProfile(),
+  ]);
 
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      <Header regions={regions} currentRegion={currentRegion} />
+      <Header
+        regions={regions}
+        currentRegion={currentRegion}
+        account={{
+          signedIn: Boolean(profile),
+          displayName: profile?.display_name ?? null,
+          isAdmin: profile?.role === 'admin',
+        }}
+      />
       <main className="flex-1">{children}</main>
       <Footer />
     </>

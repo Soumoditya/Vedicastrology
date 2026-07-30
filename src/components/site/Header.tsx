@@ -8,14 +8,19 @@ import { NAV_LINKS, SITE } from '@/lib/site';
 import { Wordmark } from './Wordmark';
 import { ThemeToggle } from './ThemeToggle';
 import { CurrencySwitcher } from './CurrencySwitcher';
+import { AccountLinks, AccountMenu, type AccountState } from './AccountMenu';
 import type { Region } from '@/lib/supabase/types';
+
+const SIGNED_OUT: AccountState = { signedIn: false, displayName: null, isAdmin: false };
 
 export function Header({
   regions = [],
   currentRegion = null,
+  account = SIGNED_OUT,
 }: {
   regions?: Region[];
   currentRegion?: Region | null;
+  account?: AccountState;
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -74,6 +79,7 @@ export function Header({
         <div className="flex items-center gap-2">
           <CurrencySwitcher regions={regions} current={currentRegion} />
           <ThemeToggle />
+          <AccountMenu account={account} />
 
           <Link
             href="/services"
@@ -126,7 +132,7 @@ export function Header({
       <div
         className="overflow-hidden transition-[max-height,opacity] duration-400 md:hidden"
         style={{
-          maxHeight: menuOpen ? '22rem' : '0',
+          maxHeight: menuOpen ? '32rem' : '0',
           opacity: menuOpen ? 1 : 0,
           transitionTimingFunction: 'var(--ease-out-soft)',
           background: 'color-mix(in oklab, var(--surface) 96%, transparent)',
@@ -145,6 +151,7 @@ export function Header({
               {link.label}
             </Link>
           ))}
+          <AccountLinks account={account} />
           <Link
             href="/services"
             className="mt-3 block rounded-lg py-3 text-center text-sm font-medium"

@@ -42,7 +42,8 @@ export default async function SettingsPage() {
   const prefs: Prefs = { ...DEFAULT_PREFS, ...(prefRow ?? {}) };
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-12 sm:py-16">
+    // The group layout supplies the page padding, so this only narrows.
+    <div className="max-w-2xl">
       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
         <Link href="/dashboard" style={{ color: 'var(--color-gold-400)' }}>
           Dashboard
