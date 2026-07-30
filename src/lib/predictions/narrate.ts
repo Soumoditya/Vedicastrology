@@ -90,6 +90,25 @@ export async function narrate({
     maxWords ??
     { day: 130, week: 220, month: 400, year: 700 }[signals.period.name];
 
+  /*
+    Token budget, with real headroom.
+
+    Set tight at first, at roughly two tokens a word, and every reading came
+    back truncated: a 130 word daily reading arrived as a single clipped clause
+    of 68 characters, and because there was nothing unsafe in the fragment it
+    passed the filter and published itself.
+
+    Two causes. Devanagari and Bengali cost several tokens per word where
+    English costs about one and a third, so one budget cannot serve all three.
+    And this is a thinking model, which spends output tokens on reasoning before
+    it writes anything, so a tight cap is consumed before the prose starts.
+
+    Thinking is turned off below, since the reasoning was already done by the
+    engine and the model is only being asked to express findings it was handed.
+  */
+  const tokensPerWord = language === 'en' ? 2 : 5;
+  const maxOutputTokens = Math.ceil(words * tokensPerWord) + 512;
+
   const findings = chosen
     .map(
       (s, i) =>
@@ -139,7 +158,11 @@ Write the reading now. Prose only.
             // Low but not zero. At zero the prose reads mechanically, and the
             // findings constrain the content anyway.
             temperature: 0.6,
-            maxOutputTokens: Math.ceil(words * 2.2),
+            maxOutputTokens,
+            // The engine has already decided what is true. There is nothing
+            // here for the model to reason about, and thinking tokens come out
+            // of the same budget as the prose.
+            thinkingConfig: { thinkingBudget: 0 },
           },
         }),
         // A reading is generated once per person per period and cached, so a
@@ -177,16 +200,51 @@ Write the reading now. Prose only.
     }
 
     const body = (await response.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
+      candidates?: {
+        finishReason?: string;
+        content?: { parts?: { text?: string }[] };
+      }[];
     };
 
-    const raw = body.candidates?.[0]?.content?.parts
+    const candidate = body.candidates?.[0];
+
+    const raw = candidate?.content?.parts
       ?.map((p) => p.text ?? '')
       .join('')
       .trim();
 
     if (!raw) {
       return { status: 'error', text: null, safety: null, detail: 'Empty response.', model: MODEL };
+    }
+
+    /*
+      A reading that was cut off must never publish.
+
+      This is the structural half of the fix above. Raising the budget makes
+      truncation unlikely; treating it as an error makes it harmless. Without
+      this check a fragment that happens to contain nothing unsafe passes the
+      filter and releases itself, which is exactly what happened.
+    */
+    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+      return {
+        status: 'error',
+        text: null,
+        safety: null,
+        detail: `The writer stopped early (${candidate.finishReason}), so nothing was saved.`,
+        model: MODEL,
+      };
+    }
+
+    // Belt and braces: a reading far shorter than asked for is a failure even
+    // if the provider reported a clean stop.
+    if (raw.length < Math.min(160, words * 2)) {
+      return {
+        status: 'error',
+        text: null,
+        safety: null,
+        detail: `The writer returned only ${raw.length} characters, too short to be a reading.`,
+        model: MODEL,
+      };
     }
 
     // Em dashes are asked for in the prompt and removed here anyway, because
