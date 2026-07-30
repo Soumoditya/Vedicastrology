@@ -84,8 +84,16 @@ export function Header({
         </nav>
 
         <div className="flex items-center gap-2">
-          <CurrencySwitcher regions={regions} current={currentRegion} />
-          <LanguageSwitcher current={locale} />
+          {/*
+            Currency and language move into the mobile menu below the small
+            breakpoint. Four controls plus a wordmark plus a menu button does not
+            fit a 390px phone: adding the language switch pushed the top bar 21px
+            past the viewport on an iPhone 13, which scrolled every page sideways.
+          */}
+          <div className="hidden items-center gap-2 sm:flex">
+            <CurrencySwitcher regions={regions} current={currentRegion} />
+            <LanguageSwitcher current={locale} />
+          </div>
           <ThemeToggle />
           <AccountMenu account={account} labels={labels} />
 
@@ -159,6 +167,13 @@ export function Header({
               {labels[link.href] ?? link.label}
             </Link>
           ))}
+          <div
+            className="flex items-center gap-2 border-b py-3 sm:hidden"
+            style={{ borderColor: 'var(--border-subtle)' }}
+          >
+            <CurrencySwitcher regions={regions} current={currentRegion} />
+            <LanguageSwitcher current={locale} />
+          </div>
           <AccountLinks account={account} labels={labels} />
           <Link
             href="/services"
