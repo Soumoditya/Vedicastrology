@@ -74,6 +74,14 @@ export const TOOL_LINKS = [
       'Every combination your chart forms with the reason it was found, plus Manglik, Kalsarpa and Ashtakavarga.',
   },
   {
+    href: '/tools/remedies',
+    feature: 'remedies',
+    label: 'Remedies',
+    sanskrit: 'Upāya',
+    description:
+      'The traditional measures for whichever grahas your chart shows as needing support, with an honest note on gemstones.',
+  },
+  {
     href: '/tools/nakshatra',
     feature: 'nakshatra',
     label: 'Nakshatra Finder',

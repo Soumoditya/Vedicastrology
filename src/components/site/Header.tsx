@@ -38,7 +38,7 @@ export function Header({
 
   return (
     <header
-      className="sticky top-0 z-50 transition-all duration-500"
+      className="site-header sticky top-0 z-50 transition-all duration-500"
       style={{
         transitionTimingFunction: 'var(--ease-out-soft)',
         background: scrolled

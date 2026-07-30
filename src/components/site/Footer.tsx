@@ -8,7 +8,7 @@ export function Footer() {
 
   return (
     <footer
-      className="relative mt-24 border-t"
+      className="site-footer relative mt-24 border-t"
       style={{ background: 'var(--surface-sunken)' }}
     >
       <div className="mx-auto max-w-6xl px-5 py-14">

@@ -62,7 +62,7 @@ export async function ToolSwitcher({
   return (
     <nav
       aria-label="The same chart in another tool"
-      className="mb-6 last:mb-10"
+      className="no-print mb-6 last:mb-10"
       style={{ borderColor: 'var(--border-subtle)' }}
     >
       <p className="text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>

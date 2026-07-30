@@ -413,3 +413,143 @@ body::after {
 }
 
 .prose-vedic ol { list-style: decimal; }
+
+/* ==========================================================================
+   Print
+
+   A chart report is something people keep, and the browser already has a
+   perfectly good PDF engine. A print stylesheet gets a properly typeset report
+   with no new dependency, no second rendering path for the chart SVG and
+   nothing running on a server.
+
+   Everything atmospheric comes off: the site is deliberately dark, and dark
+   backgrounds print as either a solid black page or nothing at all depending on
+   the printer, so the palette is remapped to ink on paper regardless of theme.
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  :root,
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    --surface-sunken: #ffffff;
+    --text-primary: #16130c;
+    --text-secondary: #3a342a;
+    --text-muted: #6b6355;
+    --border-subtle: #d8d2c4;
+    --border-strong: #b8b0a0;
+    /* The gold scale has to survive on white, so it drops to the dark end. */
+    --color-gold-100: #4a3a10;
+    --color-gold-200: #5b4712;
+    --color-gold-300: #6d5615;
+    --color-gold-400: #7d6218;
+    --color-gold-500: #8c6e1b;
+    --color-gold-600: #9c7b1e;
+    --color-benefic: #1f5c33;
+    --color-malefic: #8c2020;
+    --color-graha-neutral: #3a342a;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #16130c !important;
+  }
+
+  /* Atmosphere, none of which belongs on paper. */
+  body::before,
+  body::after,
+  .starfield,
+  .aura,
+  [aria-hidden='true'] .starfield {
+    display: none !important;
+  }
+
+  /*
+    Navigation, forms and anything interactive. A printed page cannot be
+    clicked, so a row of buttons is just clutter.
+
+    Targeted by class, not by tag. Hiding every `header` also hid each page's
+    own, which is exactly where a report's name, date and birthplace sit, so the
+    first printed chart came out with nothing identifying it.
+  */
+  .site-header,
+  .site-footer,
+  .site-header nav,
+  form,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Nothing may stay hidden on paper. The reveal animation is scroll driven and
+     printing does not scroll, so without this a report would come out with
+     blank sections, which is the same bug in a different medium. */
+  .reveal-ready [data-reveal],
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .draw-stroke {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  /* Cards become ruled blocks rather than lit surfaces. */
+  .surface-card {
+    background: #ffffff !important;
+    border: 1px solid #d8d2c4 !important;
+    border-radius: 4px;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .text-gold-leaf {
+    background: none !important;
+    -webkit-text-fill-color: #5b4712 !important;
+    color: #5b4712 !important;
+  }
+
+  /* Keep a heading with what follows it, and never split a table row. */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  tr,
+  li,
+  section {
+    break-inside: avoid;
+  }
+
+  .print-break {
+    break-before: page;
+  }
+
+  /* Wide tables scroll on screen. On paper there is nowhere to scroll, so they
+     have to fit. */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 9pt;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}

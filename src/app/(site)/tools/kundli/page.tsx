@@ -19,6 +19,7 @@ import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
 import { getUser } from '@/lib/supabase/server';
@@ -116,6 +117,7 @@ export default async function KundliPage({
 
       <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
         <ToolSwitcher current="kundli" params={params} />
+        <div className="mb-8 flex justify-end"><PrintButton /></div>
         <header className="mb-10">
           <p
             className="text-xs uppercase tracking-[0.28em]"
@@ -178,7 +180,8 @@ export default async function KundliPage({
           />
         </section>
 
-        <section className="mb-12">
+        {/* An invitation to sign up, which has no business on a printed report. */}
+        <section className="mb-12 no-print">
           <SaveChartButton
             signedIn={Boolean(user)}
             defaultLabel={displayName ?? 'My chart'}
@@ -356,7 +359,7 @@ export default async function KundliPage({
         </section>
 
         {/* Recast */}
-        <section className="mt-12">
+        <section className="mt-12 no-print">
           <SectionHeading eyebrow="Another chart" title="Cast a different chart" />
           <div className="surface-card max-w-xl p-6">
             <SavedChartPicker action="/tools/kundli" />

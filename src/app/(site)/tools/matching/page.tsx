@@ -7,6 +7,7 @@ import { birthQuerySchema, toBirthQueryString } from '@/lib/astro/query';
 import { MatchForm } from '@/components/forms/MatchForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
@@ -198,6 +199,7 @@ export default async function MatchingPage({
             name: groom.name ?? undefined,
           })}
         />
+        <div className="mb-8 flex justify-end"><PrintButton /></div>
         <p className="eyebrow" data-reveal>Guṇa Milan</p>
         <h1
           className="font-display mt-4 text-3xl sm:text-4xl"
@@ -346,7 +348,7 @@ export default async function MatchingPage({
           </p>
         </section>
 
-        <section className="mt-12">
+        <section className="no-print mt-12">
           <h2 className="eyebrow">Match another pair</h2>
           <div className="surface-card mt-5 p-6">
             <MatchForm />
