@@ -16,6 +16,20 @@ interface Person {
 const blank: Person = { name: '', date: '', time: '', place: null };
 
 /**
+ * Details carried in from another tool, for the first person.
+ *
+ * Somebody arriving here from their own chart is almost always comparing it
+ * against someone else's, so their side is filled in and only the other person
+ * is left to enter. Arriving with nothing still gives two blank columns.
+ */
+export interface MatchPrefill {
+  name?: string;
+  date: string;
+  time?: string;
+  place: PlaceResult;
+}
+
+/**
  * Two sets of birth details for Guna Milan.
  *
  * Time is optional here and labelled as such, because the score depends only
@@ -23,9 +37,18 @@ const blank: Person = { name: '', date: '', time: '', place: null };
  * tool turns most people away for no gain: a date and place is enough, and a
  * known time only sharpens the Mangal dosha check.
  */
-export function MatchForm() {
+export function MatchForm({ prefillA }: { prefillA?: MatchPrefill }) {
   const router = useRouter();
-  const [a, setA] = useState<Person>(blank);
+  const [a, setA] = useState<Person>(
+    prefillA
+      ? {
+          name: prefillA.name ?? '',
+          date: prefillA.date,
+          time: prefillA.time ?? '',
+          place: prefillA.place,
+        }
+      : blank,
+  );
   const [b, setB] = useState<Person>(blank);
   const [error, setError] = useState<string | null>(null);
 

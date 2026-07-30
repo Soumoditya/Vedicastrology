@@ -18,6 +18,8 @@ import { formatDms, formatPosition } from '@/lib/astro/zodiac';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
+import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
 import { getUser } from '@/lib/supabase/server';
 import { chartStyleFor, getSettings } from '@/lib/account/settings';
@@ -113,6 +115,7 @@ export default async function KundliPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
+        <ToolSwitcher current="kundli" params={params} />
         <header className="mb-10">
           <p
             className="text-xs uppercase tracking-[0.28em]"
@@ -356,6 +359,7 @@ export default async function KundliPage({
         <section className="mt-12">
           <SectionHeading eyebrow="Another chart" title="Cast a different chart" />
           <div className="surface-card max-w-xl p-6">
+            <SavedChartPicker action="/tools/kundli" />
             <BirthForm action="/tools/kundli" submitLabel="Cast the chart" />
           </div>
         </section>
@@ -404,7 +408,8 @@ function KundliIntro({ error }: { error?: string }) {
         )}
 
         <div className="surface-card mt-10 p-6 sm:p-8">
-          <BirthForm action="/tools/kundli" submitLabel="Cast the chart" />
+          <SavedChartPicker action="/tools/kundli" />
+            <BirthForm action="/tools/kundli" submitLabel="Cast the chart" />
         </div>
 
         <p

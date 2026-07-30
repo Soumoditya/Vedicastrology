@@ -3,9 +3,11 @@ import type { Metadata } from 'next';
 import { castChart } from '@/lib/astro/chart';
 import { matchCharts } from '@/lib/astro/matching';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
-import { birthQuerySchema } from '@/lib/astro/query';
+import { birthQuerySchema, toBirthQueryString } from '@/lib/astro/query';
 import { MatchForm } from '@/components/forms/MatchForm';
 import { gateFor } from '@/components/site/FeatureGate';
+import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -73,6 +75,39 @@ export default async function MatchingPage({
   const bride = parsePerson(params, 'a');
   const groom = parsePerson(params, 'b');
 
+  /*
+    Arriving from another tool carries an unprefixed single chart query. That is
+    almost always the visitor's own chart, and they are here to compare it with
+    somebody, so it fills the first column and leaves only the second to enter.
+  */
+  const carried = parsePerson({ ...params, ad: params.d, at: params.t, alat: params.lat,
+    alon: params.lon, atz: params.tz, aplace: params.place, aname: params.name }, 'a');
+
+  const prefillA =
+    !bride && carried
+      ? {
+          name: carried.name ?? undefined,
+          date: `${carried.birth.year}-${String(carried.birth.month).padStart(2, '0')}-${String(carried.birth.day).padStart(2, '0')}`,
+          time: `${String(carried.birth.hour).padStart(2, '0')}:${String(carried.birth.minute).padStart(2, '0')}`,
+          /*
+            Reconstructed from the query rather than geocoded again. The label
+            is the only part shown, and the rest of PlaceResult exists for the
+            autocomplete's own bookkeeping, so it is filled in consistently
+            instead of sending a request for something already known.
+          */
+          place: {
+            id: 'carried',
+            name: carried.birth.place.name.split(',')[0].trim(),
+            label: carried.birth.place.name,
+            latitude: carried.birth.place.latitude,
+            longitude: carried.birth.place.longitude,
+            timezone: carried.birth.place.timezone ?? 'UTC',
+            country: carried.birth.place.name.split(',').pop()!.trim(),
+            countryCode: '',
+          },
+        }
+      : undefined;
+
   if (!bride || !groom) {
     return (
       <div className="relative">
@@ -102,7 +137,7 @@ export default async function MatchingPage({
           </header>
 
           <div className="surface-card mt-12 p-6 sm:p-8" data-reveal="scale">
-            <MatchForm />
+            <MatchForm prefillA={prefillA} />
           </div>
 
           <p className="mt-6 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
@@ -134,6 +169,35 @@ export default async function MatchingPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
+        {/* Two charts, so "the same chart" needs saying whose. Each person's
+            own query is built rather than passing this page's prefixed params,
+            which mean nothing to a single chart tool. */}
+        <ToolSwitcher
+          current="matching"
+          heading={`${bride.name ?? 'First person'}, elsewhere`}
+          query={toBirthQueryString({
+            date: `${bride.birth.year}-${String(bride.birth.month).padStart(2, '0')}-${String(bride.birth.day).padStart(2, '0')}`,
+            time: `${String(bride.birth.hour).padStart(2, '0')}:${String(bride.birth.minute).padStart(2, '0')}`,
+            latitude: bride.birth.place.latitude,
+            longitude: bride.birth.place.longitude,
+            timezone: bride.birth.place.timezone,
+            place: bride.birth.place.name,
+            name: bride.name ?? undefined,
+          })}
+        />
+        <ToolSwitcher
+          current="matching"
+          heading={`${groom.name ?? 'Second person'}, elsewhere`}
+          query={toBirthQueryString({
+            date: `${groom.birth.year}-${String(groom.birth.month).padStart(2, '0')}-${String(groom.birth.day).padStart(2, '0')}`,
+            time: `${String(groom.birth.hour).padStart(2, '0')}:${String(groom.birth.minute).padStart(2, '0')}`,
+            latitude: groom.birth.place.latitude,
+            longitude: groom.birth.place.longitude,
+            timezone: groom.birth.place.timezone,
+            place: groom.birth.place.name,
+            name: groom.name ?? undefined,
+          })}
+        />
         <p className="eyebrow" data-reveal>Guṇa Milan</p>
         <h1
           className="font-display mt-4 text-3xl sm:text-4xl"

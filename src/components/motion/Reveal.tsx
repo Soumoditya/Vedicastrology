@@ -5,30 +5,34 @@ import { useEffect } from 'react';
 /**
  * Scroll choreography.
  *
- * Elements marked `data-reveal` fade and rise as they enter view. The hiding
- * class is added to the document by this component rather than living in the
- * stylesheet, so if JavaScript never runs the content simply stays visible.
+ * Elements marked `data-reveal` fade and rise as they enter view.
  *
- * That last guarantee was not enough. It covers JavaScript never running at
- * all, but not the case that actually bit: the effect runs, everything below
- * the fold is hidden, and then the observer fails to deliver for some of the
- * targets. On a phone a tool page stacks into one narrow column, so most of it
- * starts below the fold, and the page reads as empty. Reported from a real
- * phone, where a reload or desktop mode fixed it, which is the signature of a
- * page whose content depends on a callback arriving.
+ * The ordering here is the whole design, and it took two goes to get right.
  *
- * So visibility no longer depends on the observer succeeding. Three layers,
- * in order of how much they are trusted:
+ * The obvious way, and the way this was written twice, is to hide everything
+ * first and then reveal it as it scrolls into view. That is backwards. It means
+ * a page is blank by default and depends on JavaScript running, an
+ * IntersectionObserver delivering, and a timer firing, to become readable. Any
+ * one of those failing on a phone leaves somebody looking at empty space, which
+ * is what happened: reported twice from a real phone, on the tool pages and
+ * then on the consultations page, fixed by a reload or by desktop mode, both of
+ * which simply force a fresh load.
  *
- *   1. Anything at or near the first screen is revealed the moment the observer
- *      is armed, without waiting for a callback. A page therefore never opens
- *      blank, which was the complaint.
- *   2. Anything beyond that reveals on intersection, as before, which is the
- *      effect worth having.
- *   3. A timer reveals whatever is still hidden regardless. If the observer is
- *      throttled, dropped on a restore from the back cache, or simply never
- *      fires, the reading is a little less choreographed and completely
- *      readable. Content is never permanently hidden.
+ * So nothing is hidden until the observer has proved it works.
+ *
+ *   1. The page renders visible. No class, no inline style, nothing hidden.
+ *   2. The observer is armed. It always delivers an initial callback for every
+ *      target it is given, so that first callback is proof of life.
+ *   3. Only then, inside that callback, is anything hidden, and only the
+ *      elements that are currently off screen. Whatever is already on screen is
+ *      never touched, because animating something the reader is already looking
+ *      at gains nothing.
+ *   4. Those hidden elements reveal as they come into view, and a timer reveals
+ *      any stragglers regardless.
+ *
+ * If the observer never fires, step three never happens and the page is simply
+ * readable with no animation. A failure now costs the effect rather than the
+ * content, which is the right way round.
  *
  * Honours prefers-reduced-motion by never arming at all.
  */
@@ -37,56 +41,75 @@ export function Reveal() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) return;
 
-    const root = document.documentElement;
     const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
     if (targets.length === 0) return;
 
-    root.classList.add('reveal-ready');
+    let armed = false;
+    const pending = new Set<HTMLElement>();
 
-    const show = (el: Element) => el.classList.add('in');
+    const show = (el: HTMLElement) => {
+      pending.delete(el);
+      el.classList.add('in');
+    };
 
-    /*
-      Layer 1. Everything within the first screen and a half is shown at once.
-
-      Deliberately generous. The animation is worth having for a section a
-      reader scrolls down to; it is worth nothing for a section that is already
-      on screen, and hiding those is all downside.
-    */
-    const eager = window.innerHeight * 1.5;
-    const deferred: HTMLElement[] = [];
-
-    for (const el of targets) {
-      if (el.getBoundingClientRect().top < eager) show(el);
-      else deferred.push(el);
-    }
-
-    // Layer 2. Threshold zero, so any overlap at all counts. A section taller
-    // than about twelve screens can never reach a fractional threshold, and on
-    // a phone that is a reachable height.
     const observer = new IntersectionObserver(
       (entries) => {
+        /*
+          The first callback is the proof. Until it arrives nothing has been
+          hidden, so there is no state to unwind if it never does.
+        */
+        if (!armed) {
+          armed = true;
+          document.documentElement.classList.add('reveal-ready');
+
+          for (const entry of entries) {
+            const el = entry.target as HTMLElement;
+
+            /*
+              Judged against the real viewport, not against the observer's
+              verdict. The observer applies a negative bottom margin so things
+              reveal slightly before they arrive, which means an element peeking
+              into the last few percent of the screen is reported as not
+              intersecting. Trusting that hid an element the reader could see.
+            */
+            const box = el.getBoundingClientRect();
+            const onScreen = box.top < window.innerHeight && box.bottom > 0;
+
+            if (onScreen) {
+              show(el);
+              observer.unobserve(el);
+            } else {
+              pending.add(el);
+            }
+          }
+          return;
+        }
+
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          show(entry.target);
+          show(entry.target as HTMLElement);
           observer.unobserve(entry.target);
         }
       },
+      // Threshold zero, so any overlap counts. A section taller than about
+      // twelve screens can never reach a fractional threshold, and on a phone
+      // that height is reachable.
       { rootMargin: '0px 0px -8% 0px', threshold: 0 },
     );
 
-    for (const el of deferred) observer.observe(el);
+    for (const el of targets) observer.observe(el);
 
-    // Layer 3. The safety net. Long enough that a normal scroll animates
-    // first, short enough that nobody sits looking at a blank panel.
+    // The net. Long enough for a normal scroll to animate first, short enough
+    // that nobody sits looking at a blank panel.
     const net = window.setTimeout(() => {
-      for (const el of deferred) show(el);
+      for (const el of Array.from(pending)) show(el);
       observer.disconnect();
     }, 2500);
 
     /*
       Restoring from the back cache re-shows a page without remounting this
       component, and a phone browser may not redeliver observations for it. The
-      symptom is a page that was fine, navigated away from, and returns blank.
+      symptom is a page that was fine, navigated away from, and comes back blank.
     */
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) for (const el of targets) show(el);
@@ -97,7 +120,7 @@ export function Reveal() {
       window.clearTimeout(net);
       window.removeEventListener('pageshow', onPageShow);
       observer.disconnect();
-      root.classList.remove('reveal-ready');
+      document.documentElement.classList.remove('reveal-ready');
     };
   }, []);
 

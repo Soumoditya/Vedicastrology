@@ -15,6 +15,8 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { formatDms, NAKSHATRA_SPAN } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
+import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -55,6 +57,7 @@ export default async function NakshatraPage({ searchParams }: { searchParams: Se
             Yours is wherever the Moon stood at your birth.
           </p>
           <div className="surface-card mt-10 p-6 sm:p-8" data-reveal="scale">
+            <SavedChartPicker action="/tools/nakshatra" />
             <BirthForm action="/tools/nakshatra" submitLabel="Find my nakshatra" />
           </div>
         </div>
@@ -89,6 +92,7 @@ export default async function NakshatraPage({ searchParams }: { searchParams: Se
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
+        <ToolSwitcher current="nakshatra" params={params} />
         <p className="eyebrow" data-reveal>Nakṣatra</p>
         <h1
           className="font-display mt-4 text-[clamp(2.5rem,7vw,4.5rem)] leading-[1.02]"
@@ -156,6 +160,7 @@ export default async function NakshatraPage({ searchParams }: { searchParams: Se
         <section className="mt-12">
           <h2 className="eyebrow">Another chart</h2>
           <div className="surface-card mt-5 p-6">
+            <SavedChartPicker action="/tools/nakshatra" />
             <BirthForm action="/tools/nakshatra" submitLabel="Find nakshatra" />
           </div>
         </section>

@@ -14,6 +14,8 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { formatDms } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
+import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
 export const metadata: Metadata = {
@@ -64,6 +66,7 @@ export default async function TransitsPage({
           </p>
 
           <div className="surface-card mt-10 p-6 sm:p-8" data-reveal="scale">
+            <SavedChartPicker action="/tools/transits" />
             <BirthForm action="/tools/transits" submitLabel="Show my transits" />
           </div>
         </div>
@@ -101,6 +104,7 @@ export default async function TransitsPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-20">
+        <ToolSwitcher current="transits" params={params} />
         <p className="eyebrow" data-reveal>Gochara</p>
         <h1
           className="font-display mt-4 text-3xl sm:text-4xl"
@@ -282,6 +286,7 @@ export default async function TransitsPage({
         <section className="mt-12">
           <h2 className="eyebrow">Another chart</h2>
           <div className="surface-card mt-5 max-w-xl p-6">
+            <SavedChartPicker action="/tools/transits" />
             <BirthForm action="/tools/transits" submitLabel="Show transits" />
           </div>
         </section>
