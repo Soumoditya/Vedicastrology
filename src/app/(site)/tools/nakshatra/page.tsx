@@ -20,12 +20,38 @@ import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
-export const metadata: Metadata = {
-  title: 'Nakshatra Finder',
-  description:
-    'Your birth star, its pada, ruling graha, deity and symbol, with what the ' +
-    'classical texts record about it.',
-};
+/**
+ * The share card is built from the birth details in the query, so a link to
+ * somebody's chart previews as that chart rather than as a generic card. The
+ * file convention cannot do this because it never sees the query string.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    query.set(key, Array.isArray(value) ? value[0] : value);
+  }
+
+  const base: Metadata = {
+    title: 'Nakshatra Finder',
+    description:
+      'Your birth star, its pada, ruling graha, deity and symbol, with what the ' +
+      'classical texts record about it.',
+  };
+
+  const card = `/api/og/chart?${query.toString()}`;
+
+  return {
+    ...base,
+    openGraph: { ...base.openGraph, images: [{ url: card, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', images: [card] },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 

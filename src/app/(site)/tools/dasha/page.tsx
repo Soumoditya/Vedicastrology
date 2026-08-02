@@ -18,12 +18,38 @@ import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 import type { DashaPeriod } from '@/lib/astro/types';
 
-export const metadata: Metadata = {
-  title: 'Vimshottari Dasha',
-  description:
-    'Your planetary periods to four levels, with the exact date each one ' +
-    'begins and ends.',
-};
+/**
+ * The share card is built from the birth details in the query, so a link to
+ * somebody's chart previews as that chart rather than as a generic card. The
+ * file convention cannot do this because it never sees the query string.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    query.set(key, Array.isArray(value) ? value[0] : value);
+  }
+
+  const base: Metadata = {
+    title: 'Vimshottari Dasha',
+    description:
+      'Your planetary periods to four levels, with the exact date each one ' +
+      'begins and ends.',
+  };
+
+  const card = `/api/og/chart?${query.toString()}`;
+
+  return {
+    ...base,
+    openGraph: { ...base.openGraph, images: [{ url: card, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', images: [card] },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
