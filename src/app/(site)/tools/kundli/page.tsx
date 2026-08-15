@@ -20,6 +20,7 @@ import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
 import { PrintButton } from '@/components/chart/PrintButton';
+import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
 import { getUser } from '@/lib/supabase/server';
@@ -138,8 +139,17 @@ export default async function KundliPage({
   const local = DateTime.fromISO(chart.meta.utcISO).setZone(zone);
 
   return (
-    <div className="relative">
+    <div className="relative report-body">
       <div className="starfield" aria-hidden />
+
+      {/* On paper only: a branded cover and a footer that rides every page. */}
+      <ReportCover
+        title={displayName ? `${displayName}’s birth chart` : 'Vedic birth chart'}
+        subtitle={`${local.toFormat('d LLLL yyyy')}${
+          chart.meta.timeUnknown ? '' : ` · ${local.toFormat('HH:mm')}`
+        } · ${birth.place.name}`}
+      />
+      <ReportFooter />
 
       <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
         <JourneyRail current="kundli" params={params} />

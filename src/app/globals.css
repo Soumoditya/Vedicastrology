@@ -636,6 +636,54 @@ body::after {
     text-decoration: none !important;
     color: inherit !important;
   }
+
+  /*
+    Report chrome. Shown only on paper, so the screen never carries a redundant
+    cover or footer. This is what turns a printed page into a report a person
+    keeps and passes on, which is the "advertisement" the report is meant to be.
+  */
+  .print-only {
+    display: block !important;
+  }
+
+  .report-cover {
+    text-align: center;
+    padding-top: 4mm;
+    padding-bottom: 6mm;
+    margin-bottom: 8mm;
+    border-bottom: 1px solid #cdbb95;
+    break-after: avoid;
+  }
+
+  /*
+    The advertisement band, fixed to the foot of every printed page. Chrome
+    repeats a fixed element per page, so the site's name, address and handle
+    ride along on every sheet without being placed by hand.
+  */
+  .report-ad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3mm 0 0;
+    border-top: 1px solid #cdbb95;
+    font-size: 8pt;
+    color: #6b6355;
+  }
+
+  /* Reserve room so the band never lands on top of the last lines. */
+  .report-body {
+    padding-bottom: 14mm;
+  }
+}
+
+/* Off paper, the report-only parts do not exist. */
+.print-only {
+  display: none;
 }
 
 /* ==========================================================================
