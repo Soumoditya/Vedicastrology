@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { computePanchang } from '@/lib/astro/panchang';
 import { RASHI_NAMES_EN, NAKSHATRA_DEITY, NAKSHATRA_SYMBOL } from '@/lib/astro/constants';
 import { PlacePicker } from '@/components/forms/PlacePicker';
+import { Swastika } from '@/components/ornament/Ornaments';
 import { gateFor } from '@/components/site/FeatureGate';
 import { POPULAR_PLACES } from '@/lib/geo/geocode';
 import { timezoneFor } from '@/lib/astro/time';
@@ -65,12 +66,15 @@ export default async function PanchangPage({
 
       <div className="relative mx-auto max-w-5xl px-5 py-12 sm:py-16">
         <header className="mb-9">
-          <p
-            className="text-xs uppercase tracking-[0.28em]"
-            style={{ color: 'var(--color-gold-600)' }}
-          >
-            Pañcāṅga · The five limbs
-          </p>
+          <div className="flex items-center gap-2.5" style={{ color: 'var(--color-gold-500)' }}>
+            {/* The swastika belongs here: the panchang is the reckoning of
+                auspicious time, the one context where the mark reads plainly as
+                the sacred sign it is. */}
+            <Swastika size={20} className="shrink-0" title="An auspicious day" />
+            <p className="text-xs uppercase tracking-[0.28em]" style={{ color: 'var(--color-gold-600)' }}>
+              Pañcāṅga · The five limbs
+            </p>
+          </div>
           <h1
             className="font-display mt-2 text-3xl sm:text-4xl"
             style={{ color: 'var(--text-primary)' }}
