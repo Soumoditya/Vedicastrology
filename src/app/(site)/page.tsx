@@ -2,14 +2,16 @@ import Link from 'next/link';
 
 import { BirthForm } from '@/components/forms/BirthForm';
 import { SITE, TOOL_LINKS } from '@/lib/site';
-import { Yantra } from '@/components/site/Yantra';
+import { HeroYantra } from '@/components/site/HeroYantra';
+import { Shloka } from '@/components/ornament/Shloka';
+import { Ganesha, Om, OrnamentRule } from '@/components/ornament/Ornaments';
 import { Parallax, Reveal } from '@/components/motion/Reveal';
 
 export default function HomePage() {
   return (
     <>
       <Reveal />
-      <Parallax selector="#hero-yantra" strength={0.14} />
+      <Parallax selector="#hero-yantra" strength={0.1} />
 
       {/* ================================================================ Hero */}
       <section className="relative min-h-[92vh] overflow-hidden">
@@ -34,8 +36,24 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-20 lg:grid-cols-[1.15fr_1fr] lg:gap-8 lg:pt-28">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-8 lg:pt-20">
           <div>
+            {/* The invocation. Ganesha is addressed before any undertaking is
+                begun, and casting a chart is one, so the site opens with it. */}
+            <div
+              className="mb-7 flex items-center gap-2.5"
+              data-reveal
+              style={{ color: 'var(--color-gold-400)' }}
+            >
+              <Ganesha size={26} className="shrink-0" />
+              <p className="text-[0.8rem] leading-snug" style={{ color: 'var(--color-gold-400)' }}>
+                <span lang="sa" style={{ fontFamily: 'var(--font-devanagari), serif' }}>
+                  वक्रतुण्ड महाकाय
+                </span>
+                <span style={{ color: 'var(--text-muted)' }}> · a beginning without obstacles</span>
+              </p>
+            </div>
+
             <p className="eyebrow" data-reveal>
               Jyotisa, the science of light
             </p>
@@ -121,7 +139,7 @@ export default function HomePage() {
           </div>
 
           <div id="hero-yantra" className="relative mx-auto w-full max-w-lg will-change-transform">
-            <Yantra />
+            <HeroYantra />
           </div>
         </div>
 
@@ -241,6 +259,13 @@ export default function HomePage() {
       <section className="relative overflow-hidden border-y" style={{ background: 'var(--surface-sunken)' }}>
         <div className="starfield" aria-hidden />
 
+        {/* An engraved Om sits far back, so the section has a ground of craft
+            behind the argument without competing with it. */}
+        <Om
+          size={520}
+          className="ornament-watermark right-[-8%] top-1/2 hidden -translate-y-1/2 lg:block"
+        />
+
         <div className="relative mx-auto max-w-6xl px-5 py-28">
           <p className="eyebrow" data-reveal>
             Why the numbers hold up
@@ -338,8 +363,17 @@ export default function HomePage() {
         />
 
         <div className="mx-auto max-w-3xl px-5 py-32 text-center">
+          {/* The verse the whole site is named for: from darkness to light. */}
+          <div data-reveal>
+            <Shloka which="jyoti" />
+          </div>
+
+          <div data-reveal>
+            <OrnamentRule className="mt-14" />
+          </div>
+
           <blockquote
-            className="font-quote text-[clamp(1.5rem,3.4vw,2.375rem)] italic leading-[1.35]"
+            className="font-quote mt-14 text-[clamp(1.5rem,3.4vw,2.375rem)] italic leading-[1.35]"
             style={{ color: 'var(--text-primary)' }}
             data-reveal
           >
