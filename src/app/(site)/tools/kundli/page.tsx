@@ -18,7 +18,7 @@ import { formatDms, formatPosition } from '@/lib/astro/zodiac';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { JourneyRail } from '@/components/chart/JourneyRail';
 import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
@@ -142,7 +142,7 @@ export default async function KundliPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
-        <ToolSwitcher current="kundli" params={params} />
+        <JourneyRail current="kundli" params={params} />
         <div className="mb-8 flex justify-end"><PrintButton /></div>
         <header className="mb-10">
           <p

@@ -6,7 +6,7 @@ import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { birthQuerySchema, toBirthQueryString } from '@/lib/astro/query';
 import { MatchForm } from '@/components/forms/MatchForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { JourneyRail } from '@/components/chart/JourneyRail';
 import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
@@ -62,6 +62,20 @@ function parsePerson(
   };
 }
 
+/** A single-chart query string for one person, to carry them to other tools. */
+function personQuery(person: NonNullable<ReturnType<typeof parsePerson>>): string {
+  const b = person.birth;
+  return toBirthQueryString({
+    date: `${b.year}-${String(b.month).padStart(2, '0')}-${String(b.day).padStart(2, '0')}`,
+    time: `${String(b.hour).padStart(2, '0')}:${String(b.minute).padStart(2, '0')}`,
+    latitude: b.place.latitude,
+    longitude: b.place.longitude,
+    timezone: b.place.timezone,
+    place: b.place.name,
+    name: person.name ?? undefined,
+  });
+}
+
 export default async function MatchingPage({
   searchParams,
 }: {
@@ -114,7 +128,14 @@ export default async function MatchingPage({
       <div className="relative">
         <Reveal />
         <div className="starfield" aria-hidden />
-        <div className="relative mx-auto max-w-3xl px-5 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
+          {/*
+            The dead-end fix. Arriving here from a chart, the rail stays present
+            so there is always a way back to the rest of that chart rather than
+            being stranded on a two-person form with no exit.
+          */}
+          {carried && <JourneyRail current="matching" query={personQuery(carried)} />}
+
           <header className="max-w-xl">
             <p className="eyebrow" data-reveal>Guṇa Milan</p>
             <h1
@@ -170,35 +191,9 @@ export default async function MatchingPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
-        {/* Two charts, so "the same chart" needs saying whose. Each person's
-            own query is built rather than passing this page's prefixed params,
-            which mean nothing to a single chart tool. */}
-        <ToolSwitcher
-          current="matching"
-          heading={`${bride.name ?? 'First person'}, elsewhere`}
-          query={toBirthQueryString({
-            date: `${bride.birth.year}-${String(bride.birth.month).padStart(2, '0')}-${String(bride.birth.day).padStart(2, '0')}`,
-            time: `${String(bride.birth.hour).padStart(2, '0')}:${String(bride.birth.minute).padStart(2, '0')}`,
-            latitude: bride.birth.place.latitude,
-            longitude: bride.birth.place.longitude,
-            timezone: bride.birth.place.timezone,
-            place: bride.birth.place.name,
-            name: bride.name ?? undefined,
-          })}
-        />
-        <ToolSwitcher
-          current="matching"
-          heading={`${groom.name ?? 'Second person'}, elsewhere`}
-          query={toBirthQueryString({
-            date: `${groom.birth.year}-${String(groom.birth.month).padStart(2, '0')}-${String(groom.birth.day).padStart(2, '0')}`,
-            time: `${String(groom.birth.hour).padStart(2, '0')}:${String(groom.birth.minute).padStart(2, '0')}`,
-            latitude: groom.birth.place.latitude,
-            longitude: groom.birth.place.longitude,
-            timezone: groom.birth.place.timezone,
-            place: groom.birth.place.name,
-            name: groom.name ?? undefined,
-          })}
-        />
+        {/* The path continues on the first person's chart, so there is a way
+            onward from a match rather than a dead stop. */}
+        <JourneyRail current="matching" query={personQuery(bride)} />
         <div className="mb-8 flex justify-end"><PrintButton /></div>
         <p className="eyebrow" data-reveal>Guṇa Milan</p>
         <h1

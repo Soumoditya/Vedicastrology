@@ -14,7 +14,7 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { formatDms } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { ToolSwitcher } from '@/components/chart/ToolSwitcher';
+import { JourneyRail } from '@/components/chart/JourneyRail';
 import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
@@ -131,7 +131,7 @@ export default async function TransitsPage({
       <div className="starfield" aria-hidden />
 
       <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-20">
-        <ToolSwitcher current="transits" params={params} />
+        <JourneyRail current="transits" params={params} />
         <div className="mb-8 flex justify-end"><PrintButton /></div>
         <p className="eyebrow" data-reveal>Gochara</p>
         <h1
