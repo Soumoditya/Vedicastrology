@@ -41,12 +41,15 @@
   --color-vermilion-500: #d1441f;
   --color-vermilion-600: #a83417;
 
-  /* -- Parchment, for reading surfaces and light mode. ------------------ */
-  --color-parchment-50: #fdfbf5;
-  --color-parchment-100: #f8f3e6;
-  --color-parchment-200: #efe6d0;
-  --color-parchment-300: #ddd0b0;
-  --color-parchment-400: #c4b48c;
+  /* -- Parchment, for reading surfaces and light mode. ------------------
+        Dimmed and warmed from the near-white it was. A bright white ground
+        glares and reads as an unfinished default; aged paper reads as a chosen
+        surface. The base is now a warm ivory, not paper-white. --------- */
+  --color-parchment-50: #f3ead6;
+  --color-parchment-100: #ece0c6;
+  --color-parchment-200: #e0d1b2;
+  --color-parchment-300: #cdbb95;
+  --color-parchment-400: #b6a179;
 
   /* -- Chart semantics. Tuned to stay legible on both grounds. ---------- */
   --color-benefic: #4fc79a;
@@ -94,17 +97,20 @@
 */
 [data-theme='light'] {
   --surface: var(--color-parchment-50);
-  --surface-raised: #ffffff;
+  /* Raised is a shade lighter than the ground, not stark white, so a card
+     lifts off the page without punching a bright hole in it. */
+  --surface-raised: #f8f1e2;
   --surface-sunken: var(--color-parchment-100);
 
-  --border-subtle: color-mix(in oklab, var(--color-gold-800) 28%, transparent);
-  --border-strong: color-mix(in oklab, var(--color-gold-800) 60%, transparent);
+  --border-subtle: color-mix(in oklab, var(--color-gold-800) 32%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-gold-800) 62%, transparent);
 
-  --text-primary: #17130c;
-  --text-secondary: #4b4335;
-  --text-muted: #7d7361;
+  --text-primary: #1a1408;
+  --text-secondary: #463d2c;
+  --text-muted: #786c56;
 
-  --grain-opacity: 0.035;
+  /* A touch more grain on paper than on lacquer, so the surface has tooth. */
+  --grain-opacity: 0.05;
   --glow: color-mix(in oklab, var(--color-gold-700) 26%, transparent);
 
   /* Gold is remapped so any component using a gold token stays visible.
@@ -278,6 +284,84 @@ body::after {
 
 .starfield-slow {
   animation: twinkle 7s var(--ease-in-out-soft) infinite;
+}
+
+/* ==========================================================================
+   Ornament
+
+   Traditional marks used as engraved accents rather than illustrations. The
+   watermark sits a long way back, at a whisper of opacity, so a page has a
+   ground of craft behind the type without anything competing with it.
+   ========================================================================== */
+
+.ornament-watermark {
+  position: absolute;
+  pointer-events: none;
+  color: var(--color-gold-500);
+  opacity: 0.05;
+  z-index: -1;
+}
+
+[data-theme='light'] .ornament-watermark {
+  opacity: 0.08;
+}
+
+/*
+  The ink draw. An ornament's strokes trace themselves in on first view, the
+  way a line is laid down by hand, then hold still. Applied by adding the class;
+  the reveal system adds `.in` when it scrolls into view.
+*/
+@keyframes ornament-draw {
+  from {
+    stroke-dashoffset: var(--draw-length, 400);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.reveal-ready .ink-draw [stroke] {
+  stroke-dasharray: var(--draw-length, 400);
+  stroke-dashoffset: var(--draw-length, 400);
+}
+
+.reveal-ready .ink-draw.in [stroke] {
+  animation: ornament-draw 2s var(--ease-out-expo) forwards;
+}
+
+/*
+  Lift. A card or link rises a hair and warms its border on hover, on a soft
+  curve, so interaction feels like a considered object responding rather than a
+  state flipping. Kept small on purpose.
+*/
+@utility lift {
+  transition:
+    transform 0.5s var(--ease-out-soft),
+    border-color 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
+}
+
+.lift:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: 0 22px 48px -30px color-mix(in oklab, var(--color-gold-500) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift:hover {
+    transform: none;
+  }
+  .reveal-ready .ink-draw.in [stroke] {
+    animation: none;
+  }
+  .reveal-ready .ink-draw [stroke] {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes aura {
