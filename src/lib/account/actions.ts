@@ -114,13 +114,21 @@ export async function deleteBirthProfile(formData: FormData): Promise<void> {
  *
  * Withdrawal removes the contributed row, enforced by a database trigger so it
  * cannot be missed by application code.
+ *
+ * Every write here is checked. An earlier version threw the error away and
+ * returned nothing, so when the column grant was missing the checkbox simply
+ * sprang back with no explanation at all. A preference that cannot report its
+ * own failure is worse than no preference.
  */
-export async function setResearchConsent(formData: FormData): Promise<void> {
+export async function setResearchConsent(
+  _prev: AccountState,
+  formData: FormData,
+): Promise<AccountState> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return { error: 'Please sign in first.' };
 
   const consent = formData.get('consent') === 'on';
 
@@ -136,7 +144,7 @@ export async function setResearchConsent(formData: FormData): Promise<void> {
     (profile as { research_subject_key: string | null } | null)?.research_subject_key ??
     randomUUID();
 
-  await supabase
+  const { error } = await supabase
     .from('profiles')
     .update({
       research_consent: consent,
@@ -145,7 +153,22 @@ export async function setResearchConsent(formData: FormData): Promise<void> {
     })
     .eq('id', user.id);
 
+  if (error) {
+    return { error: 'Could not save that preference. Please try again.' };
+  }
+
+  // Consenting after charts were already saved should contribute one of them.
+  // Otherwise consent would appear to do nothing until the next chart was
+  // saved, which is the state this feature was stuck in.
+  if (consent) await ensureResearchRow(user.id);
+
   revalidatePath('/dashboard');
+
+  return {
+    message: consent
+      ? 'Thank you. Your chart is now part of the research set.'
+      : 'Research sharing is off, and your contribution has been deleted.',
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -167,6 +190,11 @@ interface ContributionInput {
  * Silently does nothing when consent has not been given. That is deliberate:
  * the caller should not have to remember to check, and the safe path is the
  * default one.
+ *
+ * First chart wins. The dataset holds one row per person, and the life events
+ * on that row are the contributor's own, so letting each newly saved chart
+ * overwrite it would eventually attach somebody's marriage year to their
+ * friend's chart. Once a contribution exists it is left alone.
  */
 async function contributeResearch(userId: string, input: ContributionInput) {
   const supabase = await createClient();
@@ -182,6 +210,14 @@ async function contributeResearch(userId: string, input: ContributionInput) {
     | null;
 
   if (!p?.research_consent || !p.research_subject_key) return;
+
+  const { data: existing } = await supabase
+    .from('research_charts')
+    .select('subject_key')
+    .eq('subject_key', p.research_subject_key)
+    .maybeSingle();
+
+  if (existing) return;
 
   const [year, month, day] = input.date.split('-').map(Number);
   const [hour, minute] = (input.time ?? '12:00').split(':').map(Number);
@@ -209,14 +245,91 @@ async function contributeResearch(userId: string, input: ContributionInput) {
       gender: input.gender,
     });
 
-    await supabase
+    const { error } = await supabase
       .from('research_charts')
       .upsert(row, { onConflict: 'subject_key' });
+
+    if (error) console.error('[research] contribution rejected', error.message);
   } catch (error) {
     // A research contribution must never break saving a chart. The person's
     // own data is the thing that matters here.
     console.error('[research] contribution failed', error);
   }
+}
+
+/**
+ * Make sure a consenting person actually has a row in the research set.
+ *
+ * Consent on its own used to create nothing, so somebody who ticked the box
+ * without afterwards saving a fresh chart had no row for their life details to
+ * attach to, and the form reported success while writing nothing. The oldest
+ * saved chart is used, on the reasoning that the first chart a person casts for
+ * themselves is almost always their own.
+ *
+ * Returns true when a row exists afterwards.
+ */
+async function ensureResearchRow(userId: string): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('research_consent, research_subject_key')
+    .eq('id', userId)
+    .maybeSingle();
+
+  const p = profile as
+    | { research_consent: boolean; research_subject_key: string | null }
+    | null;
+
+  if (!p?.research_consent || !p.research_subject_key) return false;
+
+  const { data: existing } = await supabase
+    .from('research_charts')
+    .select('subject_key')
+    .eq('subject_key', p.research_subject_key)
+    .maybeSingle();
+
+  if (existing) return true;
+
+  const { data: saved } = await supabase
+    .from('birth_profiles')
+    .select('birth_date, birth_time, time_unknown, timezone, place_name, latitude, longitude, gender')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (!saved) return false;
+
+  const s = saved as {
+    birth_date: string;
+    birth_time: string | null;
+    time_unknown: boolean;
+    timezone: string;
+    place_name: string;
+    latitude: number;
+    longitude: number;
+    gender: string | null;
+  };
+
+  await contributeResearch(userId, {
+    date: s.birth_date,
+    time: s.birth_time ? s.birth_time.slice(0, 5) : null,
+    timeUnknown: s.time_unknown,
+    timezone: s.timezone,
+    placeName: s.place_name,
+    latitude: s.latitude,
+    longitude: s.longitude,
+    gender: s.gender,
+  });
+
+  const { data: after } = await supabase
+    .from('research_charts')
+    .select('subject_key')
+    .eq('subject_key', p.research_subject_key)
+    .maybeSingle();
+
+  return Boolean(after);
 }
 
 // ---------------------------------------------------------------------------
@@ -253,13 +366,6 @@ export async function saveLifeEvents(
 
   const healthConsent = formData.get('health_consent') === 'on';
 
-  // Record the health consent decision before writing anything, so that
-  // withdrawing it clears the stored years through the database trigger.
-  await supabase
-    .from('profiles')
-    .update({ health_research_consent: healthConsent })
-    .eq('id', user.id);
-
   const { data: profile } = await supabase
     .from('profiles')
     .select('research_consent, research_subject_key')
@@ -270,10 +376,34 @@ export async function saveLifeEvents(
     | { research_consent: boolean; research_subject_key: string | null }
     | null;
 
+  // Checked before the health consent is written, so that somebody who has not
+  // opted into research at all does not leave a health decision recorded.
   if (!p?.research_consent || !p.research_subject_key) {
     return {
       error:
         'Turn on research sharing above first, then these details can be saved.',
+    };
+  }
+
+  // Record the health decision before the details, so that withdrawing it
+  // clears the stored years through the database trigger.
+  const { error: healthError } = await supabase
+    .from('profiles')
+    .update({ health_research_consent: healthConsent })
+    .eq('id', user.id);
+
+  if (healthError) {
+    return { error: 'Could not save that. Please try again.' };
+  }
+
+  // There must be something to attach the details to. Consent alone creates no
+  // row, and without this check the update below would match nothing, which
+  // Postgres reports as success.
+  const hasRow = await ensureResearchRow(user.id);
+  if (!hasRow) {
+    return {
+      error:
+        'Save a chart first, then these details have a chart to attach to.',
     };
   }
 
@@ -290,7 +420,7 @@ export async function saveLifeEvents(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
 
-  const { error } = await supabase
+  const { data: written, error } = await supabase
     .from('research_charts')
     .update({
       gender: d.gender || null,
@@ -309,12 +439,20 @@ export async function saveLifeEvents(
         : [],
       life_events_updated_at: new Date().toISOString(),
     })
-    .eq('subject_key', p.research_subject_key);
+    .eq('subject_key', p.research_subject_key)
+    .select('subject_key');
 
   if (error) {
+    return { error: 'Could not save those details. Please try again.' };
+  }
+
+  // An update that matches no rows is not an error in Postgres, so a null
+  // error proves nothing on its own. Row security can filter the match away
+  // and leave this looking like a clean success while writing nothing, which
+  // is exactly how this form used to lie about having saved.
+  if (!written || written.length === 0) {
     return {
-      error:
-        'Could not save those details. Save a chart first, so there is a chart to attach them to.',
+      error: 'Those details did not save. Please try again in a moment.',
     };
   }
 

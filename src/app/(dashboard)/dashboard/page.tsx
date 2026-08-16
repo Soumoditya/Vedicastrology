@@ -6,7 +6,8 @@ import { castChart } from '@/lib/astro/chart';
 import { buildVimshottari, dashaAt, formatDashaChain } from '@/lib/astro/dasha';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { toBirthQueryString } from '@/lib/astro/query';
-import { deleteBirthProfile, setResearchConsent } from '@/lib/account/actions';
+import { deleteBirthProfile } from '@/lib/account/actions';
+import { ResearchConsentForm } from '@/components/account/ResearchConsentForm';
 import { ResearchProfileForm } from '@/components/account/ResearchProfileForm';
 import type { BirthProfile, Profile } from '@/lib/supabase/types';
 
@@ -122,26 +123,14 @@ export default async function DashboardPage() {
           immediately.
         </p>
 
-        <form action={setResearchConsent} className="mt-5 flex flex-wrap items-center gap-4">
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-            <input
-              type="checkbox"
-              name="consent"
-              defaultChecked={profile.research_consent}
-              className="h-4 w-4 accent-[var(--color-gold-500)]"
-            />
-            <span style={{ color: 'var(--text-secondary)' }}>
-              Include my charts in the research set
-            </span>
-          </label>
-          <button
-            type="submit"
-            className="rounded-full border px-4 py-2 text-xs"
-            style={{ borderColor: 'var(--border-strong)', color: 'var(--color-gold-200)' }}
-          >
-            Save preference
-          </button>
-        </form>
+        <ResearchConsentForm
+          consent={profile.research_consent}
+          strings={{
+            label: 'Include my charts in the research set',
+            save: 'Save preference',
+            saving: 'Saving…',
+          }}
+        />
 
         {profile.research_consent && (
           <>
