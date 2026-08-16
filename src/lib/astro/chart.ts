@@ -177,6 +177,22 @@ export function janmaNakshatra(chart: Chart): number {
 }
 
 /**
+ * The lord of the ascendant, the single most important graha in a chart.
+ *
+ * A one-line accessor, but it was being written out at every call site as
+ * RASHI_LORD[chart.ascendant.rashi], which is the kind of thing that stays
+ * correct until somebody writes chart.ascendant.rashi + 1 by accident.
+ */
+export function lagnaLord(chart: Chart): AnyGraha {
+  return RASHI_LORD[chart.ascendant.rashi];
+}
+
+/** The lord of the Moon sign. */
+export function rasiLord(chart: Chart): AnyGraha {
+  return RASHI_LORD[chart.byGraha.Moon.rashi];
+}
+
+/**
  * Whether the Moon is waxing. Needed to decide the Moon's benefic status, and
  * to name the paksha.
  */

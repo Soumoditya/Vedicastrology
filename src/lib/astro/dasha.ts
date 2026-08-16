@@ -6,6 +6,7 @@ import {
   type Graha,
 } from './constants';
 import type { Chart, DashaPeriod, DashaTree } from './types';
+import type { AnyGraha } from './constants';
 
 /**
  * Vimshottari dasha.
@@ -226,7 +227,20 @@ export function mahadashaList(tree: DashaTree): DashaPeriod[] {
  * Balance of dasha at birth, phrased the way an astrologer would say it:
  * "Venus mahadasha, 12 years 4 months 18 days remaining at birth".
  */
-export function formatBalance(tree: DashaTree): string {
+/**
+ * The dasha balance at birth as separate numbers.
+ *
+ * A printed kundli lays this out as a table cell reading
+ * "Jupiter: 15 Years, 6 Months, 5 Days", so the parts are needed apart from the
+ * sentence. formatBalance now builds its sentence from this, which means the
+ * two can never disagree.
+ */
+export function balanceAtBirthParts(tree: DashaTree): {
+  lord: AnyGraha;
+  years: number;
+  months: number;
+  days: number;
+} {
   const { lord, yearsRemaining } = tree.balanceAtBirth;
 
   const totalDays = yearsRemaining * VIMSHOTTARI_YEAR_DAYS;
@@ -234,6 +248,12 @@ export function formatBalance(tree: DashaTree): string {
   const afterYears = totalDays - years * VIMSHOTTARI_YEAR_DAYS;
   const months = Math.floor(afterYears / 30.4375);
   const days = Math.round(afterYears - months * 30.4375);
+
+  return { lord, years, months, days };
+}
+
+export function formatBalance(tree: DashaTree): string {
+  const { lord, years, months, days } = balanceAtBirthParts(tree);
 
   const parts: string[] = [];
   if (years) parts.push(`${years} year${years === 1 ? '' : 's'}`);

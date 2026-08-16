@@ -111,12 +111,33 @@ export interface SafetyResult {
   findings: { rule: SafetyRule; excerpt: string }[];
 }
 
+/**
+ * Phrasings that invert the rule they precede.
+ *
+ * "Nothing here is a reason to delay seeing a doctor" contains the exact words
+ * the medical rule looks for while saying the opposite of what that rule
+ * guards against. Without this, the most responsible sentence a reading can
+ * contain is the one most likely to get it blocked, which would train the
+ * writer out of including it.
+ *
+ * Kept deliberately tight. It matches only where a negation runs directly into
+ * the offending phrase, so it cannot be used to smuggle real advice past the
+ * filter by opening a paragraph with the word "not".
+ */
+const NEGATED_BEFORE =
+  /\b(?:not|never|no|nothing)\b[^.]{0,24}\breason\s+to\s*$|\bdo(?:es)?\s+not\s+mean\s+(?:you\s+should\s+)?$|\bis\s+not\s+a\s+reason\s+to\s*$/i;
+
 export function checkSafety(text: string): SafetyResult {
   const findings: SafetyResult['findings'] = [];
 
   for (const rule of SAFETY_RULES) {
     const match = rule.pattern.exec(text);
     if (!match) continue;
+
+    // A negated match is the sentence doing the right thing, not the wrong one.
+    if (NEGATED_BEFORE.test(text.slice(Math.max(0, match.index - 60), match.index))) {
+      continue;
+    }
 
     // Keep a little context either side so the review screen shows the
     // sentence rather than a fragment.

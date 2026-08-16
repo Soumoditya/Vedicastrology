@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { TOOL_LINKS } from '@/lib/site';
+import { CHECK_FEATURES, TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
 
 /**
@@ -57,7 +57,10 @@ export async function JourneyRail({
   }
 
   const byFeature = new Map(TOOL_LINKS.map((t) => [t.feature, t]));
-  const access = await canUseAll(JOURNEY.filter((f) => f !== current));
+  const access = await canUseAll([
+    ...JOURNEY.filter((f) => f !== current),
+    ...CHECK_FEATURES.filter((f) => f !== current),
+  ]);
 
   const currentIndex = JOURNEY.indexOf(current as (typeof JOURNEY)[number]);
 
@@ -146,6 +149,68 @@ export async function JourneyRail({
           </Link>
         </li>
       </ol>
+
+      {/*
+        The named afflictions, on a second row. They are lookups rather than
+        steps on the path, so numbering them alongside the journey would imply
+        an order that does not exist. Kept visible because these three are what
+        people arrive already worried about.
+      */}
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <span className="text-[0.65rem] uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
+          Specific checks
+        </span>
+        {CHECK_FEATURES.map((feature) => {
+          const tool = byFeature.get(feature);
+          if (!tool) return null;
+
+          const isCurrent = feature === current;
+          const refused = !isCurrent && access[feature] && !access[feature].allowed;
+
+          const label = (
+            <>
+              {tool.label}
+              {refused ? ' · members' : ''}
+            </>
+          );
+
+          return isCurrent || !suffix ? (
+            <span
+              key={feature}
+              aria-current={isCurrent ? 'page' : undefined}
+              className="rounded-full px-2.5 py-1 text-[0.7rem]"
+              style={{
+                background: isCurrent
+                  ? 'color-mix(in oklab, var(--color-gold-500) 12%, transparent)'
+                  : undefined,
+                color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-muted)',
+              }}
+            >
+              {label}
+            </span>
+          ) : (
+            <Link
+              key={feature}
+              href={`${tool.href}?${suffix}`}
+              className="rounded-full border px-2.5 py-1 text-[0.7rem] transition-colors duration-300"
+              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+            >
+              {label}
+            </Link>
+          );
+        })}
+
+        {/* The whole thing, on paper. */}
+        {suffix && (
+          <Link
+            href={`/report?${suffix}`}
+            className="rounded-full border px-2.5 py-1 text-[0.7rem]"
+            style={{ borderColor: 'var(--color-gold-600)', color: 'var(--color-gold-200)' }}
+          >
+            Full report
+          </Link>
+        )}
+      </div>
     </nav>
   );
 }

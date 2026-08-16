@@ -89,4 +89,45 @@ export const TOOL_LINKS = [
     description:
       'Your birth star, its pada, ruling graha and what the classical texts say about it.',
   },
+  {
+    href: '/tools/sade-sati',
+    feature: 'sade_sati',
+    label: 'Sade Sati',
+    sanskrit: 'Sāḍe Sātī',
+    description:
+      "Saturn's seven and a half years over your Moon, every phase dated to the day, with Kantaka and Ashtama Shani.",
+  },
+  {
+    href: '/tools/manglik',
+    feature: 'manglik',
+    label: 'Manglik Check',
+    sanskrit: 'Maṅgala Doṣa',
+    description:
+      'Checked from the ascendant, the Moon and Venus alike, with every cancellation that applies to your chart.',
+  },
+  {
+    href: '/tools/kalsarpa',
+    feature: 'kalsarpa',
+    label: 'Kalsarpa Dosha',
+    sanskrit: 'Kālasarpa',
+    description:
+      'Measured by the real arc from Rahu rather than by house, naming which of the twelve forms it is.',
+  },
+  {
+    href: '/report',
+    feature: 'full_report',
+    label: 'Full Written Report',
+    sanskrit: 'Sampūrṇa Phala',
+    description:
+      'Everything in one document, twenty pages, laid out for print and downloadable in English, Hindi or Bengali.',
+  },
 ] as const;
+
+/**
+ * The three specific afflictions people search for by name.
+ *
+ * Kept apart from the main journey because they are checks rather than steps:
+ * you do not read a chart by going through them in order, you look one up
+ * because somebody has told you that you have it.
+ */
+export const CHECK_FEATURES = ['manglik', 'kalsarpa', 'sade_sati'] as const;

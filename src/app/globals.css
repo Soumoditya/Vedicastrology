@@ -687,6 +687,437 @@ body::after {
 }
 
 /* ==========================================================================
+   The full written report
+
+   One long document at /report, laid out as a run of A4 sheets. It reads on
+   screen as a continuous scroll and prints as around twenty pages, and the
+   same markup does both, so there is no second rendering path to keep in step.
+
+   Two decisions worth stating.
+
+   The two full-bleed pages, the cover and the closing advertisement, keep their
+   artwork and stay dark. Everything between them prints as ink on white. A
+   twenty page document with a photographic background on every sheet is
+   unreadable, drains a cartridge and looks cheap; the same artwork used twice,
+   as a cover and a back, reads as a bound report. `print-color-adjust` forces
+   the browser to keep those two, since printers strip backgrounds by default.
+
+   Sheets are sized in millimetres rather than by aspect ratio, so what is seen
+   on screen is what lands on the page.
+   ========================================================================== */
+.report-page {
+  --sheet-width: 210mm;
+  --sheet-pad: 16mm;
+}
+
+.report-sheet,
+.report-cover-page {
+  width: min(var(--sheet-width), 100%);
+  margin: 0 auto 10mm;
+  padding: var(--sheet-pad);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+
+.report-cover-page {
+  position: relative;
+  min-height: 297mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border: none;
+  background: #060a18;
+  color: #f2e6c8;
+}
+
+.report-cover-art {
+  object-fit: cover;
+  z-index: 0;
+}
+
+.report-cover-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 150mm;
+}
+
+.report-cover-brand {
+  font-size: 0.7rem;
+  letter-spacing: 0.34em;
+  color: #e8c877;
+}
+
+.report-cover-title {
+  margin-top: 0.75rem;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.1;
+  color: #fdf6e4;
+}
+
+.report-cover-sub {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #d8bd82;
+}
+
+/* The framed box on the cover art is empty by design, so the details sit in it. */
+.report-cover-card {
+  margin: 2.5rem auto 0;
+  padding: 1.25rem 1.5rem;
+  max-width: 118mm;
+  text-align: left;
+  border: 1px solid rgb(232 200 119 / 0.45);
+  border-radius: 3px;
+  background: rgb(6 10 24 / 0.45);
+}
+
+.report-cover-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgb(232 200 119 / 0.18);
+}
+
+.report-cover-row:last-child {
+  border-bottom: none;
+}
+
+.report-cover-row span {
+  color: #c9b389;
+}
+
+.report-cover-row strong {
+  font-weight: 500;
+  color: #fdf6e4;
+  text-align: right;
+}
+
+.report-cover-foot {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: #c9b389;
+}
+
+/* A part divider carries no data, so it can be shorter than a full sheet. */
+.report-divider {
+  min-height: 180mm;
+}
+
+.report-divider .report-cover-title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.report-back-shloka {
+  margin-top: 2rem;
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: #e8c877;
+  white-space: pre-line;
+}
+
+.report-back-translation {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #d8bd82;
+}
+
+.report-back-cta {
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #c9b389;
+}
+
+.report-back-url {
+  margin-top: 0.35rem;
+  font-size: 1.25rem;
+  color: #fdf6e4;
+}
+
+.report-back-social {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #e8c877;
+}
+
+.report-sheet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-gold-600);
+}
+
+.report-sheet-head h2 {
+  font-size: 1.5rem;
+  color: var(--color-gold-200);
+}
+
+.report-sheet-head span {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.report-block {
+  margin-bottom: 1.75rem;
+  break-inside: avoid;
+}
+
+.report-block h3 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold-300);
+  margin-bottom: 0.6rem;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.1rem 1.5rem;
+}
+
+.report-cell {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dotted var(--border-subtle);
+  font-size: 0.85rem;
+}
+
+.report-cell dt {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.report-cell dd {
+  margin: 0;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.report-prose {
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.report-meta {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.report-verdict {
+  font-size: 1.35rem;
+  color: var(--color-gold-200);
+  margin-bottom: 0.5rem;
+}
+
+.report-note {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 2px solid var(--color-gold-600);
+  background: color-mix(in oklab, var(--color-gold-500) 6%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.report-list {
+  margin: 0.5rem 0 0.75rem 1.1rem;
+  list-style: disc;
+  font-size: 0.87rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.report-list li {
+  margin-bottom: 0.3rem;
+}
+
+.report-ordered {
+  list-style: decimal;
+}
+
+/* The conduct line sits under its graha rather than running on from it. */
+.report-conduct {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.report-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.report-table td {
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.report-table tr.is-now td {
+  color: var(--color-gold-200);
+  font-weight: 500;
+}
+
+.report-chart-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0 1rem;
+}
+
+.report-chart-wrap img {
+  width: min(100%, 130mm);
+  height: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+}
+
+.report-finding {
+  margin-bottom: 0.9rem;
+  break-inside: avoid;
+}
+
+.report-finding-name {
+  font-size: 0.95rem;
+  color: var(--color-gold-200);
+}
+
+.report-finding-name span {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.report-advice {
+  margin-bottom: 1rem;
+  break-inside: avoid;
+}
+
+.report-advice-area {
+  font-size: 0.9rem;
+  color: var(--color-gold-300);
+  margin-bottom: 0.25rem;
+}
+
+@media print {
+  .report-page {
+    --sheet-pad: 0;
+  }
+
+  /* Each sheet is its own page, with the @page margin doing the spacing. */
+  .report-sheet,
+  .report-cover-page {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    break-after: page;
+  }
+
+  .report-sheet:last-of-type,
+  .report-cover-page:last-of-type {
+    break-after: auto;
+  }
+
+  /*
+    The cover and the back keep their artwork. Bleeding to the paper edge means
+    escaping the @page margin, which is what the negative offsets do.
+  */
+  .report-cover-page {
+    position: relative;
+    min-height: 0;
+    height: 265mm;
+    margin: -16mm -14mm;
+    padding: 16mm 14mm;
+    background: #060a18 !important;
+    color: #f2e6c8 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .report-cover-page * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Dividers are shorter on screen but still take a whole sheet on paper. */
+  .report-divider {
+    height: 265mm;
+  }
+
+  .report-cover-title,
+  .report-cover-row strong,
+  .report-back-url {
+    color: #fdf6e4 !important;
+  }
+
+  .report-cover-brand,
+  .report-cover-sub,
+  .report-cover-foot,
+  .report-cover-row span,
+  .report-back-shloka,
+  .report-back-translation,
+  .report-back-cta,
+  .report-back-social {
+    color: #e8c877 !important;
+  }
+
+  /* A chart must never be split across two sheets. */
+  .report-chart-wrap,
+  .report-block,
+  .report-finding,
+  .report-advice {
+    break-inside: avoid;
+  }
+
+  .report-chart-wrap img {
+    width: 120mm;
+  }
+
+  .report-table {
+    font-size: 8.5pt;
+  }
+
+  .report-prose {
+    font-size: 9.5pt;
+  }
+}
+
+/* ==========================================================================
    Indic scripts
 
    Selected by the document language rather than by a class, so it follows the
