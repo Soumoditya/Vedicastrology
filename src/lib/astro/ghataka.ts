@@ -226,6 +226,17 @@ export interface GhatakaChakra {
   nakshatra: string;
   lagna: string;
   rashi: string;
+  /*
+    The same values as indices, so a page can render them through the
+    translated vocabulary. The English strings above stay for callers that
+    only need to print something, but anything user facing should prefer
+    these: a Hindi report with "Thursday" and "Ardra" in Latin is exactly the
+    half-translated page this work exists to remove.
+  */
+  varaIndex: number;
+  nakshatraIndex: number;
+  lagnaIndex: number;
+  rashiIndex: number;
   note: string;
 }
 
@@ -242,6 +253,10 @@ export function ghatakaChakra(chart: Chart): GhatakaChakra {
     nakshatra: NAKSHATRA_NAMES[g.nakshatra],
     lagna: RASHI_NAMES_EN[g.lagna],
     rashi: RASHI_NAMES_EN[g.rashi],
+    varaIndex: g.vara,
+    nakshatraIndex: g.nakshatra,
+    lagnaIndex: g.lagna,
+    rashiIndex: g.rashi,
     note:
       'Ghataka is a folk layer of the tradition rather than a Parashari one. ' +
       'It is printed here because every panchang prints it and people look ' +

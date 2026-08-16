@@ -23,7 +23,7 @@ import { detectYogas } from '@/lib/astro/yogas';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
 import { advice } from '@/lib/predictions/advice';
 import { remedies } from '@/lib/predictions/remedies';
-import { NAKSHATRA_NAMES, RASHI_LORD, RASHI_NAMES_EN } from '@/lib/astro/constants';
+import { NAKSHATRA_NAMES, RASHI_LORD, RASHI_NAMES_EN, type AnyGraha } from '@/lib/astro/constants';
 import type { BirthData, Chart } from '@/lib/astro/types';
 import type { ChartRenderData } from '@/lib/chart-render/geometry';
 
@@ -70,11 +70,16 @@ export interface FullReport {
   identity: {
     lagnaRashi: number;
     lagnaName: string;
-    lagnaLord: string;
+    /*
+      Lords are typed as grahas, not as strings. The report prints them through
+      the translated vocabulary, which is keyed by graha, and a plain string
+      would let a sign name be passed here and rendered untranslated.
+    */
+    lagnaLord: AnyGraha;
     rasiName: string;
-    rasiLord: string;
+    rasiLord: AnyGraha;
     nakshatraName: string;
-    nakshatraLord: string;
+    nakshatraLord: AnyGraha;
     pada: number;
   };
 

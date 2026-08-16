@@ -4,6 +4,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 
 import { getUser, createClient } from '@/lib/supabase/server';
+import { astroNames, type AstroNames } from './astro-names';
 import { DICTIONARIES } from './dictionary';
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from './locales';
 
@@ -64,3 +65,18 @@ export const getT = cache(async (): Promise<{ t: Translate; locale: Locale }> =>
 
   return { t, locale };
 });
+
+/**
+ * The translator and the astrological vocabulary together.
+ *
+ * Almost every page that needs one needs the other, and fetching them
+ * separately meant resolving the locale twice and, more than once, translating
+ * the chrome while leaving the graha names in English. One call returns both,
+ * so that cannot drift apart.
+ */
+export const getNames = cache(
+  async (): Promise<{ t: Translate; n: AstroNames; locale: Locale }> => {
+    const { t, locale } = await getT();
+    return { t, n: astroNames(locale), locale };
+  },
+);

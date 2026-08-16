@@ -6,10 +6,11 @@ import { buildFullReport } from '@/lib/report/build';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { chartToDataUri } from '@/lib/chart-render/svgString';
 import { sarvaVerdict } from '@/lib/astro/ashtakavarga';
-import { RASHI_NAMES_EN, RASHI_SYMBOLS } from '@/lib/astro/constants';
-import { formatPosition } from '@/lib/astro/zodiac';
+import { RASHI_SYMBOLS } from '@/lib/astro/constants';
+import { formatDms } from '@/lib/astro/zodiac';
 import { SHLOKAS } from '@/lib/shlokas';
 import { SITE } from '@/lib/site';
+import { getNames } from '@/lib/i18n/server';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
 import { PrintButton } from '@/components/chart/PrintButton';
@@ -79,6 +80,10 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
     settings: parsed.settings,
   });
 
+  // Names in the reader's own script. The prose around them is still English
+  // for now; the vocabulary is what fills a page, so it goes first.
+  const { n } = await getNames();
+
   const zone = r.chart.meta.timezone;
   const bt = r.birthTime;
   const p = r.panchang;
@@ -134,7 +139,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
           <Grid>
             <Cell label="Gender" value={genderOf(params)} />
             <Cell label="Date of birth" value={formatBirthDate(r)} />
-            <Cell label="Day of birth" value={p.vara.nameEn} />
+            <Cell label="Day of birth" value={n.vara(p.vara.index)} />
             <Cell label="Time of birth" value={formatBirthTime(r)} />
             <Cell label="Place of birth" value={r.chart.meta.place.name} />
             <Cell label="Latitude" value={`${r.chart.meta.place.latitude.toFixed(4)}°`} />
@@ -166,12 +171,12 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
 
         <Block title="Panchang at birth">
           <Grid>
-            <Cell label="Hindu week day" value={`${p.vara.name} (${p.vara.nameEn})`} />
-            <Cell label="Paksha" value={p.tithi.paksha} />
+            <Cell label="Hindu week day" value={`${p.vara.name} (${n.vara(p.vara.index)})`} />
+            <Cell label="Paksha" value={n.paksha(p.tithi.paksha)} />
             <Cell label="Tithi" value={p.tithi.name} />
             <Cell label="Yoga" value={p.yoga.name} />
             <Cell label="Karan" value={p.karana.name} />
-            <Cell label="Nakshatra" value={`${p.nakshatra.name} (${p.nakshatra.lord})`} />
+            <Cell label="Nakshatra" value={`${p.nakshatra.name} (${n.graha(p.nakshatra.lord)})`} />
           </Grid>
         </Block>
 
@@ -194,16 +199,16 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
 
         <Block title="Natal identity">
           <Grid>
-            <Cell label="Lagna" value={r.identity.lagnaName} />
-            <Cell label="Lagna lord" value={r.identity.lagnaLord} />
-            <Cell label="Rasi" value={r.identity.rasiName} />
-            <Cell label="Rasi lord" value={r.identity.rasiLord} />
-            <Cell label="Nakshatra" value={r.identity.nakshatraName} />
+            <Cell label="Lagna" value={n.rashi(r.identity.lagnaRashi)} />
+            <Cell label="Lagna lord" value={n.graha(r.identity.lagnaLord)} />
+            <Cell label="Rasi" value={n.rashi(r.chart.byGraha.Moon.rashi)} />
+            <Cell label="Rasi lord" value={n.graha(r.identity.rasiLord)} />
+            <Cell label="Nakshatra" value={n.nakshatra(r.chart.byGraha.Moon.nakshatra)} />
             <Cell label="Pada" value={String(r.identity.pada)} />
-            <Cell label="Nakshatra lord" value={r.identity.nakshatraLord} />
+            <Cell label="Nakshatra lord" value={n.graha(r.identity.nakshatraLord)} />
             <Cell
               label="Dasa balance at birth"
-              value={`${r.dasha.balance.lord}: ${r.dasha.balance.years} Years, ${r.dasha.balance.months} Months, ${r.dasha.balance.days} Days`}
+              value={`${n.graha(r.dasha.balance.lord)}: ${r.dasha.balance.years} Years, ${r.dasha.balance.months} Months, ${r.dasha.balance.days} Days`}
             />
           </Grid>
         </Block>
@@ -225,7 +230,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             <Cell label="Deity of the rasi lord" value={r.favourable.deity} />
           </Grid>
           <Note>
-            Every value above is derived from {r.identity.rasiLord}, the lord of
+            Every value above is derived from {n.graha(r.identity.rasiLord)}, the lord of
             your Moon sign, which is the traditional derivation. It is not
             invented per person, and the derivation is given so it can be
             checked.
@@ -236,18 +241,18 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
           <Grid>
             <Cell label="Ghatak month" value={r.ghataka.month} />
             <Cell label="Ghatak tithi" value={r.ghataka.tithi} />
-            <Cell label="Ghatak day" value={r.ghataka.vara} />
-            <Cell label="Ghatak nakshatra" value={r.ghataka.nakshatra} />
-            <Cell label="Ghatak lagna" value={r.ghataka.lagna} />
-            <Cell label="Ghatak rasi" value={r.ghataka.rashi} />
+            <Cell label="Ghatak day" value={n.vara(r.ghataka.varaIndex)} />
+            <Cell label="Ghatak nakshatra" value={n.nakshatra(r.ghataka.nakshatraIndex)} />
+            <Cell label="Ghatak lagna" value={n.rashi(r.ghataka.lagnaIndex)} />
+            <Cell label="Ghatak rasi" value={n.rashi(r.ghataka.rashiIndex)} />
           </Grid>
           <Note>{r.ghataka.note}</Note>
         </Block>
 
         <Block title="Your nakshatra">
           <p className="report-prose">
-            {who} is born under {r.identity.nakshatraName}, pada{' '}
-            {r.identity.pada}, ruled by {r.identity.nakshatraLord}. The nakshatra
+            {who} is born under {n.nakshatra(r.chart.byGraha.Moon.nakshatra)}, pada{' '}
+            {r.identity.pada}, ruled by {n.graha(r.identity.nakshatraLord)}. The nakshatra
             lord is what sets the Vimshottari dasha sequence running, so this one
             graha decides the order in which your whole life unfolds, which is a
             larger claim than it first sounds.
@@ -262,14 +267,14 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
 
         <Block title="Your lagna and rasi">
           <p className="report-prose">
-            The ascendant is {r.identity.lagnaName}, ruled by{' '}
-            {r.identity.lagnaLord}. The ascendant is the body and the temperament,
+            The ascendant is {n.rashi(r.identity.lagnaRashi)}, ruled by{' '}
+            {n.graha(r.identity.lagnaLord)}. The ascendant is the body and the temperament,
             and its lord is the graha whose condition matters most in the whole
             chart: whatever else a chart contains, a strong lagna lord carries it
             and a weak one struggles under it.
           </p>
           <p className="report-prose">
-            The Moon is in {r.identity.rasiName}, ruled by {r.identity.rasiLord}.
+            The Moon is in {n.rashi(r.chart.byGraha.Moon.rashi)}, ruled by {n.graha(r.identity.rasiLord)}.
             Where the ascendant is the body, the Moon is the mind. In Indian
             practice the Moon sign is the one used for daily prediction and for
             matching, which is why a person is often given a different sign here
@@ -304,11 +309,11 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
                 <tbody>
                   {r.chart.planets.map((planet) => (
                     <tr key={planet.graha}>
-                      <td>{planet.graha}</td>
-                      <td>{RASHI_NAMES_EN[planet.rashi]}</td>
-                      <td className="tabular-nums">{formatPosition(planet.longitude)}</td>
+                      <td>{n.graha(planet.graha)}</td>
+                      <td>{n.rashi(planet.rashi)}</td>
+                      <td className="tabular-nums">{formatDms(planet.degreeInRashi)}</td>
                       <td className="tabular-nums">{planet.house}</td>
-                      <td>{planet.dignity.replace(/_/g, ' ')}</td>
+                      <td>{n.dignity(planet.dignity)}</td>
                       <td>
                         {[planet.retrograde && 'retrograde', planet.combust && 'combust']
                           .filter(Boolean)
@@ -424,7 +429,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
 
         <Block title="Balance at birth">
           <p className="report-prose">
-            {r.dasha.balance.lord}: {r.dasha.balance.years} Years,{' '}
+            {n.graha(r.dasha.balance.lord)}: {r.dasha.balance.years} Years,{' '}
             {r.dasha.balance.months} Months, {r.dasha.balance.days} Days
             remaining at the moment of birth. The sequence then runs in the fixed
             Vimshottari order for a hundred and twenty years.
@@ -447,7 +452,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
                 return (
                   <tr key={`${d.lord}-${d.start.toISOString()}`} className={running ? 'is-now' : ''}>
                     <td>
-                      {d.lord}
+                      {n.graha(d.lord)}
                       {running ? ' (running)' : ''}
                     </td>
                     <td className="tabular-nums">{DateTime.fromJSDate(d.start).toFormat('d LLL yyyy')}</td>
@@ -506,8 +511,8 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             <tbody>
               {r.transits.map((t) => (
                 <tr key={t.graha}>
-                  <td>{t.graha}</td>
-                  <td>{RASHI_NAMES_EN[t.rashi]}</td>
+                  <td>{n.graha(t.graha)}</td>
+                  <td>{n.rashi(t.rashi)}</td>
                   <td className="tabular-nums">{t.houseFromAscendant}</td>
                   <td className="tabular-nums">{t.houseFromMoon}</td>
                   <td>{t.retrograde ? 'retrograde' : '—'}</td>
@@ -528,7 +533,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
               This phase runs from{' '}
               {DateTime.fromJSDate(r.sadeSati.currentPhase.start).toFormat('d LLLL yyyy')} to{' '}
               {DateTime.fromJSDate(r.sadeSati.currentPhase.end).toFormat('d LLLL yyyy')}, with
-              Saturn in {RASHI_NAMES_EN[r.sadeSati.currentPhase.rashi]}.
+              {n.graha('Saturn')} in {n.rashi(r.sadeSati.currentPhase.rashi)}.
             </p>
           )}
           <p className="report-prose">
@@ -550,7 +555,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             <thead>
               <tr>
                 {RASHI_SYMBOLS.map((symbol, rashi) => (
-                  <th key={rashi} title={RASHI_NAMES_EN[rashi]}>
+                  <th key={rashi} title={n.rashi(rashi)}>
                     {symbol}
                   </th>
                 ))}
@@ -585,10 +590,10 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
           const own = r.remedies.remedies.filter((rem) => rem.graha === planet.graha);
 
           return (
-            <Block key={planet.graha} title={planet.graha}>
+            <Block key={planet.graha} title={n.graha(planet.graha)}>
               <p className="report-meta">
-                {RASHI_NAMES_EN[planet.rashi]} · {formatPosition(planet.longitude)} ·{' '}
-                house {planet.house} · {planet.dignity.replace(/_/g, ' ')}
+                {n.rashi(planet.rashi)} {formatDms(planet.degreeInRashi)} ·{' '}
+                house {planet.house} · {n.dignity(planet.dignity)}
                 {planet.retrograde ? ' · retrograde' : ''}
                 {planet.combust ? ' · combust' : ''}
               </p>
@@ -606,7 +611,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
                 </>
               ) : (
                 <p className="report-prose">
-                  {planet.graha} is in reasonable condition in this chart and
+                  {n.graha(planet.graha)} is in reasonable condition in this chart and
                   needs no particular support. A remedy for a graha that is
                   already working is effort spent where it changes nothing.
                 </p>
@@ -648,7 +653,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
                   );
                   return (
                     <li key={graha}>
-                      <strong>{graha}</strong>
+                      <strong>{n.graha(graha)}</strong>
                       {' · '}
                       {reasons[0]}
                       {conduct && <span className="report-conduct">{conduct.action}</span>}
@@ -681,8 +686,8 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
           </p>
           <p className="report-meta">{r.advice.religious.derivation}</p>
           <Grid>
-            <Cell label="Atmakaraka" value={r.advice.religious.atmakaraka} />
-            <Cell label="Ishta graha" value={r.advice.religious.ishtaGraha} />
+            <Cell label="Atmakaraka" value={n.graha(r.advice.religious.atmakaraka)} />
+            <Cell label="Ishta graha" value={n.graha(r.advice.religious.ishtaGraha)} />
             <Cell label="Fasting day" value={r.advice.religious.fastingDay} />
             <Cell label="Direction" value={r.advice.religious.direction} />
             <Cell label="Charity" value={r.advice.religious.charity} />
