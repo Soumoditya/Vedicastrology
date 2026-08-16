@@ -1,0 +1,1178 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Vedic Astrologey, design system
+
+   The look is a night sky seen through gold leaf on lacquer. Two rules keep it
+   from drifting into the flat, washed out register that reads as generated:
+
+     1. Contrast is committed. Text is near white on near black, not grey on
+        grey. Gold is saturated pigment, not a tint.
+     2. Nothing is flat. Every surface carries grain, a gradient, or a light
+        source. Depth comes from layering, never from a drop shadow alone.
+   ========================================================================== */
+
+@theme {
+  /* -- Ink. A blue black lacquer, not neutral grey. --------------------- */
+  --color-ink-1000: #000106;
+  --color-ink-950: #04050f;
+  --color-ink-900: #080a18;
+  --color-ink-850: #0c0f22;
+  --color-ink-800: #12162e;
+  --color-ink-700: #1a1f3d;
+  --color-ink-600: #262d55;
+  --color-ink-500: #363f70;
+
+  /* -- Gold. Real pigment: warm, saturated, with a bright leaf highlight. */
+  --color-gold-50: #fffaea;
+  --color-gold-100: #fdf0c4;
+  --color-gold-200: #f8e199;
+  --color-gold-300: #f0cb63;
+  --color-gold-400: #e3b23c;
+  --color-gold-500: #d19a1c;
+  --color-gold-600: #ad7c12;
+  --color-gold-700: #855d0e;
+  --color-gold-800: #5c400b;
+
+  /* -- Vermilion. The sindoor red of temple pigment. Used sparingly, and
+        only where something is genuinely urgent or auspicious. ---------- */
+  --color-vermilion-300: #f08a6a;
+  --color-vermilion-400: #e5643c;
+  --color-vermilion-500: #d1441f;
+  --color-vermilion-600: #a83417;
+
+  /* -- Parchment, for reading surfaces and light mode. ------------------
+        Dimmed and warmed from the near-white it was. A bright white ground
+        glares and reads as an unfinished default; aged paper reads as a chosen
+        surface. The base is now a warm ivory, not paper-white. --------- */
+  --color-parchment-50: #f3ead6;
+  --color-parchment-100: #ece0c6;
+  --color-parchment-200: #e0d1b2;
+  --color-parchment-300: #cdbb95;
+  --color-parchment-400: #b6a179;
+
+  /* -- Chart semantics. Tuned to stay legible on both grounds. ---------- */
+  --color-benefic: #4fc79a;
+  --color-malefic: #f2705f;
+  --color-graha-neutral: #a9b4e0;
+
+  /* -- Type ------------------------------------------------------------- */
+  --font-display: var(--font-marcellus), 'Iowan Old Style', Georgia, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-quote: var(--font-cormorant), Georgia, serif;
+
+  /* -- Motion. One family of curves, so movement feels like one hand. --- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   Surfaces
+   ========================================================================== */
+
+:root {
+  --surface: var(--color-ink-950);
+  --surface-raised: var(--color-ink-850);
+  --surface-sunken: var(--color-ink-1000);
+
+  --border-subtle: color-mix(in oklab, var(--color-gold-500) 20%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-gold-400) 48%, transparent);
+
+  /* Committed contrast. Primary sits at roughly 16:1 on the base. */
+  --text-primary: #f4f0e6;
+  --text-secondary: #c3bcab;
+  --text-muted: #8b8371;
+
+  --grain-opacity: 0.05;
+  --glow: color-mix(in oklab, var(--color-gold-400) 30%, transparent);
+
+  color-scheme: dark;
+}
+
+/*
+  Light mode is a distinct instrument, not the dark palette lightened.
+  The gold has to darken substantially or it disappears on parchment, which is
+  exactly what happened to the hero yantra before.
+*/
+[data-theme='light'] {
+  --surface: var(--color-parchment-50);
+  /* Raised is a shade lighter than the ground, not stark white, so a card
+     lifts off the page without punching a bright hole in it. */
+  --surface-raised: #f8f1e2;
+  --surface-sunken: var(--color-parchment-100);
+
+  --border-subtle: color-mix(in oklab, var(--color-gold-800) 32%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-gold-800) 62%, transparent);
+
+  --text-primary: #1a1408;
+  --text-secondary: #463d2c;
+  --text-muted: #786c56;
+
+  /* A touch more grain on paper than on lacquer, so the surface has tooth. */
+  --grain-opacity: 0.05;
+  --glow: color-mix(in oklab, var(--color-gold-700) 26%, transparent);
+
+  /* Gold is remapped so any component using a gold token stays visible.
+     Without this, pale leaf tones vanish against parchment. */
+  --color-gold-100: #7a5a10;
+  --color-gold-200: #6d500e;
+  --color-gold-300: #8a660f;
+  --color-gold-400: #a37913;
+  --color-gold-500: #b8880f;
+  --color-gold-600: #96700d;
+
+  --color-benefic: #1a7d58;
+  --color-malefic: #b83a28;
+  --color-graha-neutral: #4a5480;
+
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+/*
+  Film grain over the whole page.
+
+  This is the single cheapest thing that stops a dark site looking like flat
+  vector fill. It is an inline SVG turbulence so there is no image request, it
+  never scrolls, and it ignores pointer events entirely.
+*/
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-gold-500) 35%, transparent);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+@utility font-quote {
+  font-family: var(--font-quote);
+}
+
+/* Small tracked caps. The counterweight to very large display type. */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--color-gold-400);
+  font-weight: 500;
+}
+
+@utility text-gold-leaf {
+  background: linear-gradient(
+    118deg,
+    var(--color-gold-100) 0%,
+    var(--color-gold-400) 38%,
+    var(--color-gold-200) 55%,
+    var(--color-gold-500) 78%,
+    var(--color-gold-300) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@utility rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-600) 18%,
+    var(--color-gold-300) 50%,
+    var(--color-gold-600) 82%,
+    transparent
+  );
+  opacity: 0.6;
+}
+
+/*
+  Card surface. Carries a light source from the top left and a hairline
+  highlight along its top edge, so it reads as a lit object rather than a
+  rectangle of fill.
+*/
+@utility surface-card {
+  position: relative;
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      color-mix(in oklab, var(--color-gold-500) 7%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      175deg,
+      color-mix(in oklab, var(--surface-raised) 88%, var(--color-ink-700) 12%),
+      var(--surface-raised)
+    );
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.875rem;
+}
+
+/* ==========================================================================
+   Ambient layers
+   ========================================================================== */
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.4px 1.4px at 20% 30%, rgba(255, 246, 224, 0.9), transparent),
+    radial-gradient(1px 1px at 75% 15%, rgba(255, 246, 224, 0.6), transparent),
+    radial-gradient(1.8px 1.8px at 45% 65%, rgba(255, 246, 224, 0.75), transparent),
+    radial-gradient(1px 1px at 88% 78%, rgba(255, 246, 224, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 12% 85%, rgba(255, 246, 224, 0.65), transparent),
+    radial-gradient(1.6px 1.6px at 62% 42%, rgba(255, 246, 224, 0.5), transparent),
+    radial-gradient(1px 1px at 33% 8%, rgba(255, 246, 224, 0.7), transparent),
+    radial-gradient(1px 1px at 95% 45%, rgba(255, 246, 224, 0.45), transparent),
+    radial-gradient(1.3px 1.3px at 8% 55%, rgba(255, 246, 224, 0.5), transparent),
+    radial-gradient(1px 1px at 55% 90%, rgba(255, 246, 224, 0.4), transparent),
+    radial-gradient(1px 1px at 70% 62%, rgba(255, 246, 224, 0.35), transparent),
+    radial-gradient(1.5px 1.5px at 28% 48%, rgba(255, 246, 224, 0.55), transparent);
+  opacity: 0.7;
+}
+
+[data-theme='light'] .starfield {
+  display: none;
+}
+
+/* A few stars breathe, at different rates, so the sky is never quite still. */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.35; }
+}
+
+.starfield-slow {
+  animation: twinkle 7s var(--ease-in-out-soft) infinite;
+}
+
+/* ==========================================================================
+   Ornament
+
+   Traditional marks used as engraved accents rather than illustrations. The
+   watermark sits a long way back, at a whisper of opacity, so a page has a
+   ground of craft behind the type without anything competing with it.
+   ========================================================================== */
+
+.ornament-watermark {
+  position: absolute;
+  pointer-events: none;
+  color: var(--color-gold-500);
+  opacity: 0.05;
+  z-index: -1;
+}
+
+[data-theme='light'] .ornament-watermark {
+  opacity: 0.08;
+}
+
+/*
+  The ink draw. An ornament's strokes trace themselves in on first view, the
+  way a line is laid down by hand, then hold still. Applied by adding the class;
+  the reveal system adds `.in` when it scrolls into view.
+*/
+@keyframes ornament-draw {
+  from {
+    stroke-dashoffset: var(--draw-length, 400);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.reveal-ready .ink-draw [stroke] {
+  stroke-dasharray: var(--draw-length, 400);
+  stroke-dashoffset: var(--draw-length, 400);
+}
+
+.reveal-ready .ink-draw.in [stroke] {
+  animation: ornament-draw 2s var(--ease-out-expo) forwards;
+}
+
+/*
+  Lift. A card or link rises a hair and warms its border on hover, on a soft
+  curve, so interaction feels like a considered object responding rather than a
+  state flipping. Kept small on purpose.
+*/
+@utility lift {
+  transition:
+    transform 0.5s var(--ease-out-soft),
+    border-color 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
+}
+
+.lift:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: 0 22px 48px -30px color-mix(in oklab, var(--color-gold-500) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift:hover {
+    transform: none;
+  }
+  .reveal-ready .ink-draw.in [stroke] {
+    animation: none;
+  }
+  .reveal-ready .ink-draw [stroke] {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes aura {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.06); }
+}
+
+.aura {
+  animation: aura 11s var(--ease-in-out-soft) infinite;
+}
+
+/* ==========================================================================
+   Entrance motion
+
+   Applied by an intersection observer that adds `.in` when an element first
+   enters view. Elements start visible and are hidden only once the observer
+   has confirmed it is running, so nothing can be stranded invisible if
+   JavaScript fails.
+   ========================================================================== */
+
+[data-reveal] {
+  opacity: 1;
+}
+
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-ready [data-reveal='left'] {
+  transform: translateX(-26px);
+}
+
+.reveal-ready [data-reveal='scale'] {
+  transform: scale(0.96);
+}
+
+.reveal-ready [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes draw-stroke {
+  from { stroke-dashoffset: var(--dash-length, 1000); }
+  to { stroke-dashoffset: 0; }
+}
+
+.draw-stroke {
+  stroke-dasharray: var(--dash-length, 1000);
+  animation: draw-stroke 1.6s var(--ease-out-expo) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Long form reading
+   ========================================================================== */
+
+.prose-vedic {
+  color: var(--text-primary);
+  font-size: 1.09375rem;
+  line-height: 1.78;
+}
+
+.prose-vedic h2 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 1.22;
+  margin: 2.75rem 0 0.875rem;
+  color: var(--color-gold-200);
+}
+
+.prose-vedic h3 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  margin: 2rem 0 0.625rem;
+  color: var(--color-gold-300);
+}
+
+.prose-vedic p { margin: 0 0 1.15rem; }
+
+.prose-vedic a {
+  color: var(--color-gold-300);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.prose-vedic blockquote {
+  font-family: var(--font-quote);
+  font-size: 1.4375rem;
+  font-style: italic;
+  border-left: 2px solid var(--color-gold-500);
+  padding-left: 1.25rem;
+  margin: 1.85rem 0;
+  color: var(--text-secondary);
+}
+
+.prose-vedic ul,
+.prose-vedic ol { margin: 0 0 1.15rem 1.25rem; }
+
+.prose-vedic li { margin-bottom: 0.5rem; }
+
+.prose-vedic ul li {
+  list-style: none;
+  position: relative;
+}
+
+.prose-vedic ul li::before {
+  content: '◆';
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-gold-500);
+  font-size: 0.6em;
+  top: 0.5em;
+}
+
+.prose-vedic ol { list-style: decimal; }
+
+/* ==========================================================================
+   Print
+
+   A chart report is something people keep, and the browser already has a
+   perfectly good PDF engine. A print stylesheet gets a properly typeset report
+   with no new dependency, no second rendering path for the chart SVG and
+   nothing running on a server.
+
+   Everything atmospheric comes off: the site is deliberately dark, and dark
+   backgrounds print as either a solid black page or nothing at all depending on
+   the printer, so the palette is remapped to ink on paper regardless of theme.
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  :root,
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    --surface-sunken: #ffffff;
+    --text-primary: #16130c;
+    --text-secondary: #3a342a;
+    --text-muted: #6b6355;
+    --border-subtle: #d8d2c4;
+    --border-strong: #b8b0a0;
+    /* The gold scale has to survive on white, so it drops to the dark end. */
+    --color-gold-100: #4a3a10;
+    --color-gold-200: #5b4712;
+    --color-gold-300: #6d5615;
+    --color-gold-400: #7d6218;
+    --color-gold-500: #8c6e1b;
+    --color-gold-600: #9c7b1e;
+    --color-benefic: #1f5c33;
+    --color-malefic: #8c2020;
+    --color-graha-neutral: #3a342a;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #16130c !important;
+  }
+
+  /* Atmosphere, none of which belongs on paper. */
+  body::before,
+  body::after,
+  .starfield,
+  .aura,
+  [aria-hidden='true'] .starfield {
+    display: none !important;
+  }
+
+  /*
+    Navigation, forms and anything interactive. A printed page cannot be
+    clicked, so a row of buttons is just clutter.
+
+    Targeted by class, not by tag. Hiding every `header` also hid each page's
+    own, which is exactly where a report's name, date and birthplace sit, so the
+    first printed chart came out with nothing identifying it.
+  */
+  .site-header,
+  .site-footer,
+  .site-header nav,
+  form,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Nothing may stay hidden on paper. The reveal animation is scroll driven and
+     printing does not scroll, so without this a report would come out with
+     blank sections, which is the same bug in a different medium. */
+  .reveal-ready [data-reveal],
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .draw-stroke {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  /* Cards become ruled blocks rather than lit surfaces. */
+  .surface-card {
+    background: #ffffff !important;
+    border: 1px solid #d8d2c4 !important;
+    border-radius: 4px;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .text-gold-leaf {
+    background: none !important;
+    -webkit-text-fill-color: #5b4712 !important;
+    color: #5b4712 !important;
+  }
+
+  /* Keep a heading with what follows it, and never split a table row. */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  tr,
+  li,
+  section {
+    break-inside: avoid;
+  }
+
+  .print-break {
+    break-before: page;
+  }
+
+  /* Wide tables scroll on screen. On paper there is nowhere to scroll, so they
+     have to fit. */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 9pt;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+
+  /*
+    Report chrome. Shown only on paper, so the screen never carries a redundant
+    cover or footer. This is what turns a printed page into a report a person
+    keeps and passes on, which is the "advertisement" the report is meant to be.
+  */
+  .print-only {
+    display: block !important;
+  }
+
+  .report-cover {
+    text-align: center;
+    padding-top: 4mm;
+    padding-bottom: 6mm;
+    margin-bottom: 8mm;
+    border-bottom: 1px solid #cdbb95;
+    break-after: avoid;
+  }
+
+  /*
+    The advertisement band, fixed to the foot of every printed page. Chrome
+    repeats a fixed element per page, so the site's name, address and handle
+    ride along on every sheet without being placed by hand.
+  */
+  .report-ad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3mm 0 0;
+    border-top: 1px solid #cdbb95;
+    font-size: 8pt;
+    color: #6b6355;
+  }
+
+  /* Reserve room so the band never lands on top of the last lines. */
+  .report-body {
+    padding-bottom: 14mm;
+  }
+}
+
+/* Off paper, the report-only parts do not exist. */
+.print-only {
+  display: none;
+}
+
+/* ==========================================================================
+   The full written report
+
+   One long document at /report, laid out as a run of A4 sheets. It reads on
+   screen as a continuous scroll and prints as around twenty pages, and the
+   same markup does both, so there is no second rendering path to keep in step.
+
+   Two decisions worth stating.
+
+   The two full-bleed pages, the cover and the closing advertisement, keep their
+   artwork and stay dark. Everything between them prints as ink on white. A
+   twenty page document with a photographic background on every sheet is
+   unreadable, drains a cartridge and looks cheap; the same artwork used twice,
+   as a cover and a back, reads as a bound report. `print-color-adjust` forces
+   the browser to keep those two, since printers strip backgrounds by default.
+
+   Sheets are sized in millimetres rather than by aspect ratio, so what is seen
+   on screen is what lands on the page.
+   ========================================================================== */
+.report-page {
+  --sheet-width: 210mm;
+  --sheet-pad: 16mm;
+}
+
+.report-sheet,
+.report-cover-page {
+  width: min(var(--sheet-width), 100%);
+  margin: 0 auto 10mm;
+  padding: var(--sheet-pad);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+
+.report-cover-page {
+  position: relative;
+  min-height: 297mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border: none;
+  background: #060a18;
+  color: #f2e6c8;
+}
+
+.report-cover-art {
+  object-fit: cover;
+  z-index: 0;
+}
+
+.report-cover-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 150mm;
+}
+
+.report-cover-brand {
+  font-size: 0.7rem;
+  letter-spacing: 0.34em;
+  color: #e8c877;
+}
+
+.report-cover-title {
+  margin-top: 0.75rem;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.1;
+  color: #fdf6e4;
+}
+
+.report-cover-sub {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #d8bd82;
+}
+
+/* The framed box on the cover art is empty by design, so the details sit in it. */
+.report-cover-card {
+  margin: 2.5rem auto 0;
+  padding: 1.25rem 1.5rem;
+  max-width: 118mm;
+  text-align: left;
+  border: 1px solid rgb(232 200 119 / 0.45);
+  border-radius: 3px;
+  background: rgb(6 10 24 / 0.45);
+}
+
+.report-cover-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgb(232 200 119 / 0.18);
+}
+
+.report-cover-row:last-child {
+  border-bottom: none;
+}
+
+.report-cover-row span {
+  color: #c9b389;
+}
+
+.report-cover-row strong {
+  font-weight: 500;
+  color: #fdf6e4;
+  text-align: right;
+}
+
+.report-cover-foot {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: #c9b389;
+}
+
+/* A part divider carries no data, so it can be shorter than a full sheet. */
+.report-divider {
+  min-height: 180mm;
+}
+
+.report-divider .report-cover-title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.report-back-shloka {
+  margin-top: 2rem;
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: #e8c877;
+  white-space: pre-line;
+}
+
+.report-back-translation {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #d8bd82;
+}
+
+.report-back-cta {
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #c9b389;
+}
+
+.report-back-url {
+  margin-top: 0.35rem;
+  font-size: 1.25rem;
+  color: #fdf6e4;
+}
+
+.report-back-social {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #e8c877;
+}
+
+.report-sheet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-gold-600);
+}
+
+.report-sheet-head h2 {
+  font-size: 1.5rem;
+  color: var(--color-gold-200);
+}
+
+.report-sheet-head span {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.report-block {
+  margin-bottom: 1.75rem;
+  break-inside: avoid;
+}
+
+.report-block h3 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold-300);
+  margin-bottom: 0.6rem;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.1rem 1.5rem;
+}
+
+.report-cell {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dotted var(--border-subtle);
+  font-size: 0.85rem;
+}
+
+.report-cell dt {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.report-cell dd {
+  margin: 0;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.report-prose {
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.report-meta {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.report-verdict {
+  font-size: 1.35rem;
+  color: var(--color-gold-200);
+  margin-bottom: 0.5rem;
+}
+
+.report-note {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 2px solid var(--color-gold-600);
+  background: color-mix(in oklab, var(--color-gold-500) 6%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.report-list {
+  margin: 0.5rem 0 0.75rem 1.1rem;
+  list-style: disc;
+  font-size: 0.87rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.report-list li {
+  margin-bottom: 0.3rem;
+}
+
+.report-ordered {
+  list-style: decimal;
+}
+
+/* The conduct line sits under its graha rather than running on from it. */
+.report-conduct {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.report-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.report-table td {
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.report-table tr.is-now td {
+  color: var(--color-gold-200);
+  font-weight: 500;
+}
+
+.report-chart-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0 1rem;
+}
+
+.report-chart-wrap img {
+  width: min(100%, 130mm);
+  height: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+}
+
+.report-finding {
+  margin-bottom: 0.9rem;
+  break-inside: avoid;
+}
+
+.report-finding-name {
+  font-size: 0.95rem;
+  color: var(--color-gold-200);
+}
+
+.report-finding-name span {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.report-advice {
+  margin-bottom: 1rem;
+  break-inside: avoid;
+}
+
+.report-advice-area {
+  font-size: 0.9rem;
+  color: var(--color-gold-300);
+  margin-bottom: 0.25rem;
+}
+
+@media print {
+  .report-page {
+    --sheet-pad: 0;
+  }
+
+  /* Each sheet is its own page, with the @page margin doing the spacing. */
+  .report-sheet,
+  .report-cover-page {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    break-after: page;
+  }
+
+  .report-sheet:last-of-type,
+  .report-cover-page:last-of-type {
+    break-after: auto;
+  }
+
+  /*
+    The cover and the back keep their artwork. Bleeding to the paper edge means
+    escaping the @page margin, which is what the negative offsets do.
+  */
+  .report-cover-page {
+    position: relative;
+    min-height: 0;
+    height: 265mm;
+    margin: -16mm -14mm;
+    padding: 16mm 14mm;
+    background: #060a18 !important;
+    color: #f2e6c8 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .report-cover-page * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Dividers are shorter on screen but still take a whole sheet on paper. */
+  .report-divider {
+    height: 265mm;
+  }
+
+  .report-cover-title,
+  .report-cover-row strong,
+  .report-back-url {
+    color: #fdf6e4 !important;
+  }
+
+  .report-cover-brand,
+  .report-cover-sub,
+  .report-cover-foot,
+  .report-cover-row span,
+  .report-back-shloka,
+  .report-back-translation,
+  .report-back-cta,
+  .report-back-social {
+    color: #e8c877 !important;
+  }
+
+  /* A chart must never be split across two sheets. */
+  .report-chart-wrap,
+  .report-block,
+  .report-finding,
+  .report-advice {
+    break-inside: avoid;
+  }
+
+  .report-chart-wrap img {
+    width: 120mm;
+  }
+
+  .report-table {
+    font-size: 8.5pt;
+  }
+
+  .report-prose {
+    font-size: 9.5pt;
+  }
+}
+
+/* ==========================================================================
+   Indic scripts
+
+   Selected by the document language rather than by a class, so it follows the
+   `lang` attribute the layout already sets and applies to everything including
+   text this stylesheet has never heard of.
+
+   The display face is Latin only, so headings in Hindi or Bengali fall back to
+   the same Noto face as the body. A Roman capital face has nothing to say about
+   Devanagari, and pairing it badly looks worse than not pairing it at all.
+   ========================================================================== */
+:root:lang(hi) body,
+:root:lang(hi) .font-display,
+:root:lang(hi) .font-quote {
+  font-family: var(--font-devanagari), var(--font-inter), system-ui, sans-serif;
+}
+
+:root:lang(bn) body,
+:root:lang(bn) .font-display,
+:root:lang(bn) .font-quote {
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+}
+
+/*
+  Both scripts carry ascenders and descenders that Latin does not, and Bengali
+  hangs from a headline rather than sitting on a baseline. Tight leading set for
+  Latin display type clips them, so it is loosened, and the letter-spacing used
+  on small Latin caps is removed entirely: Devanagari and Bengali are joined
+  scripts and tracking them apart breaks the conjuncts.
+*/
+:root:lang(hi) .font-display,
+:root:lang(bn) .font-display {
+  line-height: 1.35;
+}
+
+/*
+  No letter-spacing, anywhere, in either script.
+
+  Devanagari and Bengali are joined scripts: tracking the letters apart splits
+  conjuncts and renders words as loose fragments. Latin small caps want the
+  tracking, so it is set generously throughout, and every one of those has to be
+  undone here. Targeting the utility classes as well as the named ones, because
+  the tracking is applied both ways across the site and missing either leaves
+  broken text on some pages only.
+*/
+:root:lang(hi) .eyebrow,
+:root:lang(bn) .eyebrow,
+:root:lang(hi) [class*='tracking-'],
+:root:lang(bn) [class*='tracking-'],
+:root:lang(hi) [class*='uppercase'],
+:root:lang(bn) [class*='uppercase'] {
+  letter-spacing: normal !important;
+  text-transform: none;
+}
+
+:root:lang(hi) .eyebrow,
+:root:lang(bn) .eyebrow {
+  font-size: 0.8125rem;
+}

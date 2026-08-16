@@ -1,0 +1,456 @@
+import type { Locale } from './locales';
+
+/**
+ * The interface dictionary.
+ *
+ * Flat keys, grouped by area with a dotted prefix, because a nested object
+ * looks tidier and is worse to work with: a missing branch throws instead of
+ * falling back, and comparing three languages side by side is harder.
+ *
+ * English is the source of truth. `hi` and `bn` may be incomplete without
+ * breaking anything, since a missing key falls back to English rather than
+ * rendering blank.
+ */
+
+export type Dictionary = Record<string, string>;
+
+const en: Dictionary = {
+  // Tool names and descriptions, keyed by feature so a page needs no mapping.
+  'tool.kundli.label': 'Birth Chart',
+  'tool.panchang.label': 'Panchang',
+  'tool.dasha.label': 'Dasha Periods',
+  'tool.transits.label': 'Transits',
+  'tool.matching.label': 'Compatibility',
+  'tool.yogas.label': 'Yogas and Doshas',
+  'tool.remedies.label': 'Remedies',
+  'tool.nakshatra.label': 'Nakshatra Finder',
+
+  'tool.kundli.description':
+    'Your complete Vedic chart with houses, nakshatras, dignities and all sixteen divisional charts.',
+  'tool.panchang.description':
+    'Today’s tithi, nakshatra, yoga and karana with true sunrise, Rahu Kaal and auspicious windows.',
+  'tool.dasha.description':
+    'Your planetary periods to four levels, with the exact dates each one begins and ends.',
+  'tool.transits.description':
+    'Where the grahas are now relative to your chart, including Sade Sati and its phases.',
+  'tool.matching.description':
+    'Ashtakoot matching across all eight koots, with Mangal dosha and its cancellations.',
+  'tool.yogas.description':
+    'Every combination your chart forms with the reason it was found, plus Manglik, Kalsarpa and Ashtakavarga.',
+  'tool.remedies.description':
+    'The traditional measures for whichever grahas your chart shows as needing support, with an honest note on gemstones.',
+  'tool.nakshatra.description':
+    'Your birth star, its pada, ruling graha and what the classical texts say about it.',
+
+
+  // Navigation and chrome
+  'nav.tools': 'Free Tools',
+  'nav.services': 'Consultations',
+  'nav.journal': 'Journal',
+  'nav.about': 'About',
+  'nav.book': 'Book a reading',
+  'nav.signIn': 'Sign in',
+  'nav.signInLong': 'Sign in or create an account',
+  'nav.charts': 'Your charts',
+  'nav.settings': 'Settings',
+  'nav.admin': 'Admin panel',
+  'nav.signOut': 'Sign out',
+  'nav.account': 'Your account',
+  'nav.menuOpen': 'Open menu',
+  'nav.menuClose': 'Close menu',
+
+  // Tools index
+  'tools.eyebrow': 'Free tools',
+  'tools.heading': 'Study your own chart',
+  'tools.intro':
+    'These run the same calculations I use in a paid reading. They are free ' +
+    'because a chart you can check for yourself is worth more than one you are ' +
+    'asked to take on trust. Nothing here needs an account.',
+  'tools.open': 'Open',
+  'tools.membersBadge': 'Members',
+  'tools.accountBadge': 'Account',
+
+  // Shared chart wording
+  'chart.sameChartElsewhere': 'Same chart, elsewhere',
+  'chart.savedChart': 'Your saved chart',
+  'chart.savedCharts': 'Your saved charts',
+  'chart.orEnterDetails': 'Or enter different details below.',
+  'chart.downloadPdf': 'Download as PDF',
+  'chart.anotherChart': 'Another chart',
+  'chart.northIndian': 'North',
+  'chart.southIndian': 'South',
+  'chart.chartStyle': 'Chart style',
+  'chart.ascendant': 'Ascendant',
+  'chart.moonSign': 'Moon sign',
+  'chart.nakshatra': 'Nakshatra',
+  'chart.currentDasha': 'Current dasha',
+  'chart.house': 'House',
+  'chart.sign': 'Sign',
+  'chart.lord': 'Lord',
+  'chart.occupiedBy': 'Occupied by',
+  'chart.aspectedBy': 'Aspected by',
+  'chart.none': 'None',
+  'chart.retrograde': 'Retrograde, moving backward',
+  'chart.benefic': 'Benefic for this chart',
+  'chart.malefic': 'Malefic for this chart',
+  'chart.neutral': 'Neutral',
+
+  // Birth form
+  'form.name': 'Name',
+  'form.optional': 'Optional',
+  'form.whoseChart': 'Whose chart is this?',
+  'form.dateOfBirth': 'Date of birth',
+  'form.timeOfBirth': 'Time of birth',
+  'form.clock24': '24-hour clock',
+  'form.timeUnknown': 'I don’t know the time of birth',
+  'form.timeUnknownNote':
+    'The chart is still cast, but the ascendant, houses and dasha dates cannot ' +
+    'be relied on, everything affected is marked.',
+  'form.placeOfBirth': 'Place of birth',
+  'form.placeHint': 'Start typing a city',
+  'form.cityOfBirth': 'City of birth',
+  'form.submitChart': 'Cast the chart',
+  'form.required': 'Please fill this in.',
+
+  // Yogas
+  'yogas.eyebrow': 'Yoga, Doṣa, Aṣṭakavarga',
+  'yogas.whatForms': 'What forms',
+  'yogas.mangalDosha': 'Mangal doṣa',
+  'yogas.otherAfflictions': 'Other afflictions',
+  'yogas.kalasarpa': 'Kālasarpa',
+  'yogas.ashtakavarga': 'Aṣṭakavarga',
+  'yogas.strongest': 'Strongest',
+  'yogas.weakest': 'Weakest',
+  'yogas.total': 'Total',
+  'yogas.manglik': 'Manglik',
+  'yogas.notManglik': 'Not Manglik',
+  'yogas.manglikCancelled': 'Manglik, but cancelled',
+  'yogas.noKalsarpa': 'No Kalsarpa',
+  'yogas.yoga': 'yoga',
+  'yogas.yogaPlural': 'yogas',
+  'yogas.affliction': 'affliction',
+  'yogas.afflictionPlural': 'afflictions',
+
+  // Readings
+  'readings.title': 'Readings',
+  'readings.today': 'Today',
+  'readings.thisWeek': 'This week',
+  'readings.thisMonth': 'This month',
+  'readings.thisYear': 'This year',
+  'readings.whatEngineFound': 'What the engine found',
+  'readings.whereThisStands': 'Where this stands',
+  'readings.awaitingReview':
+    'This reading is written and waiting to be read over before it is released. ' +
+    'Longer readings are always checked by hand. The findings it was built from ' +
+    'are below in the meantime, and they do not change.',
+  'readings.disclaimer':
+    'A reading describes tendencies, not certainties, and it is not a ' +
+    'substitute for medical, legal or financial advice. Where something here ' +
+    'touches your health, a doctor is the person to ask.',
+
+  // Remedies
+  'remedies.eyebrow': 'Upāya',
+  'remedies.conduct': 'Conduct',
+  'remedies.charity': 'Charity',
+  'remedies.fasting': 'Fasting',
+  'remedies.mantra': 'Mantra',
+  'remedies.gemstone': 'Gemstone',
+
+  // Gates
+  'gate.needsAccount': 'This one needs an account. It is free to make and takes a moment.',
+  'gate.needsPremium': 'This is part of membership.',
+  'gate.disabled': 'This is turned off for now. It will be back.',
+  'gate.unavailable': 'This is not available.',
+  'gate.createAccount': 'Create an account',
+  'gate.backToTools': 'Back to the free tools',
+
+  // Settings
+  'settings.title': 'Settings',
+  'settings.language': 'Language',
+  'settings.theme': 'Theme',
+  'settings.save': 'Save settings',
+  'settings.saved': 'Settings saved.',
+};
+
+const hi: Dictionary = {
+  'nav.tools': 'निःशुल्क साधन',
+  'nav.services': 'परामर्श',
+  'nav.journal': 'लेख',
+  'nav.about': 'परिचय',
+  'nav.book': 'परामर्श बुक करें',
+  'nav.signIn': 'साइन इन',
+  'nav.signInLong': 'साइन इन करें या खाता बनाएँ',
+  'nav.charts': 'आपकी कुंडलियाँ',
+  'nav.settings': 'सेटिंग्स',
+  'nav.admin': 'व्यवस्थापन',
+  'nav.signOut': 'साइन आउट',
+  'nav.account': 'आपका खाता',
+  'nav.menuOpen': 'मेनू खोलें',
+  'nav.menuClose': 'मेनू बंद करें',
+
+  'tools.eyebrow': 'निःशुल्क साधन',
+  'tools.heading': 'अपनी कुंडली स्वयं देखें',
+  'tools.intro':
+    'यहाँ वही गणनाएँ चलती हैं जो सशुल्क परामर्श में प्रयोग होती हैं। ये निःशुल्क ' +
+    'हैं क्योंकि जिस कुंडली को आप स्वयं जाँच सकें, वह उस कुंडली से अधिक मूल्यवान है ' +
+    'जिसे केवल विश्वास पर मानना पड़े। किसी खाते की आवश्यकता नहीं।',
+  'tools.open': 'खोलें',
+  'tools.membersBadge': 'सदस्य',
+  'tools.accountBadge': 'खाता',
+
+  'chart.sameChartElsewhere': 'यही कुंडली, अन्य साधनों में',
+  'chart.savedChart': 'आपकी सुरक्षित कुंडली',
+  'chart.savedCharts': 'आपकी सुरक्षित कुंडलियाँ',
+  'chart.orEnterDetails': 'या नीचे अन्य विवरण भरें।',
+  'chart.downloadPdf': 'PDF डाउनलोड करें',
+  'chart.anotherChart': 'दूसरी कुंडली',
+  'chart.northIndian': 'उत्तर',
+  'chart.southIndian': 'दक्षिण',
+  'chart.chartStyle': 'कुंडली शैली',
+  'chart.ascendant': 'लग्न',
+  'chart.moonSign': 'चंद्र राशि',
+  'chart.nakshatra': 'नक्षत्र',
+  'chart.currentDasha': 'वर्तमान दशा',
+  'chart.house': 'भाव',
+  'chart.sign': 'राशि',
+  'chart.lord': 'स्वामी',
+  'chart.occupiedBy': 'स्थित ग्रह',
+  'chart.aspectedBy': 'दृष्टि',
+  'chart.none': 'कोई नहीं',
+  'chart.retrograde': 'वक्री, पीछे की ओर गतिमान',
+  'chart.benefic': 'इस कुंडली में शुभ',
+  'chart.malefic': 'इस कुंडली में अशुभ',
+  'chart.neutral': 'सम',
+
+  'form.name': 'नाम',
+  'form.optional': 'वैकल्पिक',
+  'form.whoseChart': 'यह कुंडली किसकी है?',
+  'form.dateOfBirth': 'जन्म तिथि',
+  'form.timeOfBirth': 'जन्म समय',
+  'form.clock24': '24 घंटे की घड़ी',
+  'form.timeUnknown': 'मुझे जन्म समय ज्ञात नहीं है',
+  'form.timeUnknownNote':
+    'कुंडली फिर भी बनेगी, परंतु लग्न, भाव और दशा की तिथियाँ विश्वसनीय नहीं होंगी। ' +
+    'जो भी प्रभावित है, वह चिह्नित कर दिया गया है।',
+  'form.placeOfBirth': 'जन्म स्थान',
+  'form.placeHint': 'नगर का नाम लिखना आरंभ करें',
+  'form.cityOfBirth': 'जन्म नगर',
+  'form.submitChart': 'कुंडली बनाएँ',
+  'form.required': 'कृपया यह भरें।',
+
+  'yogas.eyebrow': 'योग, दोष, अष्टकवर्ग',
+  'yogas.whatForms': 'कौन से योग बनते हैं',
+  'yogas.mangalDosha': 'मंगल दोष',
+  'yogas.otherAfflictions': 'अन्य दोष',
+  'yogas.kalasarpa': 'कालसर्प',
+  'yogas.ashtakavarga': 'अष्टकवर्ग',
+  'yogas.strongest': 'सर्वाधिक बल',
+  'yogas.weakest': 'न्यूनतम बल',
+  'yogas.total': 'कुल',
+  'yogas.manglik': 'मांगलिक',
+  'yogas.notManglik': 'मांगलिक नहीं',
+  'yogas.manglikCancelled': 'मांगलिक, परंतु दोष भंग',
+  'yogas.noKalsarpa': 'कालसर्प नहीं',
+  'yogas.yoga': 'योग',
+  'yogas.yogaPlural': 'योग',
+  'yogas.affliction': 'दोष',
+  'yogas.afflictionPlural': 'दोष',
+
+  'readings.title': 'फलादेश',
+  'readings.today': 'आज',
+  'readings.thisWeek': 'यह सप्ताह',
+  'readings.thisMonth': 'यह माह',
+  'readings.thisYear': 'यह वर्ष',
+  'readings.whatEngineFound': 'गणना में जो मिला',
+  'readings.whereThisStands': 'वर्तमान स्थिति',
+  'readings.awaitingReview':
+    'यह फलादेश लिखा जा चुका है और प्रकाशित होने से पहले पढ़े जाने की प्रतीक्षा में ' +
+    'है। बड़े फलादेश सदैव स्वयं जाँचे जाते हैं। जिन आधारों पर यह बना है, वे नीचे ' +
+    'दिए हैं और वे बदलते नहीं।',
+  'readings.disclaimer':
+    'फलादेश प्रवृत्तियाँ बताता है, निश्चितताएँ नहीं, और यह चिकित्सा, विधि अथवा ' +
+    'वित्तीय सलाह का विकल्प नहीं है। जहाँ बात स्वास्थ्य की हो, वहाँ चिकित्सक से ' +
+    'पूछना उचित है।',
+
+  'remedies.eyebrow': 'उपाय',
+  'remedies.conduct': 'आचरण',
+  'remedies.charity': 'दान',
+  'remedies.fasting': 'व्रत',
+  'remedies.mantra': 'मंत्र',
+  'remedies.gemstone': 'रत्न',
+
+  'gate.needsAccount': 'इसके लिए खाता आवश्यक है। बनाना निःशुल्क है और क्षण भर का काम है।',
+  'gate.needsPremium': 'यह सदस्यता का भाग है।',
+  'gate.disabled': 'यह अभी बंद है। पुनः उपलब्ध होगा।',
+  'gate.unavailable': 'यह उपलब्ध नहीं है।',
+  'gate.createAccount': 'खाता बनाएँ',
+  'gate.backToTools': 'निःशुल्क साधनों पर वापस',
+
+  'settings.title': 'सेटिंग्स',
+  'settings.language': 'भाषा',
+  'settings.theme': 'रूप',
+  'settings.save': 'सेटिंग्स सुरक्षित करें',
+  'settings.saved': 'सेटिंग्स सुरक्षित हो गईं।',
+
+  'tool.kundli.label': 'जन्म कुंडली',
+  'tool.panchang.label': 'पंचांग',
+  'tool.dasha.label': 'दशा काल',
+  'tool.transits.label': 'गोचर',
+  'tool.matching.label': 'गुण मिलान',
+  'tool.yogas.label': 'योग और दोष',
+  'tool.remedies.label': 'उपाय',
+  'tool.nakshatra.label': 'नक्षत्र खोज',
+
+  'tool.kundli.description': 'भाव, नक्षत्र, ग्रह-बल और सोलह वर्ग कुंडलियों सहित पूर्ण वैदिक कुंडली।',
+  'tool.panchang.description': 'आज की तिथि, नक्षत्र, योग और करण, वास्तविक सूर्योदय, राहु काल तथा शुभ मुहूर्त के साथ।',
+  'tool.dasha.description': 'आपकी दशाएँ चार स्तरों तक, प्रत्येक के आरंभ और समाप्ति की सटीक तिथियों के साथ।',
+  'tool.transits.description': 'आपकी कुंडली के सापेक्ष ग्रहों की वर्तमान स्थिति, साढ़े साती और उसके चरणों सहित।',
+  'tool.matching.description': 'आठों कूटों पर अष्टकूट मिलान, मंगल दोष और उसके भंग के साथ।',
+  'tool.yogas.description': 'आपकी कुंडली में बनने वाला प्रत्येक योग, उसके कारण सहित, तथा मांगलिक, कालसर्प और अष्टकवर्ग।',
+  'tool.remedies.description': 'जिन ग्रहों को बल की आवश्यकता है उनके पारंपरिक उपाय, रत्नों पर स्पष्ट टिप्पणी सहित।',
+  'tool.nakshatra.description': 'आपका जन्म नक्षत्र, पाद, स्वामी ग्रह और शास्त्रों में उसका वर्णन।',
+};
+
+const bn: Dictionary = {
+  'nav.tools': 'বিনামূল্যের সরঞ্জাম',
+  'nav.services': 'পরামর্শ',
+  'nav.journal': 'লেখা',
+  'nav.about': 'পরিচিতি',
+  'nav.book': 'পরামর্শ বুক করুন',
+  'nav.signIn': 'সাইন ইন',
+  'nav.signInLong': 'সাইন ইন করুন বা অ্যাকাউন্ট তৈরি করুন',
+  'nav.charts': 'আপনার কুণ্ডলী',
+  'nav.settings': 'সেটিংস',
+  'nav.admin': 'প্রশাসন',
+  'nav.signOut': 'সাইন আউট',
+  'nav.account': 'আপনার অ্যাকাউন্ট',
+  'nav.menuOpen': 'মেনু খুলুন',
+  'nav.menuClose': 'মেনু বন্ধ করুন',
+
+  'tools.eyebrow': 'বিনামূল্যের সরঞ্জাম',
+  'tools.heading': 'নিজের কুণ্ডলী নিজেই দেখুন',
+  'tools.intro':
+    'এখানে সেই একই গণনা চলে যা সশুল্ক পরামর্শে ব্যবহৃত হয়। এগুলি বিনামূল্যে, ' +
+    'কারণ যে কুণ্ডলী আপনি নিজে যাচাই করতে পারেন তা কেবল বিশ্বাসে মেনে নেওয়া ' +
+    'কুণ্ডলীর চেয়ে বেশি মূল্যবান। কোনও অ্যাকাউন্টের প্রয়োজন নেই।',
+  'tools.open': 'খুলুন',
+  'tools.membersBadge': 'সদস্য',
+  'tools.accountBadge': 'অ্যাকাউন্ট',
+
+  'chart.sameChartElsewhere': 'একই কুণ্ডলী, অন্য সরঞ্জামে',
+  'chart.savedChart': 'আপনার সংরক্ষিত কুণ্ডলী',
+  'chart.savedCharts': 'আপনার সংরক্ষিত কুণ্ডলীগুলি',
+  'chart.orEnterDetails': 'অথবা নীচে অন্য বিবরণ দিন।',
+  'chart.downloadPdf': 'PDF ডাউনলোড করুন',
+  'chart.anotherChart': 'অন্য কুণ্ডলী',
+  'chart.northIndian': 'উত্তর',
+  'chart.southIndian': 'দক্ষিণ',
+  'chart.chartStyle': 'কুণ্ডলীর ধরন',
+  'chart.ascendant': 'লগ্ন',
+  'chart.moonSign': 'চন্দ্র রাশি',
+  'chart.nakshatra': 'নক্ষত্র',
+  'chart.currentDasha': 'বর্তমান দশা',
+  'chart.house': 'ভাব',
+  'chart.sign': 'রাশি',
+  'chart.lord': 'অধিপতি',
+  'chart.occupiedBy': 'অবস্থিত গ্রহ',
+  'chart.aspectedBy': 'দৃষ্টি',
+  'chart.none': 'কিছু নেই',
+  'chart.retrograde': 'বক্রী, পিছনের দিকে গতিশীল',
+  'chart.benefic': 'এই কুণ্ডলীতে শুভ',
+  'chart.malefic': 'এই কুণ্ডলীতে অশুভ',
+  'chart.neutral': 'সম',
+
+  'form.name': 'নাম',
+  'form.optional': 'ঐচ্ছিক',
+  'form.whoseChart': 'এটি কার কুণ্ডলী?',
+  'form.dateOfBirth': 'জন্ম তারিখ',
+  'form.timeOfBirth': 'জন্ম সময়',
+  'form.clock24': '২৪ ঘণ্টার ঘড়ি',
+  'form.timeUnknown': 'আমি জন্ম সময় জানি না',
+  'form.timeUnknownNote':
+    'কুণ্ডলী তবুও তৈরি হবে, তবে লগ্ন, ভাব এবং দশার তারিখ নির্ভরযোগ্য হবে না। ' +
+    'যা যা প্রভাবিত, তা চিহ্নিত করা আছে।',
+  'form.placeOfBirth': 'জন্মস্থান',
+  'form.placeHint': 'শহরের নাম লিখতে শুরু করুন',
+  'form.cityOfBirth': 'জন্ম শহর',
+  'form.submitChart': 'কুণ্ডলী তৈরি করুন',
+  'form.required': 'অনুগ্রহ করে এটি পূরণ করুন।',
+
+  'yogas.eyebrow': 'যোগ, দোষ, অষ্টকবর্গ',
+  'yogas.whatForms': 'কোন যোগ তৈরি হয়',
+  'yogas.mangalDosha': 'মঙ্গল দোষ',
+  'yogas.otherAfflictions': 'অন্য দোষ',
+  'yogas.kalasarpa': 'কালসর্প',
+  'yogas.ashtakavarga': 'অষ্টকবর্গ',
+  'yogas.strongest': 'সর্বাধিক বল',
+  'yogas.weakest': 'সর্বনিম্ন বল',
+  'yogas.total': 'মোট',
+  'yogas.manglik': 'মাঙ্গলিক',
+  'yogas.notManglik': 'মাঙ্গলিক নয়',
+  'yogas.manglikCancelled': 'মাঙ্গলিক, তবে দোষ ভঙ্গ',
+  'yogas.noKalsarpa': 'কালসর্প নেই',
+  'yogas.yoga': 'যোগ',
+  'yogas.yogaPlural': 'যোগ',
+  'yogas.affliction': 'দোষ',
+  'yogas.afflictionPlural': 'দোষ',
+
+  'readings.title': 'ফলাদেশ',
+  'readings.today': 'আজ',
+  'readings.thisWeek': 'এই সপ্তাহ',
+  'readings.thisMonth': 'এই মাস',
+  'readings.thisYear': 'এই বছর',
+  'readings.whatEngineFound': 'গণনায় যা পাওয়া গেল',
+  'readings.whereThisStands': 'বর্তমান অবস্থা',
+  'readings.awaitingReview':
+    'এই ফলাদেশ লেখা হয়ে গেছে এবং প্রকাশের আগে পড়ে দেখার অপেক্ষায় আছে। বড় ' +
+    'ফলাদেশ সবসময় হাতে যাচাই করা হয়। যে ভিত্তিতে এটি তৈরি, তা নীচে দেওয়া ' +
+    'আছে এবং তা বদলায় না।',
+  'readings.disclaimer':
+    'ফলাদেশ প্রবণতা বলে, নিশ্চয়তা নয়, এবং এটি চিকিৎসা, আইনি বা আর্থিক ' +
+    'পরামর্শের বিকল্প নয়। যেখানে স্বাস্থ্যের প্রশ্ন, সেখানে চিকিৎসককেই ' +
+    'জিজ্ঞাসা করা উচিত।',
+
+  'remedies.eyebrow': 'উপায়',
+  'remedies.conduct': 'আচরণ',
+  'remedies.charity': 'দান',
+  'remedies.fasting': 'উপবাস',
+  'remedies.mantra': 'মন্ত্র',
+  'remedies.gemstone': 'রত্ন',
+
+  'gate.needsAccount': 'এর জন্য অ্যাকাউন্ট প্রয়োজন। তৈরি করা বিনামূল্যে এবং এক মুহূর্তের কাজ।',
+  'gate.needsPremium': 'এটি সদস্যপদের অংশ।',
+  'gate.disabled': 'এটি আপাতত বন্ধ। আবার ফিরে আসবে।',
+  'gate.unavailable': 'এটি উপলভ্য নয়।',
+  'gate.createAccount': 'অ্যাকাউন্ট তৈরি করুন',
+  'gate.backToTools': 'বিনামূল্যের সরঞ্জামে ফিরুন',
+
+  'settings.title': 'সেটিংস',
+  'settings.language': 'ভাষা',
+  'settings.theme': 'রূপ',
+  'settings.save': 'সেটিংস সংরক্ষণ করুন',
+  'settings.saved': 'সেটিংস সংরক্ষিত হয়েছে।',
+
+  'tool.kundli.label': 'জন্ম কুণ্ডলী',
+  'tool.panchang.label': 'পঞ্চাঙ্গ',
+  'tool.dasha.label': 'দশা কাল',
+  'tool.transits.label': 'গোচর',
+  'tool.matching.label': 'গুণ মিলন',
+  'tool.yogas.label': 'যোগ ও দোষ',
+  'tool.remedies.label': 'উপায়',
+  'tool.nakshatra.label': 'নক্ষত্র অনুসন্ধান',
+
+  'tool.kundli.description': 'ভাব, নক্ষত্র, গ্রহবল এবং ষোলটি বর্গ কুণ্ডলী সহ সম্পূর্ণ বৈদিক কুণ্ডলী।',
+  'tool.panchang.description': 'আজকের তিথি, নক্ষত্র, যোগ ও করণ, প্রকৃত সূর্যোদয়, রাহুকাল এবং শুভ সময়ের সঙ্গে।',
+  'tool.dasha.description': 'আপনার দশা চারটি স্তর পর্যন্ত, প্রতিটির শুরু ও শেষের সঠিক তারিখ সহ।',
+  'tool.transits.description': 'আপনার কুণ্ডলীর সাপেক্ষে গ্রহের বর্তমান অবস্থান, সাড়ে সাতি ও তার পর্যায় সহ।',
+  'tool.matching.description': 'আটটি কূটে অষ্টকূট মিলন, মঙ্গল দোষ ও তার ভঙ্গ সহ।',
+  'tool.yogas.description': 'আপনার কুণ্ডলীতে গঠিত প্রতিটি যোগ, তার কারণ সহ, এবং মাঙ্গলিক, কালসর্প ও অষ্টকবর্গ।',
+  'tool.remedies.description': 'যে গ্রহগুলির বল প্রয়োজন তাদের প্রথাগত উপায়, রত্ন সম্পর্কে স্পষ্ট মন্তব্য সহ।',
+  'tool.nakshatra.description': 'আপনার জন্ম নক্ষত্র, পাদ, অধিপতি গ্রহ এবং শাস্ত্রে তার বর্ণনা।',
+};
+
+export const DICTIONARIES: Record<Locale, Dictionary> = { en, hi, bn };
+
+/** Every key English defines, for the completeness test. */
+export const KEYS = Object.keys(en);

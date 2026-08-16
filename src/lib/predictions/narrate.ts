@@ -1,0 +1,272 @@
+import 'server-only';
+
+import { checkSafety, SAFETY_INSTRUCTIONS, type SafetyResult } from './safety';
+import { topSignals, type SignalSet } from './signals';
+
+/**
+ * The narration layer.
+ *
+ * The engine computes, the writer only writes. The model is handed a list of
+ * findings and asked to express them in readable prose. It is never asked what
+ * a chart means, and it is told explicitly that anything not in the list must
+ * not appear. That arrangement is what makes the output checkable: every claim
+ * traces back to a signal, and a signal traces back to a rule.
+ *
+ * The output is then run through the safety filter regardless of what the
+ * prompt said, because a prompt is a request and a filter is a rule.
+ *
+ * With no API key configured this returns `unavailable` rather than throwing.
+ * The prediction pages fall back to showing the signals themselves, which are
+ * the substance anyway, so the site works fully before the key exists and
+ * gains prose the moment it does.
+ */
+
+const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+/** Overridable, so a model change is an environment variable and not a deploy. */
+const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
+
+export type NarrationStatus = 'ready' | 'held' | 'blocked' | 'unavailable' | 'error';
+
+export interface Narration {
+  status: NarrationStatus;
+  text: string | null;
+  safety: SafetyResult | null;
+  /** Present when something went wrong, for the admin screen. */
+  detail?: string;
+  model?: string;
+}
+
+export function narrationConfigured(): boolean {
+  return Boolean(process.env.GEMINI_API_KEY);
+}
+
+const VOICE = `
+You are writing for a Vedic astrology site that shows its working. The tone is
+plain, warm and unhurried. It is a knowledgeable person talking, not a
+marketing page and not a fortune teller.
+
+Use British spelling, as the rest of the site does: favourable, not favorable.
+Do not use em dashes.
+Do not open with a greeting or a restatement of the question.
+Do not use headings, bullet points or bold text. Write paragraphs.
+Do not use the words destiny, fate, cosmic, energies, vibrations, blessed,
+or manifest.
+Do not flatter the reader.
+`.trim();
+
+const LANGUAGE_NAME: Record<string, string> = {
+  en: 'English',
+  hi: 'Hindi, in Devanagari script',
+  bn: 'Bengali, in Bengali script',
+};
+
+/**
+ * Turn a set of signals into prose.
+ *
+ * `editorial` is the site owner's own interpretation text, passed straight
+ * through to the model. It exists so the writing follows one astrologer's
+ * reading of a rule rather than whatever the model absorbed from the internet.
+ */
+export async function narrate({
+  signals,
+  editorial,
+  audience = 'the person whose chart this is',
+  maxWords,
+  language = 'en',
+}: {
+  signals: SignalSet;
+  editorial?: string;
+  audience?: string;
+  maxWords?: number;
+  /** Written directly in this language. Translating afterwards reads worse. */
+  language?: 'en' | 'hi' | 'bn';
+}): Promise<Narration> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return { status: 'unavailable', text: null, safety: null };
+
+  const chosen = topSignals(signals);
+
+  const words =
+    maxWords ??
+    { day: 130, week: 220, month: 400, year: 700 }[signals.period.name];
+
+  /*
+    Token budget, with real headroom.
+
+    Set tight at first, at roughly two tokens a word, and every reading came
+    back truncated: a 130 word daily reading arrived as a single clipped clause
+    of 68 characters, and because there was nothing unsafe in the fragment it
+    passed the filter and published itself.
+
+    Two causes. Devanagari and Bengali cost several tokens per word where
+    English costs about one and a third, so one budget cannot serve all three.
+    And this is a thinking model, which spends output tokens on reasoning before
+    it writes anything, so a tight cap is consumed before the prose starts.
+
+    Thinking is turned off below, since the reasoning was already done by the
+    engine and the model is only being asked to express findings it was handed.
+  */
+  const tokensPerWord = language === 'en' ? 2 : 5;
+  const maxOutputTokens = Math.ceil(words * tokensPerWord) + 512;
+
+  const findings = chosen
+    .map(
+      (s, i) =>
+        `${i + 1}. [${s.tone}, weight ${s.weight}] ${s.statement}\n   Rule: ${s.rule}`,
+    )
+    .join('\n');
+
+  const prompt = `
+${VOICE}
+
+${SAFETY_INSTRUCTIONS}
+
+You are given findings from a Vedic astrology engine. Write a ${signals.period.name}
+reading for ${audience}, of about ${words} words.
+
+Write it in ${LANGUAGE_NAME[language] ?? 'English'}. Sanskrit and Jyotish terms
+keep their usual form in that language rather than being translated into
+everyday words.
+
+Absolute constraint: every claim you make must come from the findings below.
+You may connect them, weigh them against each other and say which matters
+most. You may not introduce any astrological factor that is not listed, and
+you may not invent an outcome that the findings do not support. If the
+findings are thin, write something short rather than filling space.
+
+Chart context:
+  Ascendant: ${signals.context.ascendant}
+  Moon sign: ${signals.context.moonRashi}
+  Running dasha: ${signals.context.dasha}
+  Sade Sati: ${signals.context.sadeSatiPhase ?? 'not running'}
+
+Findings, heaviest first:
+${findings}
+${editorial ? `\nThe astrologer's own notes on how to read these. Follow them where they apply:\n${editorial}\n` : ''}
+Write the reading now. Prose only.
+`.trim();
+
+  try {
+    const response = await fetch(
+      `${ENDPOINT}/${MODEL}:generateContent?key=${encodeURIComponent(key)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            // Low but not zero. At zero the prose reads mechanically, and the
+            // findings constrain the content anyway.
+            temperature: 0.6,
+            maxOutputTokens,
+            // The engine has already decided what is true. There is nothing
+            // here for the model to reason about, and thinking tokens come out
+            // of the same budget as the prose.
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+        // A reading is generated once per person per period and cached, so a
+        // slow call is acceptable. A hanging one is not.
+        signal: AbortSignal.timeout(45_000),
+      },
+    );
+
+    if (!response.ok) {
+      /*
+        Carry the provider's own message through. A bare status code sends you
+        looking in the wrong place: an invalid key, a model name that has been
+        retired and a quota refusal all arrive as 400 or 429, and only the body
+        distinguishes them.
+      */
+      const detail = await response
+        .text()
+        .then((body) => {
+          try {
+            const parsed = JSON.parse(body) as { error?: { message?: string } };
+            return parsed.error?.message ?? body.slice(0, 200);
+          } catch {
+            return body.slice(0, 200);
+          }
+        })
+        .catch(() => '');
+
+      return {
+        status: 'error',
+        text: null,
+        safety: null,
+        detail: `Model returned ${response.status}. ${detail}`.trim(),
+        model: MODEL,
+      };
+    }
+
+    const body = (await response.json()) as {
+      candidates?: {
+        finishReason?: string;
+        content?: { parts?: { text?: string }[] };
+      }[];
+    };
+
+    const candidate = body.candidates?.[0];
+
+    const raw = candidate?.content?.parts
+      ?.map((p) => p.text ?? '')
+      .join('')
+      .trim();
+
+    if (!raw) {
+      return { status: 'error', text: null, safety: null, detail: 'Empty response.', model: MODEL };
+    }
+
+    /*
+      A reading that was cut off must never publish.
+
+      This is the structural half of the fix above. Raising the budget makes
+      truncation unlikely; treating it as an error makes it harmless. Without
+      this check a fragment that happens to contain nothing unsafe passes the
+      filter and releases itself, which is exactly what happened.
+    */
+    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+      return {
+        status: 'error',
+        text: null,
+        safety: null,
+        detail: `The writer stopped early (${candidate.finishReason}), so nothing was saved.`,
+        model: MODEL,
+      };
+    }
+
+    // Belt and braces: a reading far shorter than asked for is a failure even
+    // if the provider reported a clean stop.
+    if (raw.length < Math.min(160, words * 2)) {
+      return {
+        status: 'error',
+        text: null,
+        safety: null,
+        detail: `The writer returned only ${raw.length} characters, too short to be a reading.`,
+        model: MODEL,
+      };
+    }
+
+    // Em dashes are asked for in the prompt and removed here anyway, because
+    // an instruction is not a guarantee and this one is a house style rule.
+    const text = raw.replace(/\s*—\s*/g, ', ').replace(/\s*–\s*/g, ', ');
+
+    const safety = checkSafety(text);
+
+    return {
+      status: safety.blocked ? 'blocked' : safety.clean ? 'ready' : 'held',
+      text,
+      safety,
+      model: MODEL,
+    };
+  } catch (error) {
+    return {
+      status: 'error',
+      text: null,
+      safety: null,
+      detail: error instanceof Error ? error.message : 'Request failed.',
+      model: MODEL,
+    };
+  }
+}
