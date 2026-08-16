@@ -6,15 +6,9 @@ import { buildVarga, COMMON_VARGAS } from '@/lib/astro/divisional';
 import { buildVimshottari, dashaAt, formatBalance } from '@/lib/astro/dasha';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
-import {
-  DIGNITY_LABEL,
-} from '@/lib/astro/dignity';
-import {
-  GRAHA_NAMES_SA,
-  NAKSHATRA_NAMES,
-  RASHI_NAMES_EN,
-} from '@/lib/astro/constants';
-import { formatDms, formatPosition } from '@/lib/astro/zodiac';
+import { GRAHA_NAMES_SA } from '@/lib/astro/constants';
+import { formatDms } from '@/lib/astro/zodiac';
+import { getNames } from '@/lib/i18n/server';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
@@ -94,9 +88,10 @@ export default async function KundliPage({
   const { birth, settings, displayName } = parsed;
   const chart = castChart(birth, { settings });
   const user = await getUser();
-  const [userSettings, canSwitchStyle] = await Promise.all([
+  const [userSettings, canSwitchStyle, { n }] = await Promise.all([
     getSettings(),
     allowed('south_indian_chart'),
+    getNames(),
   ]);
   const zone = chart.meta.timezone;
 
@@ -196,23 +191,23 @@ export default async function KundliPage({
         <section className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard
             label="Ascendant"
-            value={RASHI_NAMES_EN[chart.ascendant.rashi]}
+            value={n.rashi(chart.ascendant.rashi)}
             detail={formatDms(chart.ascendant.degreeInRashi, false)}
           />
           <SummaryCard
             label="Moon sign"
-            value={RASHI_NAMES_EN[moonRashi(chart)]}
+            value={n.rashi(moonRashi(chart))}
             detail={isWaxingMoon(chart) ? 'Waxing' : 'Waning'}
           />
           <SummaryCard
             label="Nakshatra"
-            value={NAKSHATRA_NAMES[moon.nakshatra]}
-            detail={`Pada ${moon.pada} · ${moon.nakshatraLord}`}
+            value={n.nakshatra(moon.nakshatra)}
+            detail={`Pada ${moon.pada} · ${n.graha(moon.nakshatraLord)}`}
           />
           <SummaryCard
             label="Current dasha"
-            value={active ? active.maha.lord : 'None'}
-            detail={active?.antar ? `Antar: ${active.antar.lord}` : undefined}
+            value={active ? n.graha(active.maha.lord) : 'None'}
+            detail={active?.antar ? `Antar: ${n.graha(active.antar.lord)}` : undefined}
           />
         </section>
 
@@ -274,17 +269,24 @@ export default async function KundliPage({
                     className="border-b last:border-0 transition-colors duration-200"
                   >
                     <Td>
-                      <span style={{ color: 'var(--text-primary)' }}>{p.graha}</span>
-                      <span
-                        className="ml-1.5 text-xs"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        {GRAHA_NAMES_SA[p.graha as keyof typeof GRAHA_NAMES_SA]}
-                      </span>
+                      <span style={{ color: 'var(--text-primary)' }}>{n.graha(p.graha)}</span>
+                      {/*
+                        The Sanskrit gloss earns its place beside an English
+                        name. Beside सूर्य it is the same word twice, so it is
+                        dropped once the page is already in an Indic script.
+                      */}
+                      {n.locale === 'en' && (
+                        <span
+                          className="ml-1.5 text-xs"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          {GRAHA_NAMES_SA[p.graha as keyof typeof GRAHA_NAMES_SA]}
+                        </span>
+                      )}
                     </Td>
-                    <Td mono>{formatPosition(p.longitude)}</Td>
+                    <Td mono>{`${n.rashi(p.rashi)} ${formatDms(p.degreeInRashi)}`}</Td>
                     <Td>{p.house}</Td>
-                    <Td>{NAKSHATRA_NAMES[p.nakshatra]}</Td>
+                    <Td>{n.nakshatra(p.nakshatra)}</Td>
                     <Td>{p.pada}</Td>
                     <Td>
                       <span
@@ -297,7 +299,7 @@ export default async function KundliPage({
                                 : 'var(--text-secondary)',
                         }}
                       >
-                        {DIGNITY_LABEL[p.dignity]}
+                        {n.dignity(p.dignity)}
                       </span>
                     </Td>
                     <Td>
