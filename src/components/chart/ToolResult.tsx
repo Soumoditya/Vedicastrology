@@ -5,6 +5,7 @@ import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { ChartSwitcher } from '@/components/chart/ChartSwitcher';
 import { Reveal } from '@/components/motion/Reveal';
 import { chartQueryString, getSavedCharts } from '@/lib/astro/current-chart';
+import { getFormLabels, getT } from '@/lib/i18n/server';
 
 /**
  * The frame every tool result sits in.
@@ -47,7 +48,7 @@ export async function ToolResult({
   submitLabel,
   cover,
   footer = false,
-  anotherLabel = 'Another chart',
+  anotherLabel,
   children,
 }: {
   /** Feature key, for the rail's current step. */
@@ -69,7 +70,11 @@ export async function ToolResult({
   anotherLabel?: string;
   children: React.ReactNode;
 }) {
-  const charts = await getSavedCharts();
+  const [charts, { t }, formLabels] = await Promise.all([
+    getSavedCharts(),
+    getT(),
+    getFormLabels(),
+  ]);
 
   return (
     <div className="relative">
@@ -120,9 +125,9 @@ export async function ToolResult({
 
         {/* Somebody else's chart. */}
         <section className="no-print mt-16 border-t pt-10" style={{ borderColor: 'var(--border-subtle)' }}>
-          <h2 className="eyebrow">{anotherLabel}</h2>
+          <h2 className="eyebrow">{anotherLabel ?? t('chart.anotherChart')}</h2>
           <div className="surface-card mt-5 p-6 sm:p-8">
-            <BirthForm action={action} submitLabel={submitLabel} />
+            <BirthForm action={action} submitLabel={submitLabel} labels={formLabels} />
           </div>
         </section>
 

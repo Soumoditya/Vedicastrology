@@ -80,3 +80,41 @@ export const getNames = cache(
     return { t, n: astroNames(locale), locale };
   },
 );
+
+/**
+ * The strings a birth form needs, as a plain record.
+ *
+ * `BirthForm` is a client component and `getT` is server-only, so the labels have
+ * to be handed to it rather than fetched by it — the same arrangement the header
+ * already uses for its navigation labels. Gathered in one place so a form never
+ * ends up half-translated because a caller forgot a key.
+ */
+export const getFormLabels = cache(async (): Promise<Record<string, string>> => {
+  const { t } = await getT();
+  const keys = [
+    'form.name',
+    'form.optional',
+    'form.whoseChart',
+    'form.dateOfBirth',
+    'form.timeOfBirth',
+    'form.clock24',
+    'form.timeUnknown',
+    'form.timeUnknownNote',
+    'form.placeOfBirth',
+    'form.placeHint',
+    'form.cityOfBirth',
+    'form.submitChart',
+    'form.genderLegend',
+    'form.genderFemale',
+    'form.genderMale',
+    'form.genderUndisclosed',
+    'form.genderNote',
+    'form.errDate',
+    'form.errPlace',
+    'form.errTime',
+    'form.errGender',
+    'form.calculating',
+    'form.searching',
+  ];
+  return Object.fromEntries(keys.map((key) => [key, t(key)]));
+});

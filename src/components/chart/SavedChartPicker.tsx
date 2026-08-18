@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { getUser, createClient } from '@/lib/supabase/server';
 import { toBirthQueryString } from '@/lib/astro/query';
+import { getT } from '@/lib/i18n/server';
 import type { BirthProfile } from '@/lib/supabase/types';
 
 /**
@@ -17,6 +18,7 @@ export async function SavedChartPicker({ action }: { action: string }) {
   const user = await getUser();
   if (!user) return null;
 
+  const { t } = await getT();
   const supabase = await createClient();
   const { data } = await supabase
     .from('birth_profiles')
@@ -31,7 +33,7 @@ export async function SavedChartPicker({ action }: { action: string }) {
   return (
     <div className="mb-6">
       <p className="text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
-        {charts.length === 1 ? 'Your saved chart' : 'Your saved charts'}
+        {charts.length === 1 ? t('chart.savedChart') : t('chart.savedCharts')}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -62,7 +64,7 @@ export async function SavedChartPicker({ action }: { action: string }) {
       </div>
 
       <p className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-        Or enter different details below.
+        {t('chart.orEnterDetails')}
       </p>
     </div>
   );

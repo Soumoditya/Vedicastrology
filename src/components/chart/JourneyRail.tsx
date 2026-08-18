@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { CHECK_FEATURES, JOURNEY, STEP_VERB, TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
+import { getT } from '@/lib/i18n/server';
 import { chartQueryString, getDefaultChart } from '@/lib/astro/current-chart';
 
 /**
@@ -56,7 +57,8 @@ export async function JourneyRail({
     if (fallback) suffix = chartQueryString(fallback);
   }
 
-  const byFeature = new Map(TOOL_LINKS.map((t) => [t.feature, t]));
+  const { t: translate } = await getT();
+  const byFeature = new Map(TOOL_LINKS.map((tool) => [tool.feature, tool]));
   const access = await canUseAll([
     ...JOURNEY.filter((f) => f !== current),
     ...CHECK_FEATURES.filter((f) => f !== current),
@@ -66,11 +68,11 @@ export async function JourneyRail({
 
   return (
     <nav
-      aria-label="Where to go with this chart"
+      aria-label={translate('rail.aria')}
       className="no-print relative mb-10"
     >
       <p className="text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
-        The path through a chart
+        {translate('rail.path')}
       </p>
 
       {/*
@@ -110,7 +112,7 @@ export async function JourneyRail({
           const isCurrent = feature === current;
           const refused = !isCurrent && access[feature] && !access[feature].allowed;
           const done = currentIndex >= 0 && i < currentIndex;
-          const name = `${STEP_VERB[feature]} — ${tool.label}${refused ? ' (members)' : ''}`;
+          const name = `${translate(`step.${feature}`, STEP_VERB[feature])} — ${tool.label}${refused ? ' (members)' : ''}`;
 
           /*
             Two shapes, one component.
@@ -153,7 +155,7 @@ export async function JourneyRail({
                   className="whitespace-nowrap text-xs font-medium"
                   style={{ color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
                 >
-                  {STEP_VERB[feature]}
+                  {translate(`step.${feature}`, STEP_VERB[feature])}
                 </span>
                 <span
                   className="whitespace-nowrap text-[0.65rem]"
@@ -189,12 +191,12 @@ export async function JourneyRail({
           <span className="numeric" style={{ color: 'var(--color-gold-300)' }}>
             {currentIndex + 1}
           </span>
-          <span style={{ color: 'var(--text-muted)' }}> of </span>
+          <span style={{ color: 'var(--text-muted)' }}> {translate('rail.of')} </span>
           <span className="numeric" style={{ color: 'var(--text-muted)' }}>
             {JOURNEY.length}
           </span>
           {' · '}
-          {STEP_VERB[current]}
+          {translate(`step.${current}`, STEP_VERB[current])}
           <span style={{ color: 'var(--text-muted)' }}>
             {' — '}
             {byFeature.get(JOURNEY[currentIndex])?.label}
@@ -210,7 +212,7 @@ export async function JourneyRail({
       */}
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className="text-[0.65rem] uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
-          Specific checks
+          {translate('rail.checks')}
         </span>
         {CHECK_FEATURES.map((feature) => {
           const tool = byFeature.get(feature);
@@ -272,7 +274,7 @@ export async function JourneyRail({
               className="inline-flex items-center gap-1 px-1 py-1 text-[0.7rem] transition-colors duration-300"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Full Kundali Report
+              {translate('rail.fullReport')}
               <span aria-hidden>→</span>
             </Link>
           </>

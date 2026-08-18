@@ -15,6 +15,15 @@ export interface BirthFormProps {
   /** Ask for a name, used on saved charts, skipped on quick tools. */
   askName?: boolean;
   compact?: boolean;
+  /**
+   * Translated strings, resolved on the server and handed down.
+   *
+   * This is a client component and `getT` is server-only, so it cannot look them
+   * up itself. Every read falls back to the English literal, which means a caller
+   * that forgets to pass them gets a working English form rather than a page of
+   * blank labels — the failure mode a translation layer has to refuse.
+   */
+  labels?: Record<string, string>;
 }
 
 export interface BirthFormValues {
@@ -41,7 +50,9 @@ export function BirthForm({
   initial,
   askName = true,
   compact = false,
+  labels = {},
 }: BirthFormProps) {
+  const s = (key: string, fallback: string) => labels[key] ?? fallback;
   const router = useRouter();
   const uid = useId().replace(/:/g, '');
 
@@ -58,15 +69,15 @@ export function BirthForm({
     e.preventDefault();
     setError(null);
 
-    if (!date) return setError('Please enter the date of birth.');
-    if (!place) return setError('Please choose the place of birth from the list.');
+    if (!date) return setError(s('form.errDate', 'Please enter the date of birth.'));
+    if (!place) return setError(s('form.errPlace', 'Please choose the place of birth from the list.'));
     if (!timeUnknown && !time) {
       return setError(
-        'Please enter the time of birth, or tick “I don’t know the time”.',
+        s('form.errTime', 'Please enter the time of birth, or tick “I don’t know the time”.'),
       );
     }
     if (!gender) {
-      return setError('Please choose one of the three options under Gender.');
+      return setError(s('form.errGender', 'Please choose one of the three options under Gender.'));
     }
 
     setSubmitting(true);
@@ -95,13 +106,17 @@ export function BirthForm({
       noValidate
     >
       {askName && (
-        <Field label="Name" htmlFor={`${uid}-name`} hint="Optional">
+        <Field
+          label={s('form.name', 'Name')}
+          htmlFor={`${uid}-name`}
+          hint={s('form.optional', 'Optional')}
+        >
           <input
             id={`${uid}-name`}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Whose chart is this?"
+            placeholder={s('form.whoseChart', 'Whose chart is this?')}
             className={inputClass}
             autoComplete="off"
           />
@@ -109,7 +124,7 @@ export function BirthForm({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Date of birth" htmlFor={`${uid}-date`}>
+        <Field label={s('form.dateOfBirth', 'Date of birth')} htmlFor={`${uid}-date`}>
           <input
             id={`${uid}-date`}
             type="date"
@@ -123,9 +138,9 @@ export function BirthForm({
         </Field>
 
         <Field
-          label="Time of birth"
+          label={s('form.timeOfBirth', 'Time of birth')}
           htmlFor={`${uid}-time`}
-          hint={timeUnknown ? 'Cast for noon' : '24-hour clock'}
+          hint={timeUnknown ? 'Cast for noon' : s('form.clock24', '24-hour clock')}
         >
           <input
             id={`${uid}-time`}
@@ -151,14 +166,14 @@ export function BirthForm({
       <fieldset>
         <legend className="mb-1.5 text-xs font-medium uppercase tracking-[0.12em]"
                 style={{ color: 'var(--text-secondary)' }}>
-          Gender
+          {s('form.genderLegend', 'Gender')}
         </legend>
         <div className="flex flex-wrap gap-2">
           {(
             [
-              ['female', 'Female'],
-              ['male', 'Male'],
-              ['undisclosed', 'Prefer not to say'],
+              ['female', s('form.genderFemale', 'Female')],
+              ['male', s('form.genderMale', 'Male')],
+              ['undisclosed', s('form.genderUndisclosed', 'Prefer not to say')],
             ] as [Gender, string][]
           ).map(([value, label]) => {
             const chosen = gender === value;
@@ -189,9 +204,10 @@ export function BirthForm({
           })}
         </div>
         <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-          Used only where a classical rule needs it: comparing two charts counts
-          some of the eight koots from the bride&rsquo;s chart to the groom&rsquo;s.
-          Nothing else in your chart depends on it.
+          {s(
+            'form.genderNote',
+            'Used only where a classical rule needs it: comparing two charts counts some of the eight koots from the bride’s chart to the groom’s. Nothing else in your chart depends on it.',
+          )}
         </p>
       </fieldset>
 
@@ -203,10 +219,12 @@ export function BirthForm({
           className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--color-gold-500)]"
         />
         <span style={{ color: 'var(--text-secondary)' }}>
-          I don’t know the time of birth
+          {s('form.timeUnknown', 'I don’t know the time of birth')}
           <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>
-            The chart is still cast, but the ascendant, houses and dasha dates
-            cannot be relied on, everything affected is marked.
+            {s(
+              'form.timeUnknownNote',
+              'The chart is still cast, but the ascendant, houses and dasha dates cannot be relied on, everything affected is marked.',
+            )}
           </span>
         </span>
       </label>
@@ -246,7 +264,7 @@ export function BirthForm({
         }}
       >
         <span className="relative z-10">
-          {submitting ? 'Calculating…' : submitLabel}
+          {submitting ? s('form.calculating', 'Calculating…') : submitLabel}
         </span>
         {/* Light sweep on hover. */}
         <span

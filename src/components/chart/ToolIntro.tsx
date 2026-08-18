@@ -1,6 +1,7 @@
 import { BirthForm } from '@/components/forms/BirthForm';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
+import { getFormLabels } from '@/lib/i18n/server';
 
 /**
  * The opening state of a tool, before any birth details have been given.
@@ -9,7 +10,7 @@ import { Reveal } from '@/components/motion/Reveal';
  * entry experience had to be made seven times and was made inconsistently.
  * One component, so a tool page is only the part that is actually its own.
  */
-export function ToolIntro({
+export async function ToolIntro({
   eyebrow,
   headline,
   highlight,
@@ -26,6 +27,8 @@ export function ToolIntro({
   action: string;
   submitLabel: string;
 }) {
+  const formLabels = await getFormLabels();
+
   return (
     <div className="relative">
       <Reveal />
@@ -51,7 +54,7 @@ export function ToolIntro({
         </div>
         <div className="surface-card mt-10 p-6 sm:p-8" data-reveal="scale">
           <SavedChartPicker action={action} />
-          <BirthForm action={action} submitLabel={submitLabel} />
+          <BirthForm action={action} submitLabel={submitLabel} labels={formLabels} />
         </div>
       </div>
     </div>

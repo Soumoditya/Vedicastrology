@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { JOURNEY, STEP_VERB, TOOL_LINKS } from '@/lib/site';
+import { getT } from '@/lib/i18n/server';
 
 /**
  * The pager at the foot of a result.
@@ -14,7 +15,7 @@ import { JOURNEY, STEP_VERB, TOOL_LINKS } from '@/lib/site';
  * to work out which one is adjacent, and the whole point of a pager is that the
  * next step should take no thought.
  */
-export function JourneyPager({
+export async function JourneyPager({
   current,
   query,
 }: {
@@ -22,7 +23,9 @@ export function JourneyPager({
   /** The chart, carried to every step so the pager never drops it. */
   query: string;
 }) {
-  const byFeature = new Map(TOOL_LINKS.map((t) => [t.feature as string, t]));
+  const { t } = await getT();
+  const verb = (f: string) => t(`step.${f}`, STEP_VERB[f]);
+  const byFeature = new Map(TOOL_LINKS.map((tool) => [tool.feature as string, tool]));
   const index = JOURNEY.indexOf(current as (typeof JOURNEY)[number]);
   if (index === -1 || !query) return null;
 
@@ -33,7 +36,7 @@ export function JourneyPager({
 
   return (
     <nav
-      aria-label="Move through the chart"
+      aria-label={t('pager.aria')}
       className="no-print mt-14 border-t pt-8"
       style={{ borderColor: 'var(--border-subtle)' }}
     >
@@ -49,8 +52,8 @@ export function JourneyPager({
               <span aria-hidden className="mr-1.5">
                 ‹
               </span>
-              <span className="hidden sm:inline">{STEP_VERB[previous]}</span>
-              <span className="sm:hidden">Back</span>
+              <span className="hidden sm:inline">{verb(previous)}</span>
+              <span className="sm:hidden">{t('pager.back')}</span>
             </Link>
           ) : (
             <span
@@ -67,7 +70,7 @@ export function JourneyPager({
           const isCurrent = feature === current;
           const tool = byFeature.get(feature);
           if (!tool) return null;
-          const name = `${STEP_VERB[feature]} — ${tool.label}`;
+          const name = `${verb(feature)} — ${tool.label}`;
 
           return (
             <li key={feature}>
@@ -111,8 +114,8 @@ export function JourneyPager({
               className="flex min-h-11 items-center rounded-full px-3 text-sm"
               style={{ color: 'var(--color-gold-300)' }}
             >
-              <span className="hidden sm:inline">{STEP_VERB[next]}</span>
-              <span className="sm:hidden">Next</span>
+              <span className="hidden sm:inline">{verb(next)}</span>
+              <span className="sm:hidden">{t('pager.next')}</span>
               <span aria-hidden className="ml-1.5">
                 ›
               </span>
