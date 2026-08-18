@@ -33,9 +33,15 @@ export default async function DashboardLayout({
         offered is in the account menu, including Admin, so the dashboard is just
         the dashboard now.
       */}
-      <div className="flex min-h-screen flex-col">
-        <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-10">{children}</main>
-      </div>
+      {/*
+        `min-h-screen` used to sit here, on a wrapper that already lives below the
+        site header, so the content area was a full viewport tall *plus* the header
+        and the page opened with a large gap above "Welcome back". The parent
+        layout already makes this region grow; this only needs the same measure and
+        rhythm the tool pages use, so moving between them does not feel like
+        landing on a different site.
+      */}
+      <main className="mx-auto w-full max-w-5xl px-5 py-12 sm:py-16">{children}</main>
     </>
   );
 }

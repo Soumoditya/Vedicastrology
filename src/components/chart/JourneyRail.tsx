@@ -69,42 +69,42 @@ export async function JourneyRail({
   return (
     <nav
       aria-label={translate('rail.aria')}
-      className="no-print relative mb-10"
+      className="no-print relative mb-10 rounded-2xl border p-5 sm:p-6"
+      style={{
+        /* Its own panel. Loose on the page the rail read as stray links above the
+           content; inside a surface it reads as the navigation for what follows,
+           and the steps stop crowding the heading beneath them. */
+        borderColor: 'var(--border-subtle)',
+        background: 'color-mix(in oklab, var(--surface-raised) 60%, transparent)',
+      }}
     >
       <p className="text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
         {translate('rail.path')}
       </p>
 
       {/*
-        Seven numbers on one line, at every width.
+        A path that looks like a path.
 
-        This was seven chips each carrying a number and a two-line label, in a
-        horizontally scrolling list. At 375px that measured 825px inside a 335px
-        box: five of the seven steps were off screen behind a scrollbar, the
-        labels wrapped to three lines, and the whole thing changed shape from tool
-        to tool because each page had picked its own content width.
+        The steps are joined by a line, because that is what tells you at a glance
+        that these are stages of one reading rather than seven unrelated links, and
+        it was the thing the numbers-only version lost. Each step is an equal
+        column with its disc centred and its name underneath, so the labels no
+        longer have to fit *between* the discs — which is what made seven labels
+        impossible on anything narrower than 1024px. Now they sit below, where
+        there is room for two lines.
 
-        Fitting seven labels on one line is not possible at a phone width and only
-        just possible at 1024px, so the labels are not the thing to preserve — the
-        *path* is. Numbers always, one line, 44px targets, and the step you are on
-        named underneath where there is room to say it properly. Each number
-        carries its full name for a screen reader and as a tooltip.
+        The connector is drawn per step rather than as one line behind everything:
+        a full-width hairline on each column except the first, shifted half a
+        column left, so it runs from the previous disc's centre to this one's and
+        cannot overshoot either end. Completed stretches are gold, the rest are the
+        subtle border, so the line carries progress as well as structure.
+
+        Discs stay 44px at every size. Labels are hidden below `lg` and the step is
+        named once underneath instead, because seven two-line labels genuinely do
+        not fit a phone and shrinking them to make them fit is how you get
+        something nobody can read.
       */}
-      {/*
-        Seven 44px targets need 308px before any gap, and a 375px phone leaves
-        about 320px inside the page padding. Fixed gaps overflowed it by 24px, so
-        below `sm` the row fills the width and distributes whatever is left over
-        as the gaps: `justify-between` cannot exceed its container, so the row can
-        never scroll however narrow the screen gets, and the targets stay 44px.
-
-        At 320px even that is not enough — seven 44px targets are 308px and the
-        content box is 265px — so below `sm` the row is allowed to wrap onto a
-        second line. Wrapping keeps the targets touchable and keeps the scrollbar
-        away, which is the right trade: shrinking the circles to fit would put
-        them under the 44px minimum on exactly the devices where that matters
-        most.
-      */}
-      <ol className="mt-3 flex w-full flex-wrap items-center justify-between gap-y-1.5 sm:w-auto sm:flex-nowrap sm:justify-start sm:gap-1.5 lg:gap-0.5">
+      <ol className="mt-4 flex items-start">
         {JOURNEY.map((feature, i) => {
           const tool = byFeature.get(feature);
           if (!tool) return null;
@@ -112,72 +112,81 @@ export async function JourneyRail({
           const isCurrent = feature === current;
           const refused = !isCurrent && access[feature] && !access[feature].allowed;
           const done = currentIndex >= 0 && i < currentIndex;
-          const name = `${translate(`step.${feature}`, STEP_VERB[feature])} — ${tool.label}${refused ? ' (members)' : ''}`;
+          const verb = translate(`step.${feature}`, STEP_VERB[feature]);
+          const name = `${verb} — ${tool.label}${refused ? ' (members)' : ''}`;
 
-          /*
-            Two shapes, one component.
-
-            From `lg` up there is room for the labelled version — the one that was
-            asked for back — so the chip carries a small numbered disc and the
-            step's name on two lines. Below `lg` seven labels cannot fit (they need
-            about 994px and a phone has 335px), so the chip collapses to the disc
-            alone at a full 44px, and the step is named once underneath instead.
-            Same markup, same order, same targets; only the amount said out loud
-            changes.
-          */
-          const dot = (
+          const disc = (
             <span
-              className="flex min-h-11 items-center gap-2 rounded-full px-1 lg:px-2.5"
+              className="relative z-10 grid h-11 w-11 place-items-center rounded-full text-sm
+                         transition-colors duration-300"
               style={{
                 background: isCurrent
-                  ? 'color-mix(in oklab, var(--color-gold-500) 12%, transparent)'
+                  ? 'linear-gradient(135deg, var(--color-gold-300), var(--color-gold-500))'
+                  : done
+                    ? 'color-mix(in oklab, var(--color-gold-500) 20%, var(--surface))'
+                    : 'var(--surface)',
+                border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
+                color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
+                boxShadow: isCurrent
+                  ? '0 0 0 4px color-mix(in oklab, var(--color-gold-500) 18%, transparent)'
                   : undefined,
               }}
             >
-              <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm
-                           transition-colors duration-300 lg:h-6 lg:w-6 lg:text-[0.7rem]"
-                style={{
-                  background: isCurrent
-                    ? 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))'
-                    : done
-                      ? 'color-mix(in oklab, var(--color-gold-500) 18%, transparent)'
-                      : 'transparent',
-                  border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
-                  color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
-                }}
-              >
-                <span className="numeric">{i + 1}</span>
-              </span>
+              <span className="numeric">{i + 1}</span>
+            </span>
+          );
 
-              <span className="hidden flex-col leading-tight lg:flex">
-                <span
-                  className="whitespace-nowrap text-xs font-medium"
-                  style={{ color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
-                >
-                  {translate(`step.${feature}`, STEP_VERB[feature])}
-                </span>
-                <span
-                  className="whitespace-nowrap text-[0.65rem]"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {tool.label}
-                  {refused ? ' · members' : ''}
-                </span>
+          const label = (
+            <span className="mt-2.5 hidden flex-col text-center lg:flex">
+              <span
+                className="text-xs font-medium leading-tight"
+                style={{ color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
+              >
+                {verb}
+              </span>
+              <span
+                className="mt-0.5 text-[0.65rem] leading-tight"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {tool.label}
+                {refused ? ' · members' : ''}
               </span>
             </span>
           );
 
           return (
-            <li key={feature}>
+            <li key={feature} className="relative flex flex-1 flex-col items-center">
+              {i > 0 && (
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-[22px] h-px w-full -translate-x-1/2"
+                  style={{
+                    background: done || isCurrent
+                      ? 'color-mix(in oklab, var(--color-gold-500) 45%, transparent)'
+                      : 'var(--border-subtle)',
+                  }}
+                />
+              )}
+
               {isCurrent || !suffix ? (
-                <div aria-current={isCurrent ? 'step' : undefined} title={name}>
+                <div
+                  aria-current={isCurrent ? 'step' : undefined}
+                  title={name}
+                  className="flex flex-col items-center"
+                >
                   <span className="sr-only">{name}</span>
-                  {dot}
+                  {disc}
+                  {label}
                 </div>
               ) : (
-                <Link href={`${tool.href}?${suffix}`} title={name} aria-label={name}>
-                  {dot}
+                <Link
+                  href={`${tool.href}?${suffix}`}
+                  title={name}
+                  aria-label={name}
+                  className="flex flex-col items-center"
+                >
+                  {disc}
+                  {label}
                 </Link>
               )}
             </li>
@@ -185,9 +194,9 @@ export async function JourneyRail({
         })}
       </ol>
 
-      {/* The step you are on, named where there is room for its full name. */}
+      {/* The step you are on, named where the labels are hidden. */}
       {currentIndex >= 0 && (
-        <p className="mt-2.5 text-sm lg:hidden" style={{ color: 'var(--text-secondary)' }}>
+        <p className="mt-3 text-sm lg:hidden" style={{ color: 'var(--text-secondary)' }}>
           <span className="numeric" style={{ color: 'var(--color-gold-300)' }}>
             {currentIndex + 1}
           </span>
@@ -210,7 +219,10 @@ export async function JourneyRail({
         an order that does not exist. Kept visible because these three are what
         people arrive already worried about.
       */}
-      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      <div
+        className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-5"
+        style={{ borderColor: 'var(--border-subtle)' }}
+      >
         <span className="text-[0.65rem] uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
           {translate('rail.checks')}
         </span>
@@ -232,7 +244,7 @@ export async function JourneyRail({
             <span
               key={feature}
               aria-current={isCurrent ? 'page' : undefined}
-              className="rounded-full px-2.5 py-1 text-[0.7rem]"
+              className="flex min-h-11 items-center rounded-full px-3.5 text-xs"
               style={{
                 background: isCurrent
                   ? 'color-mix(in oklab, var(--color-gold-500) 12%, transparent)'
@@ -246,7 +258,7 @@ export async function JourneyRail({
             <Link
               key={feature}
               href={`${tool.href}?${suffix}`}
-              className="rounded-full border px-2.5 py-1 text-[0.7rem] transition-colors duration-300"
+              className="flex min-h-11 items-center rounded-full border px-3.5 text-xs transition-colors duration-300"
               style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
               {label}
@@ -264,15 +276,18 @@ export async function JourneyRail({
         */}
         {suffix && (
           <>
-            <span
-              aria-hidden
-              className="mx-1 h-3 w-px shrink-0"
-              style={{ background: 'var(--border-subtle)' }}
-            />
+            {/* Pushed to its own end of the row, so the three checks read as a
+                group and this reads as the destination it is. */}
+            <span className="ml-auto" />
             <Link
               href={`/report?${suffix}`}
-              className="inline-flex items-center gap-1 px-1 py-1 text-[0.7rem] transition-colors duration-300"
-              style={{ color: 'var(--text-secondary)' }}
+              className="flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-xs
+                         font-medium transition-colors duration-300"
+              style={{
+                borderColor: 'var(--color-gold-600)',
+                background: 'color-mix(in oklab, var(--color-gold-500) 10%, transparent)',
+                color: 'var(--color-gold-200)',
+              }}
             >
               {translate('rail.fullReport')}
               <span aria-hidden>→</span>

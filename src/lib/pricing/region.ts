@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { cookies, headers } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
@@ -23,14 +25,19 @@ import type {
 /** Cookie holding a visitor's explicit currency choice, by region code. */
 export const REGION_COOKIE = 'va_region';
 
-export async function getRegions(): Promise<Region[]> {
+/*
+  Cached per request. The pricing regions are a small, rarely-changing table, and
+  the header, the footer and any page showing a price all ask for them. Each ask
+  was a separate round trip to a database on another continent.
+*/
+export const getRegions = cache(async (): Promise<Region[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from('regions')
     .select('*')
     .order('sort_order', { ascending: true });
   return (data as Region[] | null) ?? [];
-}
+});
 
 /**
  * The region to price in, resolved in this order:

@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
@@ -57,26 +58,32 @@ export function createAdminClient() {
   });
 }
 
-/** The signed-in user, or null. */
-export async function getUser() {
+/**
+ * The signed-in user, or null.
+ *
+ * `cache` matters more here than it looks. `auth.getUser()` revalidates the token
+ * against Supabase, so it is a network round trip, and the database is in Mumbai.
+ * A tool page asks for the user from the layout, the result shell, the saved-chart
+ * picker and the feature gate, and without deduplication that is four round trips
+ * for one answer that cannot have changed mid-render.
+ */
+export const getUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});
 
 /**
  * The signed-in user's profile, including their role.
  * Returns null when signed out.
  */
-export async function getProfile() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export const getProfile = cache(async () => {
+  const user = await getUser();
   if (!user) return null;
 
+  const supabase = await createClient();
   const { data } = await supabase
     .from('profiles')
     .select('*')
@@ -84,7 +91,7 @@ export async function getProfile() {
     .single();
 
   return data;
-}
+});
 
 /** Whether the current visitor is an admin. Used to gate /admin. */
 export async function isAdmin(): Promise<boolean> {
