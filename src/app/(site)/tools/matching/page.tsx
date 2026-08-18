@@ -263,7 +263,7 @@ export default async function MatchingPage({
                     </span>
                   </div>
                   <span
-                    className="font-display text-lg tabular-nums"
+                    className="numeric text-lg"
                     style={{
                       color:
                         koot.score === koot.maximum

@@ -326,7 +326,7 @@ function Fact({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p
-        className="font-display mt-1.5 text-2xl tabular-nums"
+        className="numeric mt-1.5 text-2xl"
         style={{ color: 'var(--text-primary)' }}
       >
         {value}

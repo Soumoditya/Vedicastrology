@@ -61,6 +61,16 @@
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-quote: var(--font-cormorant), Georgia, serif;
 
+  /* -- Figures. -----------------------------------------------------------
+        Marcellus ships no lining figures and its advance widths are wildly
+        uneven: at 100px its `1` is 29.5px against `0` at 80.6px. In running
+        display type that is a Roman flourish; on a chart it is a defect,
+        because "10" reads as IO and "11" as II, and on a kundli the numbers
+        are the content. `font-variant-numeric` cannot rescue a face that has
+        no such feature, so anything a reader has to *read as a number* is set
+        in Inter instead, which has proper tabular lining figures. --------- */
+  --font-numeric: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
   /* -- Motion. One family of curves, so movement feels like one hand. --- */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
@@ -187,6 +197,16 @@ body::after {
 
 @utility font-quote {
   font-family: var(--font-quote);
+}
+
+/*
+  Figures that are read as figures: chart numerals, degrees, dates, table
+  columns. Tabular so columns align down the page, lining so they sit on one
+  baseline, and never the display face. See --font-numeric.
+*/
+@utility numeric {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 /* Small tracked caps. The counterweight to very large display type. */
@@ -1150,6 +1170,18 @@ body::after {
 :root:lang(hi) .font-display,
 :root:lang(bn) .font-display {
   line-height: 1.35;
+}
+
+/*
+  Figures stay figures in every language. Without this, `:root:lang(bn)
+  .font-display` outranks `.numeric` on specificity and a chart's rashi
+  numbers get set in a Bengali face on a Bengali page. Indic digits are a
+  deliberate choice to make one day, not something to arrive at by accident
+  through a cascade.
+*/
+:root:lang(hi) .numeric,
+:root:lang(bn) .numeric {
+  font-family: var(--font-numeric);
 }
 
 /*

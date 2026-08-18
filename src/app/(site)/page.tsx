@@ -209,7 +209,7 @@ export default function HomePage() {
                   className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 border-t py-7 transition-colors duration-500 sm:gap-6"
                 >
                   <span
-                    className="font-display text-sm tabular-nums"
+                    className="numeric text-sm"
                     style={{ color: 'var(--color-gold-600)' }}
                   >
                     {String(i + 1).padStart(2, '0')}

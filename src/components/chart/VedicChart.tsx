@@ -218,7 +218,14 @@ export function VedicChart({
                   }
                   fontWeight={isAscendant ? 600 : 400}
                   opacity={isAscendant ? 1 : 0.75}
-                  style={{ fontFamily: 'var(--font-display)' }}
+                  /* Inter, not the display face: Marcellus has no lining
+                     figures, so its 1 and 0 read as I and O and the rashi
+                     numbers — the actual content of the chart — become
+                     unreadable. */
+                  style={{
+                    fontFamily: 'var(--font-numeric)',
+                    fontVariantNumeric: 'tabular-nums lining-nums',
+                  }}
                 >
                   {house.rashi + 1}
                 </text>
