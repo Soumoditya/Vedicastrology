@@ -9,10 +9,10 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 import type { YogaResult } from '@/lib/astro/types';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 /**
  * The share card is built from the birth details in the query, so a link to
@@ -122,20 +122,14 @@ export default async function YogaPage({ searchParams }: { searchParams: SearchP
   const maxSarva = Math.max(...av.sarva);
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
-        <JourneyRail current="yogas" params={params} />
-        <p className="eyebrow" data-reveal>Yoga, Doṣa, Aṣṭakavarga</p>
-        <h1
-          className="font-display mt-4 text-3xl sm:text-4xl"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          {parsed.displayName ? `${parsed.displayName}'s combinations` : 'Your combinations'}
-        </h1>
+    <ToolResult
+      feature="yogas"
+      params={params}
+      eyebrow="Yoga, Doṣa, Aṣṭakavarga"
+      title={parsed.displayName ? `${parsed.displayName}'s combinations` : 'Your combinations'}
+      action="/tools/yogas"
+      submitLabel="Read this chart"
+    >
 
         <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3" data-reveal>
           <Count value={report.yogas.length} label={report.yogas.length === 1 ? 'yoga' : 'yogas'} />
@@ -446,15 +440,8 @@ export default async function YogaPage({ searchParams }: { searchParams: SearchP
           </div>
         </section>
 
-        <section className="mt-16 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/yogas" />
-            <BirthForm action="/tools/yogas" submitLabel="Read this chart" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }
 

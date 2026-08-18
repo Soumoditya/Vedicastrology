@@ -189,9 +189,16 @@ export default async function MatchingPage({
       <Reveal />
       <div className="starfield" aria-hidden />
 
-      <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
-        {/* The path continues on the first person's chart, so there is a way
-            onward from a match rather than a dead stop. */}
+      {/*
+        Same frame as every other tool: max-w-5xl and the same vertical rhythm as
+        the `ToolResult` shell. This page keeps its own markup rather than moving
+        onto the shell, because a match is two charts and the shell resolves one —
+        forcing it through would mean teaching the shell about a case it does not
+        have. What had to be shared is the frame, and that is shared.
+      */}
+      <div className="report-body relative mx-auto max-w-5xl px-5 py-12 sm:py-16">
+        {/* The path continues on the bride's chart, so there is a way onward
+            from a match rather than a dead stop. */}
         <JourneyRail current="matching" query={personQuery(bride)} />
         <p className="eyebrow" data-reveal>Guṇa Milan</p>
         <h1

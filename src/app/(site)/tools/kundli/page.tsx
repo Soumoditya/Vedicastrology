@@ -13,13 +13,12 @@ import { getNames } from '@/lib/i18n/server';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
-import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
 import { getUser } from '@/lib/supabase/server';
 import { chartStyleFor, getSettings } from '@/lib/account/settings';
 import { allowed } from '@/lib/features/flags';
+import { ToolResult } from '@/components/chart/ToolResult';
 import {
   ChartWorkspace,
   type WorkspaceHouse,
@@ -150,40 +149,30 @@ export default async function KundliPage({
   const local = DateTime.fromISO(chart.meta.utcISO).setZone(zone);
 
   return (
-    <div className="relative report-body">
-      <div className="starfield" aria-hidden />
-
-      {/* On paper only: a branded cover and a footer that rides every page. */}
-      <ReportCover
-        title={displayName ? `${displayName}’s birth chart` : 'Vedic birth chart'}
-        subtitle={`${local.toFormat('d LLLL yyyy')}${
+    <ToolResult
+      feature="kundli"
+      params={params}
+      footer
+      cover={{
+        title: displayName ? `${displayName}’s birth chart` : 'Vedic birth chart',
+        subtitle: `${local.toFormat('d LLLL yyyy')}${
           chart.meta.timeUnknown ? '' : ` · ${local.toFormat('HH:mm')}`
-        } · ${birth.place.name}`}
-      />
-      <ReportFooter />
-
-      <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
-        <JourneyRail current="kundli" params={params} />
-        <header className="mb-10">
-          <p
-            className="text-xs uppercase tracking-[0.28em]"
-            style={{ color: 'var(--color-gold-600)' }}
-          >
-            Janma Kundli
-          </p>
-          <h1
-            className="font-display mt-2 text-3xl sm:text-4xl"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            {displayName ? `${displayName}’s chart` : 'Birth chart'}
-          </h1>
-          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            {local.toFormat('d LLLL yyyy')}
-            {!chart.meta.timeUnknown && ` · ${local.toFormat('HH:mm')}`}
-            {' · '}
-            {birth.place.name}
-          </p>
-        </header>
+        } · ${birth.place.name}`,
+      }}
+      eyebrow="Janma Kundli"
+      title={displayName ? `${displayName}’s chart` : 'Birth chart'}
+      meta={
+        <>
+          {local.toFormat('d LLLL yyyy')}
+          {!chart.meta.timeUnknown && ` · ${local.toFormat('HH:mm')}`}
+          {' · '}
+          {birth.place.name}
+        </>
+      }
+      action="/tools/kundli"
+      submitLabel="Cast the chart"
+      anotherLabel="Another chart"
+    >
 
         {chart.meta.timeUnknown && (
           <Notice tone="warn">
@@ -412,16 +401,8 @@ export default async function KundliPage({
           for {zone}, using the historical rule in force on that date.
         </section>
 
-        {/* Recast */}
-        <section className="mt-12 no-print">
-          <SectionHeading eyebrow="Another chart" title="Cast a different chart" />
-          <div className="surface-card max-w-xl p-6">
-            <SavedChartPicker action="/tools/kundli" />
-            <BirthForm action="/tools/kundli" submitLabel="Cast the chart" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }
 

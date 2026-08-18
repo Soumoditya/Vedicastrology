@@ -15,9 +15,9 @@ import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { formatDms } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 /**
  * The share card is built from the birth details in the query, so a link to
@@ -133,24 +133,20 @@ export default async function TransitsPage({
   const fmt = (d: Date) => DateTime.fromJSDate(d).setZone(zone).toFormat('d LLL yyyy');
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-20">
-        <JourneyRail current="transits" params={params} />
-        <p className="eyebrow" data-reveal>Gochara</p>
-        <h1
-          className="font-display mt-4 text-3xl sm:text-4xl"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          {parsed.displayName ? `${parsed.displayName}'s transits` : 'Your transits'}
-        </h1>
-        <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+    <ToolResult
+      feature="transits"
+      params={params}
+      eyebrow="Gochara"
+      title={parsed.displayName ? `${parsed.displayName}'s transits` : 'Your transits'}
+      meta={
+        <>
           {DateTime.now().setZone(zone).toFormat('cccc, d LLLL yyyy')} · read from
           your Moon in {RASHI_NAMES_EN[chart.byGraha.Moon.rashi]}
-        </p>
+        </>
+      }
+      action="/tools/transits"
+      submitLabel="Show transits"
+    >
 
         {/* Sade Sati, first because it is what people came for */}
         <section className="mt-10" data-reveal>
@@ -317,14 +313,7 @@ export default async function TransitsPage({
           </section>
         )}
 
-        <section className="mt-12 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/transits" />
-            <BirthForm action="/tools/transits" submitLabel="Show transits" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }

@@ -13,10 +13,10 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 import type { DashaPeriod } from '@/lib/astro/types';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 /**
  * The share card is built from the birth details in the query, so a link to
@@ -121,20 +121,20 @@ export default async function DashaPage({ searchParams }: { searchParams: Search
   const moon = chart.byGraha.Moon;
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
-        <JourneyRail current="dasha" params={params} />
-        <p className="eyebrow" data-reveal>Vimśottarī Daśā</p>
-        <h1 className="font-display mt-4 text-3xl sm:text-4xl" style={{ color: 'var(--text-primary)' }} data-reveal>
-          {parsed.displayName ? `${parsed.displayName}'s periods` : 'Your periods'}
-        </h1>
-        <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+    <ToolResult
+      feature="dasha"
+      params={params}
+      eyebrow="Vimśottarī Daśā"
+      title={parsed.displayName ? `${parsed.displayName}'s periods` : 'Your periods'}
+      meta={
+        <>
           Seeded from the Moon in {NAKSHATRA_NAMES[moon.nakshatra]}, pada {moon.pada}.
           {' '}{formatBalance(tree)}.
-        </p>
+        </>
+      }
+      action="/tools/dasha"
+      submitLabel="Show periods"
+    >
 
         {active && (
           <div className="surface-card mt-8 p-7" data-reveal="scale">
@@ -189,15 +189,8 @@ export default async function DashaPage({ searchParams }: { searchParams: Search
           </section>
         )}
 
-        <section className="mt-12 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/dasha" />
-            <BirthForm action="/tools/dasha" submitLabel="Show periods" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }
 
