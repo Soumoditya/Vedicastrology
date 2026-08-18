@@ -239,6 +239,7 @@ export default async function KundliPage({
               placeName: birth.place.name,
               latitude: birth.place.latitude,
               longitude: birth.place.longitude,
+              gender: parsed.gender,
             }}
           />
         </section>

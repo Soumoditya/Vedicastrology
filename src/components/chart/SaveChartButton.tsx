@@ -18,6 +18,8 @@ export interface SaveChartButtonProps {
     placeName: string;
     latitude: number;
     longitude: number;
+    /** Carried through so a saved chart knows it, for comparing two charts. */
+    gender?: string;
   };
 }
 
@@ -109,6 +111,7 @@ export function SaveChartButton({ signedIn, defaultLabel, birth }: SaveChartButt
       <input type="hidden" name="place_name" value={birth.placeName} />
       <input type="hidden" name="latitude" value={birth.latitude} />
       <input type="hidden" name="longitude" value={birth.longitude} />
+      {birth.gender && <input type="hidden" name="gender" value={birth.gender} />}
 
       <div>
         <label

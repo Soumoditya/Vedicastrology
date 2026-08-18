@@ -22,8 +22,18 @@ export interface BirthFormValues {
   date: string;
   time: string;
   timeUnknown: boolean;
+  gender: Gender | '';
   place: PlaceResult | null;
 }
+
+/**
+ * Withheld is a real answer, not a missing one.
+ *
+ * Kept distinct from an empty value so a chart can record that the question was
+ * put and declined, and the results that depend on it can say so rather than
+ * quietly assuming.
+ */
+export type Gender = 'male' | 'female' | 'undisclosed';
 
 export function BirthForm({
   action,
@@ -39,6 +49,7 @@ export function BirthForm({
   const [date, setDate] = useState(initial?.date ?? '');
   const [time, setTime] = useState(initial?.time ?? '');
   const [timeUnknown, setTimeUnknown] = useState(initial?.timeUnknown ?? false);
+  const [gender, setGender] = useState<Gender | ''>(initial?.gender ?? '');
   const [place, setPlace] = useState<PlaceResult | null>(initial?.place ?? null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -54,6 +65,9 @@ export function BirthForm({
         'Please enter the time of birth, or tick “I don’t know the time”.',
       );
     }
+    if (!gender) {
+      return setError('Please choose one of the three options under Gender.');
+    }
 
     setSubmitting(true);
 
@@ -68,6 +82,7 @@ export function BirthForm({
       place: place.label,
       name: name || undefined,
       timeUnknown,
+      gender,
     });
 
     router.push(`${action}?${query}`);
@@ -123,6 +138,62 @@ export function BirthForm({
           />
         </Field>
       </div>
+
+      {/*
+        Asked, and said why.
+
+        Guna Milan counts Varna and Tara from the bride's chart to the groom's, so
+        a comparison needs to know which chart is which — and the page was deciding
+        that from whichever form happened to be filled in first. Nothing else in a
+        chart changes, and saying so plainly is better than letting somebody wonder
+        what is being done with it.
+      */}
+      <fieldset>
+        <legend className="mb-1.5 text-xs font-medium uppercase tracking-[0.12em]"
+                style={{ color: 'var(--text-secondary)' }}>
+          Gender
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ['female', 'Female'],
+              ['male', 'Male'],
+              ['undisclosed', 'Prefer not to say'],
+            ] as [Gender, string][]
+          ).map(([value, label]) => {
+            const chosen = gender === value;
+            return (
+              <label
+                key={value}
+                className="flex min-h-11 cursor-pointer items-center rounded-lg border px-3.5 text-sm
+                           transition-colors duration-200"
+                style={{
+                  borderColor: chosen ? 'var(--color-gold-500)' : 'var(--border-subtle)',
+                  background: chosen
+                    ? 'color-mix(in oklab, var(--color-gold-500) 12%, transparent)'
+                    : 'transparent',
+                  color: chosen ? 'var(--color-gold-200)' : 'var(--text-secondary)',
+                }}
+              >
+                <input
+                  type="radio"
+                  name={`${uid}-gender`}
+                  value={value}
+                  checked={chosen}
+                  onChange={() => setGender(value)}
+                  className="sr-only"
+                />
+                {label}
+              </label>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          Used only where a classical rule needs it: comparing two charts counts
+          some of the eight koots from the bride&rsquo;s chart to the groom&rsquo;s.
+          Nothing else in your chart depends on it.
+        </p>
+      </fieldset>
 
       <label className="flex cursor-pointer items-start gap-2.5 text-sm">
         <input

@@ -172,3 +172,85 @@ describe('mangal dosha', () => {
     }
   });
 });
+
+/*
+  Why the form has to name the bride and the groom.
+
+  `matchCharts(bride, groom)` is directional and always was: Varna awards its
+  point when the groom's varna equals or exceeds the bride's, and Tara counts
+  forward from the bride's nakshatra. The form, though, asked for a "first
+  person" and a "second person" and handed them over in the order they were
+  typed, so the score depended on which box was filled in first and nothing said
+  so.
+
+  These assert the property that makes the labelling load-bearing: swap the two
+  charts and the score can change. If this ever stops being true, the naming
+  stops mattering and this test should be the thing that says so.
+*/
+describe('the order of the two charts matters', () => {
+  /*
+    Rather than hand-pick a date pair and hope, sweep a spread of charts and
+    assert that asymmetry exists at all. Hand-picked dates are brittle — the first
+    pair I tried happened to score the same both ways, which proves nothing about
+    the engine and everything about the choice of dates.
+  */
+  const at = (year: number, month: number, day: number, hour: number) =>
+    castChart({
+      year,
+      month,
+      day,
+      hour,
+      minute: 0,
+      timeUnknown: false,
+      place: {
+        name: 'Kolkata',
+        latitude: 22.5726,
+        longitude: 88.3639,
+        timezone: 'Asia/Kolkata',
+      },
+    });
+
+  const charts = [
+    at(1990, 1, 12, 7),
+    at(1990, 4, 3, 11),
+    at(1991, 6, 19, 15),
+    at(1992, 9, 27, 20),
+    at(1993, 12, 8, 4),
+    at(1994, 2, 14, 9),
+  ];
+
+  it('scores at least one pair differently when bride and groom are swapped', () => {
+    const asymmetric: string[] = [];
+
+    for (let i = 0; i < charts.length; i++) {
+      for (let j = i + 1; j < charts.length; j++) {
+        const forward = matchCharts(charts[i], charts[j]);
+        const reversed = matchCharts(charts[j], charts[i]);
+        if (forward.total !== reversed.total) {
+          asymmetric.push(`${i}x${j}: ${forward.total} vs ${reversed.total}`);
+        }
+      }
+    }
+
+    expect(
+      asymmetric.length,
+      'no pair scored differently when swapped, which would make the bride and ' +
+        'groom labels decorative rather than load-bearing',
+    ).toBeGreaterThan(0);
+  });
+
+  it('keeps Bhakoot mutual, which is deliberate', () => {
+    const one = castChart(
+      { year: 1988, month: 11, day: 4, hour: 9, minute: 0, timeUnknown: false,
+        place: { name: 'Chennai', latitude: 13.0827, longitude: 80.2707, timezone: 'Asia/Kolkata' } },
+    );
+    const two = castChart(
+      { year: 1991, month: 5, day: 21, hour: 20, minute: 45, timeUnknown: false,
+        place: { name: 'Pune', latitude: 18.5204, longitude: 73.8567, timezone: 'Asia/Kolkata' } },
+    );
+
+    const a = matchCharts(one, two).koots.find((k) => k.name === 'Bhakoot')!.score;
+    const b = matchCharts(two, one).koots.find((k) => k.name === 'Bhakoot')!.score;
+    expect(a).toBe(b);
+  });
+});

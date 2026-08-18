@@ -75,11 +75,21 @@ export function MatchForm({ prefillA }: { prefillA?: MatchPrefill }) {
 
   return (
     <form onSubmit={submit} className="space-y-8" noValidate>
-      <PersonFields legend="First person" person={a} onChange={setA} idPrefix="a" />
+      {/*
+        Bride and groom, not first and second.
+
+        Varna and Tara are counted from the bride's chart to the groom's, so the
+        engine's `matchCharts(bride, groom)` is directional and always was. The
+        form, though, asked for a "first person" and a "second person" and passed
+        them in the order they were typed — so the score quietly depended on which
+        box somebody filled in first, and nothing on the page said so. Naming the
+        two roles is the whole fix.
+      */}
+      <PersonFields legend="Bride" person={a} onChange={setA} idPrefix="a" />
 
       <div className="rule-gold" />
 
-      <PersonFields legend="Second person" person={b} onChange={setB} idPrefix="b" />
+      <PersonFields legend="Groom" person={b} onChange={setB} idPrefix="b" />
 
       {error && (
         <p

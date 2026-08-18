@@ -199,7 +199,7 @@ export default async function MatchingPage({
           style={{ color: 'var(--text-primary)' }}
           data-reveal
         >
-          {bride.name ?? 'First person'} and {groom.name ?? 'Second person'}
+          {bride.name ?? 'The bride'} and {groom.name ?? 'The groom'}
         </h1>
 
         {/* The score */}
@@ -230,8 +230,8 @@ export default async function MatchingPage({
 
         {/* Both Moons */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <MoonCard label={bride.name ?? 'First person'} data={result.bride} />
-          <MoonCard label={groom.name ?? 'Second person'} data={result.groom} />
+          <MoonCard label={bride.name ?? 'The bride'} data={result.bride} />
+          <MoonCard label={groom.name ?? 'The groom'} data={result.groom} />
         </div>
 
         {/* Koot by koot */}
@@ -304,8 +304,8 @@ export default async function MatchingPage({
         <section className="mt-12">
           <h2 className="eyebrow" data-reveal>Mangal dosha</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <MangalCard label={bride.name ?? 'First person'} dosha={result.mangal.bride} />
-            <MangalCard label={groom.name ?? 'Second person'} dosha={result.mangal.groom} />
+            <MangalCard label={bride.name ?? 'The bride'} dosha={result.mangal.bride} />
+            <MangalCard label={groom.name ?? 'The groom'} dosha={result.mangal.groom} />
           </div>
           {!result.mangal.balanced && (
             <p
