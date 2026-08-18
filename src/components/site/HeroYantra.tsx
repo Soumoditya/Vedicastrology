@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
+import { svgCoord } from '@/lib/svg-coord';
 
 /**
  * The hero figure, rebuilt.
@@ -111,10 +112,10 @@ export function HeroYantra() {
               return (
                 <line
                   key={`n-${deg}`}
-                  x1={200 + Math.cos(a) * 168}
-                  y1={200 + Math.sin(a) * 168}
-                  x2={200 + Math.cos(a) * 178}
-                  y2={200 + Math.sin(a) * 178}
+                  x1={svgCoord(200 + Math.cos(a) * 168)}
+                  y1={svgCoord(200 + Math.sin(a) * 168)}
+                  x2={svgCoord(200 + Math.cos(a) * 178)}
+                  y2={svgCoord(200 + Math.sin(a) * 178)}
                 />
               );
             })}
@@ -130,10 +131,10 @@ export function HeroYantra() {
               return (
                 <line
                   key={`r-${deg}`}
-                  x1={200 + Math.cos(a) * 132}
-                  y1={200 + Math.sin(a) * 132}
-                  x2={200 + Math.cos(a) * 168}
-                  y2={200 + Math.sin(a) * 168}
+                  x1={svgCoord(200 + Math.cos(a) * 132)}
+                  y1={svgCoord(200 + Math.sin(a) * 132)}
+                  x2={svgCoord(200 + Math.cos(a) * 168)}
+                  y2={svgCoord(200 + Math.sin(a) * 168)}
                 />
               );
             })}
@@ -159,8 +160,8 @@ export function HeroYantra() {
           <g strokeWidth="0.7" opacity="0.5">
             {petals.map((deg) => {
               const a = (deg * Math.PI) / 180;
-              const cx = 200 + Math.cos(a) * 62;
-              const cy = 200 + Math.sin(a) * 62;
+              const cx = svgCoord(200 + Math.cos(a) * 62);
+              const cy = svgCoord(200 + Math.sin(a) * 62);
               return <circle key={`p-${deg}`} cx={cx} cy={cy} r="22" />;
             })}
           </g>

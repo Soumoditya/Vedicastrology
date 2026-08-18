@@ -157,7 +157,15 @@
    ========================================================================== */
 
 html {
-  scroll-behavior: smooth;
+  /* Next flags an unconditional smooth scroll on <html> because it makes route
+     transitions lurch: a navigation animates the scroll position instead of
+     landing. Honouring the attribute keeps anchor links smooth and stops the
+     lurch. */
+  @media (prefers-reduced-motion: no-preference) {
+    &[data-scroll-behavior='smooth'] {
+      scroll-behavior: smooth;
+    }
+  }
   -webkit-text-size-adjust: 100%;
 }
 

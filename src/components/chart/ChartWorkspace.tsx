@@ -147,18 +147,28 @@ export function ChartWorkspace({
             </p>
           </div>
 
+          {/*
+            There was an animated blur layer behind the chart here, a third one
+            on a page that already carries two. It cost a full-size composited
+            surface repainting under an 11s animation, directly behind the one
+            thing on the page a reader is trying to study.
+          */}
           <div className="relative mx-auto max-w-lg">
-            {/* Soft aura behind the chart. */}
-            <div
-              aria-hidden
-              className="aura pointer-events-none absolute inset-0 -z-10 blur-3xl"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--color-gold-500) 22%, transparent), transparent 65%)',
-              }}
-            />
             <VedicChart
-              key={`${active.code}-${chartStyle}`}
+              /*
+                Keyed on the style only, deliberately.
+
+                Keying on the varga too meant choosing D30 destroyed the whole
+                SVG and rebuilt it, replaying a 2s stroke-draw with a 55ms
+                stagger per frame line. That is the drama and most of the lag.
+                The frame is identical for every varga in a given style — only
+                the numbers and the graha placements differ — so without the key
+                React updates those in place and nothing re-animates.
+
+                A style change genuinely is a different drawing, so that one
+                still remounts and still draws itself in.
+              */
+              key={chartStyle}
               data={active.data}
               style={chartStyle}
               showDegrees={active.code === 'D1'}

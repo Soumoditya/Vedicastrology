@@ -1,3 +1,4 @@
+import { svgCoord } from '@/lib/svg-coord';
 /**
  * The wordmark: a small hand-drawn sun-and-ray glyph beside the name.
  *
@@ -24,10 +25,10 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
             return (
               <line
                 key={i}
-                x1={16 + Math.cos(angle) * inner}
-                y1={16 + Math.sin(angle) * inner}
-                x2={16 + Math.cos(angle) * outer}
-                y2={16 + Math.sin(angle) * outer}
+                x1={svgCoord(16 + Math.cos(angle) * inner)}
+                y1={svgCoord(16 + Math.sin(angle) * inner)}
+                x2={svgCoord(16 + Math.cos(angle) * outer)}
+                y2={svgCoord(16 + Math.sin(angle) * outer)}
                 opacity={i % 3 === 0 ? 0.95 : 0.5}
               />
             );

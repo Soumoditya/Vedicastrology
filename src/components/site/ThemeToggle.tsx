@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { svgCoord } from '@/lib/svg-coord';
 
 type Theme = 'dark' | 'light';
 
@@ -64,10 +65,10 @@ export function ThemeToggle() {
                 return (
                   <line
                     key={i}
-                    x1={12 + Math.cos(a) * 6.8}
-                    y1={12 + Math.sin(a) * 6.8}
-                    x2={12 + Math.cos(a) * 9}
-                    y2={12 + Math.sin(a) * 9}
+                    x1={svgCoord(12 + Math.cos(a) * 6.8)}
+                    y1={svgCoord(12 + Math.sin(a) * 6.8)}
+                    x2={svgCoord(12 + Math.cos(a) * 9)}
+                    y2={svgCoord(12 + Math.sin(a) * 9)}
                   />
                 );
               })}

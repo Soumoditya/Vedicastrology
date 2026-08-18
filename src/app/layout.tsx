@@ -110,6 +110,9 @@ export default async function RootLayout({
   return (
     <html
       lang={HTML_LANG[locale]}
+      // Anchor links scroll smoothly; route changes land instead of animating.
+      // See the note on scroll-behavior in globals.css.
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${marcellus.variable} ${inter.variable} ${cormorant.variable} ${devanagari.variable} ${bengali.variable} h-full`}
     >
