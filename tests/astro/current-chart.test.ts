@@ -18,6 +18,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 import { chartQueryString, withChart } from '@/lib/astro/current-chart';
+import { parseBirthQuery, toBirthQueryString } from '@/lib/astro/query';
 import type { BirthProfile } from '@/lib/supabase/types';
 
 const profile = (over: Partial<BirthProfile> = {}): BirthProfile => ({
@@ -85,5 +86,65 @@ describe('withChart', () => {
 
   it('is a no-op with no saved chart, so signed-out visitors still get the form', () => {
     expect(withChart('/tools/kundli', null)).toBe('/tools/kundli');
+  });
+});
+
+/*
+  The regression that mattered most.
+
+  Postgres returns a `time` column as `13:22:00`. `birthQuerySchema` accepts
+  exactly HH:MM. The dashboard passed the stored value straight into a link, so
+  every saved chart with a known birth time produced a URL that failed
+  validation, and the one obvious way to open a saved chart showed "Those birth
+  details weren't valid" and an empty form.
+
+  The invariant worth holding is stronger than "the dashboard is fixed": anything
+  this codebase serialises into a birth query must parse back. So assert the
+  round trip, and assert that a stored time carrying seconds survives it.
+*/
+describe('a birth query always parses back', () => {
+  const stored = {
+    birth_date: '2004-10-12',
+    birth_time: '13:22:00',
+    latitude: 24.1774,
+    longitude: 87.7827,
+    timezone: 'Asia/Kolkata',
+    place_name: 'Rampur Hat, West Bengal, India',
+  };
+
+  it('round-trips a chart built from a stored profile', () => {
+    const q = chartQueryString(profile());
+    const parsed = parseBirthQuery(Object.fromEntries(new URLSearchParams(q)));
+    expect(parsed.birth.hour).toBe(13);
+    expect(parsed.birth.minute).toBe(22);
+    expect(parsed.birth.year).toBe(2004);
+  });
+
+  it('rejects a seconds-bearing time, which is why it has to be sliced', () => {
+    const withSeconds = toBirthQueryString({
+      date: stored.birth_date,
+      time: stored.birth_time, // 13:22:00 — not sliced
+      latitude: stored.latitude,
+      longitude: stored.longitude,
+      timezone: stored.timezone,
+      place: stored.place_name,
+    });
+    expect(() =>
+      parseBirthQuery(Object.fromEntries(new URLSearchParams(withSeconds))),
+    ).toThrow();
+  });
+
+  it('accepts it once sliced to HH:MM', () => {
+    const sliced = toBirthQueryString({
+      date: stored.birth_date,
+      time: stored.birth_time.slice(0, 5),
+      latitude: stored.latitude,
+      longitude: stored.longitude,
+      timezone: stored.timezone,
+      place: stored.place_name,
+    });
+    const parsed = parseBirthQuery(Object.fromEntries(new URLSearchParams(sliced)));
+    expect(parsed.birth.hour).toBe(13);
+    expect(parsed.birth.minute).toBe(22);
   });
 });

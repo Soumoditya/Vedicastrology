@@ -189,7 +189,16 @@ function SavedChart({ saved }: { saved: BirthProfile }) {
 
     query = toBirthQueryString({
       date: saved.birth_date,
-      time: saved.birth_time ?? '12:00',
+      /*
+        Sliced to HH:MM. Postgres hands back a `time` as `13:22:00`, and
+        `birthQuerySchema` requires exactly HH:MM, so passing the stored value
+        straight through built a link that failed validation for every chart with
+        a known birth time — which is to say almost all of them. The one obvious
+        way to open a saved chart led to "Those birth details weren't valid" and
+        an empty form, and that is most of what "I saved my chart and still have
+        to type it in again" was actually describing.
+      */
+      time: (saved.birth_time ?? '12:00').slice(0, 5),
       latitude: saved.latitude,
       longitude: saved.longitude,
       timezone: saved.timezone,
