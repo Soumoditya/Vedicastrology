@@ -7,7 +7,6 @@ import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
-import { PrintButton } from '@/components/chart/PrintButton';
 import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { ToolIntro } from '@/components/chart/ToolIntro';
 import { BirthForm } from '@/components/forms/BirthForm';
@@ -90,7 +89,6 @@ export default async function KalsarpaPage({ searchParams }: { searchParams: Sea
         <ReportCover title="Kālasarpa" subtitle={parsed.displayName ?? undefined} />
 
         <JourneyRail current="kalsarpa" params={params} />
-        <div className="mb-8 flex justify-end"><PrintButton /></div>
 
         <p className="eyebrow" data-reveal>Kālasarpa</p>
         <h1

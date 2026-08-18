@@ -7,7 +7,6 @@ import { birthQuerySchema, toBirthQueryString } from '@/lib/astro/query';
 import { MatchForm } from '@/components/forms/MatchForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
-import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 
@@ -194,7 +193,6 @@ export default async function MatchingPage({
         {/* The path continues on the first person's chart, so there is a way
             onward from a match rather than a dead stop. */}
         <JourneyRail current="matching" query={personQuery(bride)} />
-        <div className="mb-8 flex justify-end"><PrintButton /></div>
         <p className="eyebrow" data-reveal>Guṇa Milan</p>
         <h1
           className="font-display mt-4 text-3xl sm:text-4xl"

@@ -14,7 +14,6 @@ import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
-import { PrintButton } from '@/components/chart/PrintButton';
 import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { SaveChartButton } from '@/components/chart/SaveChartButton';
@@ -156,7 +155,6 @@ export default async function KundliPage({
 
       <div className="relative mx-auto max-w-6xl px-5 py-12 sm:py-16">
         <JourneyRail current="kundli" params={params} />
-        <div className="mb-8 flex justify-end"><PrintButton /></div>
         <header className="mb-10">
           <p
             className="text-xs uppercase tracking-[0.28em]"

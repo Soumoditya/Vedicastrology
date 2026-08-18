@@ -212,15 +212,30 @@ export async function JourneyRail({
           );
         })}
 
-        {/* The whole thing, on paper. */}
+        {/*
+          The whole chart in one document, which is not a "specific check" and
+          was reading as one: it sat fourth in this row wearing a gold border
+          while Manglik, Kalsarpa and Sade Sati wore grey, so it looked like the
+          most important of four things of the same kind. It is a different kind
+          of thing. Separated by a rule and set as a plain link with an arrow, so
+          the row reads "these three checks — and separately, all of it".
+        */}
         {suffix && (
-          <Link
-            href={`/report?${suffix}`}
-            className="rounded-full border px-2.5 py-1 text-[0.7rem]"
-            style={{ borderColor: 'var(--color-gold-600)', color: 'var(--color-gold-200)' }}
-          >
-            Full report
-          </Link>
+          <>
+            <span
+              aria-hidden
+              className="mx-1 h-3 w-px shrink-0"
+              style={{ background: 'var(--border-subtle)' }}
+            />
+            <Link
+              href={`/report?${suffix}`}
+              className="inline-flex items-center gap-1 px-1 py-1 text-[0.7rem] transition-colors duration-300"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Everything, in one document
+              <span aria-hidden>→</span>
+            </Link>
+          </>
         )}
       </div>
     </nav>

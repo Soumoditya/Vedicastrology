@@ -10,7 +10,6 @@ import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
-import { PrintButton } from '@/components/chart/PrintButton';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 import type { YogaResult } from '@/lib/astro/types';
@@ -129,7 +128,6 @@ export default async function YogaPage({ searchParams }: { searchParams: SearchP
 
       <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-20">
         <JourneyRail current="yogas" params={params} />
-        <div className="mb-8 flex justify-end"><PrintButton /></div>
         <p className="eyebrow" data-reveal>Yoga, Doṣa, Aṣṭakavarga</p>
         <h1
           className="font-display mt-4 text-3xl sm:text-4xl"
