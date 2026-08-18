@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { CHECK_FEATURES, TOOL_LINKS } from '@/lib/site';
+import { CHECK_FEATURES, JOURNEY, STEP_VERB, TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
 import { chartQueryString, getDefaultChart } from '@/lib/astro/current-chart';
 
@@ -22,18 +22,6 @@ import { chartQueryString, getDefaultChart } from '@/lib/astro/current-chart';
  * Panchang is not on the path: it is about a day and a place, not a person.
  */
 
-/** The order of understanding a chart, by feature key. */
-const JOURNEY = ['kundli', 'nakshatra', 'dasha', 'yogas', 'transits', 'remedies', 'matching'] as const;
-
-const STEP_VERB: Record<string, string> = {
-  kundli: 'Your chart',
-  nakshatra: 'Your star',
-  dasha: 'What is running',
-  yogas: 'What it forms',
-  transits: 'What is coming',
-  remedies: 'What helps',
-  matching: 'With another',
-};
 
 export async function JourneyRail({
   current,
@@ -114,7 +102,7 @@ export async function JourneyRail({
         them under the 44px minimum on exactly the devices where that matters
         most.
       */}
-      <ol className="mt-3 flex w-full flex-wrap items-center justify-between gap-y-1.5 sm:w-auto sm:flex-nowrap sm:justify-start sm:gap-1.5">
+      <ol className="mt-3 flex w-full flex-wrap items-center justify-between gap-y-1.5 sm:w-auto sm:flex-nowrap sm:justify-start sm:gap-1.5 lg:gap-0.5">
         {JOURNEY.map((feature, i) => {
           const tool = byFeature.get(feature);
           if (!tool) return null;
@@ -124,20 +112,57 @@ export async function JourneyRail({
           const done = currentIndex >= 0 && i < currentIndex;
           const name = `${STEP_VERB[feature]} — ${tool.label}${refused ? ' (members)' : ''}`;
 
+          /*
+            Two shapes, one component.
+
+            From `lg` up there is room for the labelled version — the one that was
+            asked for back — so the chip carries a small numbered disc and the
+            step's name on two lines. Below `lg` seven labels cannot fit (they need
+            about 994px and a phone has 335px), so the chip collapses to the disc
+            alone at a full 44px, and the step is named once underneath instead.
+            Same markup, same order, same targets; only the amount said out loud
+            changes.
+          */
           const dot = (
             <span
-              className="grid h-11 w-11 place-items-center rounded-full text-sm transition-colors duration-300"
+              className="flex min-h-11 items-center gap-2 rounded-full px-1 lg:px-2.5"
               style={{
                 background: isCurrent
-                  ? 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))'
-                  : done
-                    ? 'color-mix(in oklab, var(--color-gold-500) 18%, transparent)'
-                    : 'transparent',
-                border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
-                color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
+                  ? 'color-mix(in oklab, var(--color-gold-500) 12%, transparent)'
+                  : undefined,
               }}
             >
-              <span className="numeric">{i + 1}</span>
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm
+                           transition-colors duration-300 lg:h-6 lg:w-6 lg:text-[0.7rem]"
+                style={{
+                  background: isCurrent
+                    ? 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))'
+                    : done
+                      ? 'color-mix(in oklab, var(--color-gold-500) 18%, transparent)'
+                      : 'transparent',
+                  border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
+                  color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
+                }}
+              >
+                <span className="numeric">{i + 1}</span>
+              </span>
+
+              <span className="hidden flex-col leading-tight lg:flex">
+                <span
+                  className="whitespace-nowrap text-xs font-medium"
+                  style={{ color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
+                >
+                  {STEP_VERB[feature]}
+                </span>
+                <span
+                  className="whitespace-nowrap text-[0.65rem]"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {tool.label}
+                  {refused ? ' · members' : ''}
+                </span>
+              </span>
             </span>
           );
 
@@ -160,7 +185,7 @@ export async function JourneyRail({
 
       {/* The step you are on, named where there is room for its full name. */}
       {currentIndex >= 0 && (
-        <p className="mt-2.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
+        <p className="mt-2.5 text-sm lg:hidden" style={{ color: 'var(--text-secondary)' }}>
           <span className="numeric" style={{ color: 'var(--color-gold-300)' }}>
             {currentIndex + 1}
           </span>
@@ -247,7 +272,7 @@ export async function JourneyRail({
               className="inline-flex items-center gap-1 px-1 py-1 text-[0.7rem] transition-colors duration-300"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Everything, in one document
+              Full Kundali Report
               <span aria-hidden>→</span>
             </Link>
           </>

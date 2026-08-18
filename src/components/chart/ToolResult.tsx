@@ -1,5 +1,6 @@
 import { BirthForm } from '@/components/forms/BirthForm';
 import { JourneyRail } from '@/components/chart/JourneyRail';
+import { JourneyPager } from '@/components/chart/JourneyPager';
 import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { ChartSwitcher } from '@/components/chart/ChartSwitcher';
 import { Reveal } from '@/components/motion/Reveal';
@@ -26,6 +27,16 @@ import { chartQueryString, getSavedCharts } from '@/lib/astro/current-chart';
  * where it was competing with the account menu and showing the same name. Whose
  * chart is on screen belongs to the page you are reading.
  */
+/** The page's own params as a query string, so the pager keeps the chart. */
+function railQuery(params: Record<string, string | string[] | undefined>): string {
+  const built = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    built.set(key, Array.isArray(value) ? value[0] : value);
+  }
+  return built.toString();
+}
+
 export async function ToolResult({
   feature,
   params,
@@ -103,6 +114,9 @@ export async function ToolResult({
         </header>
 
         {children}
+
+        {/* Where next, at the point where "next" is a real question. */}
+        <JourneyPager current={feature} query={railQuery(params)} />
 
         {/* Somebody else's chart. */}
         <section className="no-print mt-16 border-t pt-10" style={{ borderColor: 'var(--border-subtle)' }}>

@@ -131,3 +131,16 @@ export const TOOL_LINKS = [
  * because somebody has told you that you have it.
  */
 export const CHECK_FEATURES = ['manglik', 'kalsarpa', 'sade_sati'] as const;
+
+/** The order of understanding a chart, by feature key. */
+export const JOURNEY = ['kundli', 'nakshatra', 'dasha', 'yogas', 'transits', 'remedies', 'matching'] as const;
+
+export const STEP_VERB: Record<string, string> = {
+  kundli: 'Your chart',
+  nakshatra: 'Your star',
+  dasha: 'What is running',
+  yogas: 'What it forms',
+  transits: 'What is coming',
+  remedies: 'What helps',
+  matching: 'With another',
+};
