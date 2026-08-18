@@ -34,6 +34,8 @@ export interface ChartWorkspaceProps {
   initialStyle?: ChartStyle;
   /** False hides the switch entirely, when the capability is gated. */
   canSwitchStyle?: boolean;
+  /** Translated strings, resolved on the server; every read falls back to English. */
+  labels?: Record<string, string>;
 }
 
 /**
@@ -47,7 +49,9 @@ export function ChartWorkspace({
   houses,
   initialStyle = 'north-indian',
   canSwitchStyle = true,
+  labels = {},
 }: ChartWorkspaceProps) {
+  const tr = (key: string, fallback: string) => labels[key] ?? fallback;
   const [activeCode, setActiveCode] = useState(vargas[0]?.code ?? 'D1');
   const [selected, setSelected] = useState<number | null>(null);
   const [chartStyle, setChartStyle] = useState<ChartStyle>(initialStyle);
@@ -181,7 +185,7 @@ export function ChartWorkspace({
             />
           </div>
 
-          <ChartLegend />
+          <ChartLegend style={chartStyle} labels={labels} />
         </div>
 
         {/* Detail panel */}
@@ -239,7 +243,7 @@ export function ChartWorkspace({
               style={{ color: 'var(--text-muted)' }}
             >
               <p className="font-display text-base" style={{ color: 'var(--text-secondary)' }}>
-                Reading the chart
+                {tr('chart.readingTheChart', 'Reading the chart')}
               </p>
               <p className="mt-2.5 leading-relaxed">
                 {chartStyle === 'north-indian'
@@ -247,8 +251,10 @@ export function ChartWorkspace({
                   : 'In the South Indian style the signs never move, Aries is always the same square. What changes is which one holds the ascendant, marked by the diagonal, and the houses are counted clockwise from there.'}
               </p>
               <p className="mt-2.5 leading-relaxed">
-                Select any house to see its sign, its lord, which grahas sit
-                there and which aspect it.
+                {tr(
+                  'chart.selectHouse',
+                  'Select any house to see its sign, its lord, which grahas sit there and which aspect it.',
+                )}
               </p>
             </div>
           )}

@@ -198,6 +198,32 @@ const en: Dictionary = {
   'form.errGender': 'Please choose one of the three options under Gender.',
   'form.calculating': 'Calculating…',
   'form.searching': 'searching…',
+
+  // Chart legend and workspace.
+  'legend.retrograde':
+    'Retrograde, moving backward',
+  'legend.rashisNotHouses':
+    'are rashis, not houses',
+  'legend.hide':
+    'Hide',
+  'legend.how':
+    'How do I read this chart?',
+  'legend.north1':
+    'The houses never move. The diamond at the top is always the first house, and the count runs anticlockwise from there. This is the opposite of the South Indian style, where the signs stay put and the houses move.',
+  'legend.north2':
+    'The number written in each house is the rashi sitting in it. 1 is Aries and 12 is Pisces. So if the top diamond holds a 7, your ascendant is Libra.',
+  'legend.south':
+    'The signs never move. Aries is always the second box on the top row and the order runs clockwise. The house numbers shift depending on where your ascendant falls.',
+  'legend.grahas':
+    'The two letter labels are the grahas. Su is the Sun, Mo the Moon, Ma Mars, Me Mercury, Ju Jupiter, Ve Venus, Sa Saturn, Ra Rahu and Ke Ketu. The small number beside each one is its degree within that sign.',
+  'legend.strength':
+    'Whether a graha helps or troubles you depends on your ascendant, not on its general reputation, so it is stated in words in the table below rather than by colour on the chart. A natural malefic ruling a good house can be the best graha you have.',
+  'legend.crowded':
+    'In a crowded house the degrees are hidden and the labels move to two columns, so nothing spills outside its own house.',
+  'chart.readingTheChart':
+    'Reading the chart',
+  'chart.selectHouse':
+    'Select any house to see its sign, its lord, which grahas sit there and which aspect it.',
 };
 
 const hi: Dictionary = {
@@ -365,6 +391,32 @@ const hi: Dictionary = {
   'form.errGender': 'कृपया लिंग के तीन विकल्पों में से एक चुनें।',
   'form.calculating': 'गणना हो रही है…',
   'form.searching': 'खोज रहे हैं…',
+
+  // Chart legend and workspace.
+  'legend.retrograde':
+    'वक्री, पीछे चलता हुआ',
+  'legend.rashisNotHouses':
+    'राशियाँ हैं, भाव नहीं',
+  'legend.hide':
+    'छिपाएँ',
+  'legend.how':
+    'यह कुंडली कैसे पढ़ें?',
+  'legend.north1':
+    'भाव कभी नहीं बदलते। ऊपर का केंद्रीय खंड सदा प्रथम भाव है, और गणना वहाँ से वामावर्त चलती है। यह दक्षिण भारतीय शैली के विपरीत है, जहाँ राशियाँ स्थिर रहती हैं और भाव बदलते हैं।',
+  'legend.north2':
+    'प्रत्येक भाव में लिखा अंक उसमें बैठी राशि है। 1 मेष और 12 मीन है। इसलिए यदि ऊपर के खंड में 7 है, तो आपका लग्न तुला है।',
+  'legend.south':
+    'राशियाँ कभी नहीं बदलतीं। मेष सदा ऊपरी पंक्ति का दूसरा खंड है और क्रम दक्षिणावर्त चलता है। भाव संख्याएँ आपके लग्न के अनुसार बदलती हैं।',
+  'legend.grahas':
+    'दो अक्षरों के चिह्न ग्रह हैं। Su सूर्य, Mo चन्द्र, Ma मंगल, Me बुध, Ju गुरु, Ve शुक्र, Sa शनि, Ra राहु और Ke केतु। साथ का छोटा अंक उस राशि में उसका अंश है।',
+  'legend.strength':
+    'कोई ग्रह आपके लिए शुभ है या अशुभ, यह आपके लग्न पर निर्भर करता है, उसकी सामान्य प्रतिष्ठा पर नहीं। इसलिए यह कुंडली पर रंग से नहीं, नीचे की तालिका में शब्दों में बताया गया है। शुभ भाव का स्वामी पापग्रह आपकी कुंडली का सर्वोत्तम ग्रह हो सकता है।',
+  'legend.crowded':
+    'भरे हुए भाव में अंश छिपा दिए जाते हैं और चिह्न दो स्तंभों में आ जाते हैं, जिससे कुछ भी अपने भाव से बाहर न जाए।',
+  'chart.readingTheChart':
+    'कुंडली पढ़ना',
+  'chart.selectHouse':
+    'किसी भी भाव को चुनें और देखें उसकी राशि, स्वामी, उसमें बैठे ग्रह और उस पर दृष्टि डालने वाले ग्रह।',
 };
 
 const bn: Dictionary = {
@@ -532,6 +584,32 @@ const bn: Dictionary = {
   'form.errGender': 'অনুগ্রহ করে লিঙ্গের তিনটি বিকল্পের একটি বেছে নিন।',
   'form.calculating': 'গণনা চলছে…',
   'form.searching': 'খুঁজছি…',
+
+  // Chart legend and workspace.
+  'legend.retrograde':
+    'বক্রী, পিছনে চলছে',
+  'legend.rashisNotHouses':
+    'রাশি, ভাব নয়',
+  'legend.hide':
+    'লুকান',
+  'legend.how':
+    'এই কুণ্ডলী কীভাবে পড়বেন?',
+  'legend.north1':
+    'ভাব কখনও বদলায় না। উপরের কেন্দ্রীয় খণ্ডটি সর্বদা প্রথম ভাব, এবং গণনা সেখান থেকে বামাবর্তে চলে। এটি দক্ষিণ ভারতীয় শৈলীর বিপরীত, যেখানে রাশি স্থির থাকে এবং ভাব বদলায়।',
+  'legend.north2':
+    'প্রতিটি ভাবে লেখা সংখ্যাটি সেখানে থাকা রাশি। 1 মেষ এবং 12 মীন। তাই উপরের খণ্ডে 7 থাকলে আপনার লগ্ন তুলা।',
+  'legend.south':
+    'রাশি কখনও বদলায় না। মেষ সর্বদা উপরের সারির দ্বিতীয় ঘর এবং ক্রম দক্ষিণাবর্তে চলে। ভাব সংখ্যা আপনার লগ্ন অনুসারে বদলায়।',
+  'legend.grahas':
+    'দুই অক্ষরের চিহ্নগুলি গ্রহ। Su সূর্য, Mo চন্দ্র, Ma মঙ্গল, Me বুধ, Ju গুরু, Ve শুক্র, Sa শনি, Ra রাহু এবং Ke কেতু। পাশের ছোট সংখ্যাটি সেই রাশিতে তার অংশ।',
+  'legend.strength':
+    'কোনও গ্রহ আপনার পক্ষে শুভ না অশুভ, তা আপনার লগ্নের উপর নির্ভর করে, তার সাধারণ পরিচিতির উপর নয়। তাই এটি কুণ্ডলীতে রঙে নয়, নীচের তালিকায় কথায় বলা হয়েছে। শুভ ভাবের অধিপতি পাপগ্রহ আপনার সেরা গ্রহ হতে পারে।',
+  'legend.crowded':
+    'ভিড় থাকা ভাবে অংশ লুকানো হয় এবং চিহ্নগুলি দুই কলামে সরে যায়, যাতে কিছুই নিজের ভাবের বাইরে না যায়।',
+  'chart.readingTheChart':
+    'কুণ্ডলী পড়া',
+  'chart.selectHouse':
+    'যেকোনো ভাব বেছে নিয়ে দেখুন তার রাশি, অধিপতি, সেখানে থাকা গ্রহ এবং তার উপর দৃষ্টি দেওয়া গ্রহ।',
 };
 
 export const DICTIONARIES: Record<Locale, Dictionary> = { en, hi, bn };

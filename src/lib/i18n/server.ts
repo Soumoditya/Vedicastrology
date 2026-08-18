@@ -118,3 +118,28 @@ export const getFormLabels = cache(async (): Promise<Record<string, string>> => 
   ];
   return Object.fromEntries(keys.map((key) => [key, t(key)]));
 });
+
+/**
+ * The strings the chart panel and its legend need.
+ *
+ * Same reason as `getFormLabels`: both are client components, so their text has
+ * to be handed down rather than looked up.
+ */
+export const getChartLabels = cache(async (): Promise<Record<string, string>> => {
+  const { t } = await getT();
+  const keys = [
+    'chart.readingTheChart',
+    'chart.selectHouse',
+    'legend.retrograde',
+    'legend.rashisNotHouses',
+    'legend.hide',
+    'legend.how',
+    'legend.north1',
+    'legend.north2',
+    'legend.south',
+    'legend.grahas',
+    'legend.strength',
+    'legend.crowded',
+  ];
+  return Object.fromEntries(keys.map((key) => [key, t(key)]));
+});

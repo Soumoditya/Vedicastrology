@@ -9,7 +9,7 @@ import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
 import { GRAHA_NAMES_SA } from '@/lib/astro/constants';
 import { formatDms } from '@/lib/astro/zodiac';
-import { getNames } from '@/lib/i18n/server';
+import { getChartLabels, getNames } from '@/lib/i18n/server';
 import { ephemerisMode } from '@/lib/astro/ephemeris';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
@@ -94,10 +94,11 @@ export default async function KundliPage({
   const { birth, settings, displayName } = parsed;
   const chart = castChart(birth, { settings });
   const user = await getUser();
-  const [userSettings, canSwitchStyle, { n }] = await Promise.all([
+  const [userSettings, canSwitchStyle, { n }, chartLabels] = await Promise.all([
     getSettings(),
     allowed('south_indian_chart'),
     getNames(),
+    getChartLabels(),
   ]);
   const zone = chart.meta.timezone;
 
@@ -236,6 +237,7 @@ export default async function KundliPage({
         {/* Charts */}
         <section className="mb-14">
           <ChartWorkspace
+            labels={chartLabels}
             vargas={vargas}
             houses={houses}
             initialStyle={chartStyleFor(userSettings)}
