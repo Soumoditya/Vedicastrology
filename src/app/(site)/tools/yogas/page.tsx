@@ -458,10 +458,30 @@ export default async function YogaPage({ searchParams }: { searchParams: SearchP
   );
 }
 
+/**
+ * One figure from this chart's own results.
+ *
+ * Superficially this is the same shape as the metrics band that used to open the
+ * home page, and it is not the same thing: those were claims about the site, and
+ * these are facts about the chart in front of you, which is exactly what a
+ * summary should carry.
+ *
+ * What did need fixing is the typography. Every value was set at `text-3xl` in
+ * the display face, so a single digit and the word "Shankhpal" were given the
+ * same weight, and the digits came from a face with no lining figures. Numbers
+ * now use the numeric face at full size; words are set smaller, because a word
+ * at 3xl beside a numeral reads as shouting.
+ */
 function Count({ value, label }: { value: number | string; label: string }) {
+  const isNumber = typeof value === 'number';
   return (
     <div>
-      <p className="font-display text-3xl leading-none" style={{ color: 'var(--color-gold-200)' }}>
+      <p
+        className={
+          isNumber ? 'numeric text-3xl leading-none' : 'font-display text-xl leading-none'
+        }
+        style={{ color: 'var(--color-gold-200)' }}
+      >
         {value}
       </p>
       <p className="mt-1.5 text-xs uppercase tracking-[0.14em]" style={{ color: 'var(--text-muted)' }}>

@@ -166,19 +166,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================= Proof band */}
-      <section
-        className="relative border-y"
-        style={{ background: 'var(--surface-sunken)' }}
-      >
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-5 lg:grid-cols-4">
-          <Fact figure="1″" label="Positions accurate to the arc-second" />
-          <Fact figure="16" label="Divisional charts, not just the navamsa" />
-          <Fact figure="1906" label="Historical Indian time offsets applied" />
-          <Fact figure="0" label="Cost to cast your chart" />
-        </div>
-      </section>
-
       {/* ============================================================== Tools */}
       <section className="mx-auto max-w-6xl px-5 py-28">
         <div className="grid gap-12 lg:grid-cols-[22rem_1fr] lg:gap-20">
@@ -275,10 +262,6 @@ export default async function HomePage() {
         />
 
         <div className="relative mx-auto max-w-6xl px-5 py-28">
-          <p className="eyebrow" data-reveal>
-            Why the numbers hold up
-          </p>
-
           <h2
             className="font-display mt-6 max-w-3xl text-[clamp(1.875rem,4vw,3rem)] leading-[1.08]"
             style={{ color: 'var(--text-primary)' }}
@@ -298,29 +281,54 @@ export default async function HomePage() {
             wrong, and what happens here instead:
           </p>
 
-          <div className="mt-16 grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            <Pillar
-              index="i"
-              title="The ephemeris"
+          {/*
+            Three worked examples, not three cards.
+
+            This was an i / ii / iii grid of equal columns, which is the shape
+            every generated landing page reaches for and says nothing a heading
+            could not. The claim here is specifically that a wrong chart is
+            *invisible*, so the honest way to make it is to show the wrong number
+            beside the right one and let the reader see the size of the error.
+            Set on the same hairline rules as the tool list further up the page,
+            so the page has one idiom for "a list of substantial things" rather
+            than a new layout per section.
+          */}
+          <dl className="mt-14 max-w-3xl">
+            <Failure
+              what="Where the planets are"
+              wrong="A simplified orbital approximation"
+              right="Swiss Ephemeris, full-precision data files"
               delay={0}
             >
-              Positions come from the Swiss Ephemeris with its full precision
-              data files, the same source serious Indian software uses. Not a
-              simplified orbital approximation.
-            </Pillar>
+              The same source serious Indian software uses. The test suite here
+              asserts every graha longitude to one arc-second against values
+              generated independently, so a drift in the ayanamsa or the node type
+              fails the build instead of shipping a chart that looks fine.
+            </Failure>
 
-            <Pillar index="ii" title="The moment" delay={90}>
-              India ran on +05:21:10 before 1906, and +06:30 through the war
-              years. Assume +05:30 and every older chart is quietly wrong. The
-              offset actually in force that day is applied here.
-            </Pillar>
+            <Failure
+              what="Which moment to use"
+              wrong="+05:30, for a birth in 1890"
+              right="+05:21:10, Madras Mean Time, which is what India kept"
+              delay={80}
+            >
+              India ran on Madras Mean Time before 1906 and on +06:30 through the
+              war years. Assume the modern offset and an older chart is wrong in
+              every value while still looking entirely plausible. The offset
+              actually in force on the day is applied.
+            </Failure>
 
-            <Pillar index="iii" title="The sunrise" delay={180}>
-              Panchang uses the Hindu rule, centre of the disc, no refraction.
-              That differs from the Western rule by a few minutes, often enough
-              to change which tithi a day belongs to.
-            </Pillar>
-          </div>
+            <Failure
+              what="When the day begins"
+              wrong="Upper limb, with refraction, the Western rule"
+              right="Centre of the disc, no refraction, the Hindu rule"
+              delay={160}
+            >
+              Two to four minutes apart, which sounds like nothing until it moves
+              sunrise across a tithi boundary and the day is named for the wrong
+              one. Panchang here uses the rule the tradition uses.
+            </Failure>
+          </dl>
         </div>
       </section>
 
@@ -328,7 +336,6 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-5 py-28">
         <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <div data-reveal="left">
-            <p className="eyebrow">Ten seconds</p>
             <h2
               className="font-display mt-5 text-[clamp(2rem,4vw,3rem)] leading-[1.05]"
               style={{ color: 'var(--text-primary)' }}
@@ -437,59 +444,60 @@ export default async function HomePage() {
 }
 
 /** A single figure in the proof band. Large numeral, small caption. */
-function Fact({ figure, label }: { figure: string; label: string }) {
-  return (
-    <div
-      className="border-l px-5 py-10 first:border-l-0 lg:px-7 lg:py-14"
-      data-reveal
-    >
-      <p
-        className="font-display text-[clamp(2rem,4vw,3.25rem)] leading-none"
-        style={{ color: 'var(--color-gold-300)' }}
-      >
-        {figure}
-      </p>
-      <p
-        className="mt-3 max-w-[14rem] text-[0.8125rem] leading-snug"
-        style={{ color: 'var(--text-muted)' }}
-      >
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function Pillar({
-  index,
-  title,
+/**
+ * One way a chart goes wrong, with the wrong value beside the right one.
+ *
+ * A `dl`, because that is what this is: a term and its definition. The wrong
+ * value is struck through rather than merely coloured, so the comparison
+ * survives being read in greyscale or by somebody who cannot separate the two
+ * hues.
+ */
+function Failure({
+  what,
+  wrong,
+  right,
   delay,
   children,
 }: {
-  index: string;
-  title: string;
+  what: string;
+  wrong: string;
+  right: string;
   delay: number;
   children: React.ReactNode;
 }) {
   return (
-    <div data-reveal style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}>
-      <p
-        className="font-quote text-lg italic"
-        style={{ color: 'var(--color-gold-500)' }}
-      >
-        {index}
-      </p>
-      <h3
-        className="font-display mt-2 text-xl"
+    <div
+      className="border-t py-8 first:border-t-0 first:pt-0"
+      style={
+        {
+          borderColor: 'var(--border-subtle)',
+          '--reveal-delay': `${delay}ms`,
+        } as React.CSSProperties
+      }
+      data-reveal
+    >
+      <dt
+        className="font-display text-xl"
         style={{ color: 'var(--color-gold-100)' }}
       >
-        {title}
-      </h3>
-      <p
-        className="mt-3 text-[0.9375rem] leading-relaxed"
-        style={{ color: 'var(--text-secondary)' }}
-      >
-        {children}
-      </p>
+        {what}
+      </dt>
+
+      <dd className="mt-4">
+        <div className="flex flex-col gap-1.5 text-[0.9375rem] sm:flex-row sm:items-baseline sm:gap-5">
+          <span className="line-through decoration-1" style={{ color: 'var(--text-muted)' }}>
+            {wrong}
+          </span>
+          <span style={{ color: 'var(--color-benefic)' }}>{right}</span>
+        </div>
+
+        <p
+          className="mt-3 max-w-2xl text-[0.9375rem] leading-relaxed"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {children}
+        </p>
+      </dd>
     </div>
   );
 }
