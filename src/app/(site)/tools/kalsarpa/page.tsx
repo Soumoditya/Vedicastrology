@@ -6,12 +6,8 @@ import { BHAVA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
-import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { ToolIntro } from '@/components/chart/ToolIntro';
-import { BirthForm } from '@/components/forms/BirthForm';
-import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
-import { Reveal } from '@/components/motion/Reveal';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 export const metadata: Metadata = {
   title: 'Kalsarpa dosha and its type',
@@ -81,23 +77,16 @@ export default async function KalsarpaPage({ searchParams }: { searchParams: Sea
   const ketu = chart.byGraha.Ketu;
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="report-body relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
-        <ReportCover title="Kālasarpa" subtitle={parsed.displayName ?? undefined} />
-
-        <JourneyRail current="kalsarpa" params={params} />
-
-        <p className="eyebrow" data-reveal>Kālasarpa</p>
-        <h1
-          className="font-display mt-4 text-3xl sm:text-4xl"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          {parsed.displayName ? `${parsed.displayName}, checked` : 'Your chart, checked'}
-        </h1>
+    <ToolResult
+      feature="kalsarpa"
+      params={params}
+      footer
+      cover={{ title: 'Kālasarpa', subtitle: parsed.displayName ?? undefined }}
+      eyebrow="Kālasarpa"
+      title={parsed.displayName ? `${parsed.displayName}, checked` : 'Your chart, checked'}
+      action="/tools/kalsarpa"
+      submitLabel="Check this chart"
+    >
 
         {/* Verdict ------------------------------------------------------ */}
         <section className="surface-card mt-8 p-6 sm:p-8" data-reveal>
@@ -212,18 +201,7 @@ export default async function KalsarpaPage({ searchParams }: { searchParams: Sea
             that a ritual at a particular temple is the only way out of it.
           </p>
         </section>
-
-        <section className="mt-16 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/kalsarpa" />
-            <BirthForm action="/tools/kalsarpa" submitLabel="Check this chart" />
-          </div>
-        </section>
-
-        <ReportFooter />
-      </div>
-    </div>
+    </ToolResult>
   );
 }
 

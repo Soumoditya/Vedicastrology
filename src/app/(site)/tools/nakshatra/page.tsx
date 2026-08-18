@@ -16,9 +16,9 @@ import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { formatDms, NAKSHATRA_SPAN } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 /**
  * The share card is built from the birth details in the query, so a link to
@@ -121,24 +121,20 @@ export default async function NakshatraPage({ searchParams }: { searchParams: Se
   const into = moon.longitude - start;
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
-        <JourneyRail current="nakshatra" params={params} />
-        <p className="eyebrow" data-reveal>Nakṣatra</p>
-        <h1
-          className="font-display mt-4 text-[clamp(2.5rem,7vw,4.5rem)] leading-[1.02]"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          <span className="text-gold-leaf">{NAKSHATRA_NAMES[n]}</span>
-        </h1>
-        <p className="mt-3 text-base" style={{ color: 'var(--text-secondary)' }}>
+    <ToolResult
+      feature="nakshatra"
+      params={params}
+      eyebrow="Nakṣatra"
+      title={<span className="text-gold-leaf">{NAKSHATRA_NAMES[n]}</span>}
+      meta={
+        <>
           Pada {moon.pada} · ruled by {NAKSHATRA_LORD[n]} · Moon in{' '}
           {RASHI_NAMES_EN[moon.rashi]} {formatDms(moon.degreeInRashi, false)}
-        </p>
+        </>
+      }
+      action="/tools/nakshatra"
+      submitLabel="Find nakshatra"
+    >
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2" data-reveal>
           <Fact label="Ruling graha" value={NAKSHATRA_LORD[n]} note="Opens your Vimshottari dasha sequence" />
@@ -191,15 +187,8 @@ export default async function NakshatraPage({ searchParams }: { searchParams: Se
           </p>
         </section>
 
-        <section className="mt-12 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 p-6">
-            <SavedChartPicker action="/tools/nakshatra" />
-            <BirthForm action="/tools/nakshatra" submitLabel="Find nakshatra" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }
 

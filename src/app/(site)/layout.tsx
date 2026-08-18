@@ -3,7 +3,6 @@ import { Header } from '@/components/site/Header';
 import { getRegions, resolveRegion } from '@/lib/pricing/region';
 import { getProfile } from '@/lib/supabase/server';
 import { getT } from '@/lib/i18n/server';
-import { chartQueryString, getSavedCharts } from '@/lib/astro/current-chart';
 
 /**
  * Applies the stored theme before the first paint.
@@ -50,12 +49,11 @@ async function navLabels() {
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   // Fetched once here rather than in every page that shows a price.
-  const [regions, currentRegion, profile, nav, charts] = await Promise.all([
+  const [regions, currentRegion, profile, nav] = await Promise.all([
     getRegions(),
     resolveRegion(),
     getProfile(),
     navLabels(),
-    getSavedCharts(),
   ]);
 
   return (
@@ -71,12 +69,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         }}
         locale={nav.locale}
         labels={nav.labels}
-        charts={charts.map((c) => ({
-          id: c.id,
-          label: c.label,
-          query: chartQueryString(c),
-          isDefault: c.is_default,
-        }))}
       />
       <main className="flex-1">{children}</main>
       <Footer />

@@ -12,20 +12,21 @@ export interface ChartOption {
 }
 
 /**
- * Whose chart you are reading, and how to change it.
+ * Change whose chart you are reading, without leaving the page.
  *
- * The site could show you a chart for twenty minutes without ever naming who it
- * belonged to. On a site where a person may hold their own chart, a partner's
- * and a child's, that is a real hazard: the pages look identical and the only
- * difference is a query string nobody reads.
+ * This began life in the site header and was wrong there. The chart is usually
+ * named after its owner, so it sat beside the account avatar showing the same
+ * name, and the header carried two dropdowns both reading "Soumoditya" — one
+ * offering "Another chart…", the other "Your charts". Whose chart is on screen is
+ * a property of the page, not of the site.
  *
- * So the current chart is named in the header, and switching keeps you on the
- * page you are on rather than throwing you back to a form. Reading Sade Sati for
- * one person and wanting it for another is a change of subject, not a change of
- * task.
+ * So it sits next to the chart's own title now, where the page already says whose
+ * chart it is, and reads as a modifier of that title rather than as a second
+ * account menu. Switching keeps you on the tool you are reading: wanting Sade
+ * Sati for somebody else is a change of subject, not a change of task.
  *
- * Renders nothing when there is nothing to switch between, which is the common
- * case for a signed-out visitor and costs them no space.
+ * Renders nothing when there is nothing to switch between, so a signed-out
+ * visitor pays no space for it.
  */
 export function ChartSwitcher({
   charts,
@@ -66,18 +67,18 @@ export function ChartSwitcher({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs"
+        aria-label={`Reading ${shown}. Change chart`}
+        className="no-print flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs
+                   transition-colors duration-300"
         style={{
           borderColor: open ? 'var(--color-gold-500)' : 'var(--border-subtle)',
           color: 'var(--text-secondary)',
         }}
       >
-        <span
-          aria-hidden
-          className="h-1.5 w-1.5 rounded-full"
-          style={{ background: 'var(--color-gold-500)' }}
-        />
-        <span className="max-w-[8rem] truncate">{shown}</span>
+        change chart
+        <span aria-hidden className="text-[0.6rem]">
+          ▾
+        </span>
       </button>
 
       {open && (

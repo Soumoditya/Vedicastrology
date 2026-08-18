@@ -6,9 +6,9 @@ import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { remedies, type Remedy } from '@/lib/predictions/remedies';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
-import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
+import { ToolResult } from '@/components/chart/ToolResult';
 import { Reveal } from '@/components/motion/Reveal';
+import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 
 export const metadata: Metadata = {
   title: 'Remedies',
@@ -99,21 +99,14 @@ export default async function RemediesPage({ searchParams }: { searchParams: Sea
   }));
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
-        <JourneyRail current="remedies" params={params} />
-
-        <p className="eyebrow" data-reveal>Upāya</p>
-        <h1
-          className="font-display mt-4 text-3xl sm:text-4xl"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          {parsed.displayName ? `Remedies for ${parsed.displayName}` : 'Your remedies'}
-        </h1>
+    <ToolResult
+      feature="remedies"
+      params={params}
+      eyebrow="Upāya"
+      title={parsed.displayName ? `Remedies for ${parsed.displayName}` : 'Your remedies'}
+      action="/tools/remedies"
+      submitLabel="Show remedies"
+    >
 
         <p
           className="mt-5 max-w-2xl text-sm leading-relaxed"
@@ -188,14 +181,7 @@ export default async function RemediesPage({ searchParams }: { searchParams: Sea
           </div>
         )}
 
-        <section className="mt-16 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/remedies" />
-            <BirthForm action="/tools/remedies" submitLabel="Show remedies" />
-          </div>
-        </section>
-      </div>
-    </div>
+
+    </ToolResult>
   );
 }

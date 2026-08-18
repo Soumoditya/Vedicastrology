@@ -85,8 +85,36 @@ export async function JourneyRail({
         The path through a chart
       </p>
 
-      {/* Horizontal scroll on a phone, where seven steps will not fit. */}
-      <ol className="mt-3 flex gap-1.5 overflow-x-auto pb-2">
+      {/*
+        Seven numbers on one line, at every width.
+
+        This was seven chips each carrying a number and a two-line label, in a
+        horizontally scrolling list. At 375px that measured 825px inside a 335px
+        box: five of the seven steps were off screen behind a scrollbar, the
+        labels wrapped to three lines, and the whole thing changed shape from tool
+        to tool because each page had picked its own content width.
+
+        Fitting seven labels on one line is not possible at a phone width and only
+        just possible at 1024px, so the labels are not the thing to preserve — the
+        *path* is. Numbers always, one line, 44px targets, and the step you are on
+        named underneath where there is room to say it properly. Each number
+        carries its full name for a screen reader and as a tooltip.
+      */}
+      {/*
+        Seven 44px targets need 308px before any gap, and a 375px phone leaves
+        about 320px inside the page padding. Fixed gaps overflowed it by 24px, so
+        below `sm` the row fills the width and distributes whatever is left over
+        as the gaps: `justify-between` cannot exceed its container, so the row can
+        never scroll however narrow the screen gets, and the targets stay 44px.
+
+        At 320px even that is not enough — seven 44px targets are 308px and the
+        content box is 265px — so below `sm` the row is allowed to wrap onto a
+        second line. Wrapping keeps the targets touchable and keeps the scrollbar
+        away, which is the right trade: shrinking the circles to fit would put
+        them under the 44px minimum on exactly the devices where that matters
+        most.
+      */}
+      <ol className="mt-3 flex w-full flex-wrap items-center justify-between gap-y-1.5 sm:w-auto sm:flex-nowrap sm:justify-start sm:gap-1.5">
         {JOURNEY.map((feature, i) => {
           const tool = byFeature.get(feature);
           if (!tool) return null;
@@ -94,73 +122,60 @@ export async function JourneyRail({
           const isCurrent = feature === current;
           const refused = !isCurrent && access[feature] && !access[feature].allowed;
           const done = currentIndex >= 0 && i < currentIndex;
+          const name = `${STEP_VERB[feature]} — ${tool.label}${refused ? ' (members)' : ''}`;
 
-          const inner = (
-            <>
-              <span
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.7rem] tabular-nums"
-                style={{
-                  background: isCurrent
-                    ? 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))'
-                    : done
-                      ? 'color-mix(in oklab, var(--color-gold-500) 22%, transparent)'
-                      : 'transparent',
-                  border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
-                  color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
-                }}
-              >
-                {i + 1}
-              </span>
-              <span className="flex flex-col leading-tight">
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: isCurrent ? 'var(--color-gold-200)' : 'var(--text-secondary)' }}
-                >
-                  {STEP_VERB[feature]}
-                </span>
-                <span className="text-[0.65rem]" style={{ color: 'var(--text-muted)' }}>
-                  {tool.label}
-                  {refused ? ' · members' : ''}
-                </span>
-              </span>
-            </>
+          const dot = (
+            <span
+              className="grid h-11 w-11 place-items-center rounded-full text-sm transition-colors duration-300"
+              style={{
+                background: isCurrent
+                  ? 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))'
+                  : done
+                    ? 'color-mix(in oklab, var(--color-gold-500) 18%, transparent)'
+                    : 'transparent',
+                border: isCurrent ? 'none' : '1px solid var(--border-subtle)',
+                color: isCurrent ? '#150e00' : 'var(--color-gold-300)',
+              }}
+            >
+              <span className="numeric">{i + 1}</span>
+            </span>
           );
-
-          const cls = 'flex shrink-0 items-center gap-2 rounded-full px-2.5 py-1.5 transition-colors duration-300';
 
           return (
             <li key={feature}>
               {isCurrent || !suffix ? (
-                <div
-                  className={cls}
-                  aria-current={isCurrent ? 'step' : undefined}
-                  style={{
-                    background: isCurrent ? 'color-mix(in oklab, var(--color-gold-500) 10%, transparent)' : undefined,
-                  }}
-                >
-                  {inner}
+                <div aria-current={isCurrent ? 'step' : undefined} title={name}>
+                  <span className="sr-only">{name}</span>
+                  {dot}
                 </div>
               ) : (
-                <Link href={`${tool.href}?${suffix}`} className={`${cls} lift`}>
-                  {inner}
+                <Link href={`${tool.href}?${suffix}`} title={name} aria-label={name}>
+                  {dot}
                 </Link>
               )}
             </li>
           );
         })}
-
-        {/* The path ends at a real reading, which is the point of all of it. */}
-        <li>
-          <Link
-            href="/services"
-            className="lift flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5"
-            style={{ borderColor: 'var(--border-strong)', color: 'var(--color-gold-200)' }}
-          >
-            <span className="text-xs font-medium">Read it properly</span>
-            <span aria-hidden style={{ color: 'var(--color-gold-400)' }}>→</span>
-          </Link>
-        </li>
       </ol>
+
+      {/* The step you are on, named where there is room for its full name. */}
+      {currentIndex >= 0 && (
+        <p className="mt-2.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <span className="numeric" style={{ color: 'var(--color-gold-300)' }}>
+            {currentIndex + 1}
+          </span>
+          <span style={{ color: 'var(--text-muted)' }}> of </span>
+          <span className="numeric" style={{ color: 'var(--text-muted)' }}>
+            {JOURNEY.length}
+          </span>
+          {' · '}
+          {STEP_VERB[current]}
+          <span style={{ color: 'var(--text-muted)' }}>
+            {' — '}
+            {byFeature.get(JOURNEY[currentIndex])?.label}
+          </span>
+        </p>
+      )}
 
       {/*
         The named afflictions, on a second row. They are lookups rather than

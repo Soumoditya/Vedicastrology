@@ -12,7 +12,6 @@ import { AccountLinks, AccountMenu, type AccountState } from './AccountMenu';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/locales';
 import type { Region } from '@/lib/supabase/types';
-import { ChartSwitcher, type ChartOption } from '@/components/chart/ChartSwitcher';
 
 const SIGNED_OUT: AccountState = { signedIn: false, displayName: null, isAdmin: false };
 
@@ -22,7 +21,6 @@ export function Header({
   account = SIGNED_OUT,
   locale = DEFAULT_LOCALE,
   labels = {},
-  charts = [],
 }: {
   regions?: Region[];
   currentRegion?: Region | null;
@@ -30,8 +28,6 @@ export function Header({
   locale?: Locale;
   /** Translated navigation labels, resolved on the server. */
   labels?: Record<string, string>;
-  /** Saved charts, so the header can say whose chart is open. */
-  charts?: ChartOption[];
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -109,9 +105,17 @@ export function Header({
             <CurrencySwitcher regions={regions} current={currentRegion} />
             <LanguageSwitcher current={locale} />
           </div>
-          <div className="hidden md:block">
-            <ChartSwitcher charts={charts} />
-          </div>
+          {/*
+            No chart control here.
+
+            There was one, and it sat next to the account avatar showing the same
+            name — the chart is usually named after its owner — so the header
+            carried two dropdowns both reading "Soumoditya", one offering
+            "Another chart…" and the other "Your charts". Whose chart is on screen
+            is a property of the page you are reading, not of the site, so the
+            switcher now lives beside the chart's own title. That is also where
+            the page already says whose chart it is.
+          */}
           <ThemeToggle />
           <AccountMenu account={account} labels={labels} />
 

@@ -64,6 +64,7 @@ export function Footer() {
           <FooterColumn title="More">
             <FooterLink href="/blog">Journal</FooterLink>
             <FooterLink href="/about">About</FooterLink>
+            <FooterLink href="/method">How it is calculated</FooterLink>
             <FooterLink href="/legal/privacy">Privacy</FooterLink>
             <FooterLink href="/legal/terms">Terms</FooterLink>
           </FooterColumn>

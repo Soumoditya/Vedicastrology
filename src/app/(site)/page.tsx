@@ -5,7 +5,7 @@ import { SITE, TOOL_LINKS } from '@/lib/site';
 import { getDefaultChart, withChart } from '@/lib/astro/current-chart';
 import { HeroYantra } from '@/components/site/HeroYantra';
 import { Shloka } from '@/components/ornament/Shloka';
-import { Ganesha, Om, OrnamentRule } from '@/components/ornament/Ornaments';
+import { Ganesha, OrnamentRule } from '@/components/ornament/Ornaments';
 import { Parallax, Reveal } from '@/components/motion/Reveal';
 
 export default async function HomePage() {
@@ -95,6 +95,29 @@ export default async function HomePage() {
               Most chart sites round the numbers and hope. This one uses the
               Swiss Ephemeris, applies the time zone that was actually in force
               on the day you were born, and shows you its working.
+            </p>
+
+            {/*
+              One quiet link rather than a section.
+
+              The argument for the calculations used to be made here, twice over:
+              a strip of large figures and then three boxed columns. It is a
+              technical claim and it needs room, so it has its own page now, and
+              the reader who does not care is not made to scroll past it.
+            */}
+            <p
+              className="mt-5 text-sm"
+              data-reveal
+              style={{ '--reveal-delay': '60ms' } as React.CSSProperties}
+            >
+              <Link
+                href="/method"
+                className="inline-flex items-center gap-1.5 transition-colors duration-300"
+                style={{ color: 'var(--color-gold-400)' }}
+              >
+                How the chart is calculated
+                <span aria-hidden>→</span>
+              </Link>
             </p>
 
             <div
@@ -250,88 +273,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* =========================================================== Accuracy */}
-      <section className="relative overflow-hidden border-y" style={{ background: 'var(--surface-sunken)' }}>
-        <div className="starfield" aria-hidden />
-
-        {/* An engraved Om sits far back, so the section has a ground of craft
-            behind the argument without competing with it. */}
-        <Om
-          size={520}
-          className="ornament-watermark right-[-8%] top-1/2 hidden -translate-y-1/2 lg:block"
-        />
-
-        <div className="relative mx-auto max-w-6xl px-5 py-28">
-          <h2
-            className="font-display mt-6 max-w-3xl text-[clamp(1.875rem,4vw,3rem)] leading-[1.08]"
-            style={{ color: 'var(--text-primary)' }}
-            data-reveal
-          >
-            A wrong chart still looks like a
-            <span style={{ color: 'var(--color-gold-300)' }}> perfectly good chart</span>.
-          </h2>
-
-          <p
-            className="mt-6 max-w-2xl text-[1.0625rem] leading-relaxed"
-            style={{ color: 'var(--text-secondary)' }}
-            data-reveal
-          >
-            That is the whole problem. Nothing on screen tells you the ascendant
-            was computed from the wrong moment. Three places it usually goes
-            wrong, and what happens here instead:
-          </p>
-
-          {/*
-            Three worked examples, not three cards.
-
-            This was an i / ii / iii grid of equal columns, which is the shape
-            every generated landing page reaches for and says nothing a heading
-            could not. The claim here is specifically that a wrong chart is
-            *invisible*, so the honest way to make it is to show the wrong number
-            beside the right one and let the reader see the size of the error.
-            Set on the same hairline rules as the tool list further up the page,
-            so the page has one idiom for "a list of substantial things" rather
-            than a new layout per section.
-          */}
-          <dl className="mt-14 max-w-3xl">
-            <Failure
-              what="Where the planets are"
-              wrong="A simplified orbital approximation"
-              right="Swiss Ephemeris, full-precision data files"
-              delay={0}
-            >
-              The same source serious Indian software uses. The test suite here
-              asserts every graha longitude to one arc-second against values
-              generated independently, so a drift in the ayanamsa or the node type
-              fails the build instead of shipping a chart that looks fine.
-            </Failure>
-
-            <Failure
-              what="Which moment to use"
-              wrong="+05:30, for a birth in 1890"
-              right="+05:21:10, Madras Mean Time, which is what India kept"
-              delay={80}
-            >
-              India ran on Madras Mean Time before 1906 and on +06:30 through the
-              war years. Assume the modern offset and an older chart is wrong in
-              every value while still looking entirely plausible. The offset
-              actually in force on the day is applied.
-            </Failure>
-
-            <Failure
-              what="When the day begins"
-              wrong="Upper limb, with refraction, the Western rule"
-              right="Centre of the disc, no refraction, the Hindu rule"
-              delay={160}
-            >
-              Two to four minutes apart, which sounds like nothing until it moves
-              sunrise across a tithi boundary and the day is named for the wrong
-              one. Panchang here uses the rule the tradition uses.
-            </Failure>
-          </dl>
-        </div>
-      </section>
-
       {/* ========================================================= Quick cast */}
       <section className="mx-auto max-w-6xl px-5 py-28">
         <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
@@ -444,60 +385,3 @@ export default async function HomePage() {
 }
 
 /** A single figure in the proof band. Large numeral, small caption. */
-/**
- * One way a chart goes wrong, with the wrong value beside the right one.
- *
- * A `dl`, because that is what this is: a term and its definition. The wrong
- * value is struck through rather than merely coloured, so the comparison
- * survives being read in greyscale or by somebody who cannot separate the two
- * hues.
- */
-function Failure({
-  what,
-  wrong,
-  right,
-  delay,
-  children,
-}: {
-  what: string;
-  wrong: string;
-  right: string;
-  delay: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="border-t py-8 first:border-t-0 first:pt-0"
-      style={
-        {
-          borderColor: 'var(--border-subtle)',
-          '--reveal-delay': `${delay}ms`,
-        } as React.CSSProperties
-      }
-      data-reveal
-    >
-      <dt
-        className="font-display text-xl"
-        style={{ color: 'var(--color-gold-100)' }}
-      >
-        {what}
-      </dt>
-
-      <dd className="mt-4">
-        <div className="flex flex-col gap-1.5 text-[0.9375rem] sm:flex-row sm:items-baseline sm:gap-5">
-          <span className="line-through decoration-1" style={{ color: 'var(--text-muted)' }}>
-            {wrong}
-          </span>
-          <span style={{ color: 'var(--color-benefic)' }}>{right}</span>
-        </div>
-
-        <p
-          className="mt-3 max-w-2xl text-[0.9375rem] leading-relaxed"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          {children}
-        </p>
-      </dd>
-    </div>
-  );
-}

@@ -6,12 +6,8 @@ import { BHAVA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { gateFor } from '@/components/site/FeatureGate';
-import { JourneyRail } from '@/components/chart/JourneyRail';
-import { ReportCover, ReportFooter } from '@/components/chart/ReportChrome';
 import { ToolIntro } from '@/components/chart/ToolIntro';
-import { BirthForm } from '@/components/forms/BirthForm';
-import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
-import { Reveal } from '@/components/motion/Reveal';
+import { ToolResult } from '@/components/chart/ToolResult';
 
 export const metadata: Metadata = {
   title: 'Manglik or not',
@@ -102,26 +98,16 @@ export default async function ManglikPage({ searchParams }: { searchParams: Sear
       : 'var(--color-benefic)';
 
   return (
-    <div className="relative">
-      <Reveal />
-      <div className="starfield" aria-hidden />
-
-      <div className="report-body relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
-        <ReportCover
-          title="Mangal Doṣa"
-          subtitle={parsed.displayName ?? undefined}
-        />
-
-        <JourneyRail current="manglik" params={params} />
-
-        <p className="eyebrow" data-reveal>Maṅgala Doṣa</p>
-        <h1
-          className="font-display mt-4 text-3xl sm:text-4xl"
-          style={{ color: 'var(--text-primary)' }}
-          data-reveal
-        >
-          {parsed.displayName ? `${parsed.displayName}, checked` : 'Your chart, checked'}
-        </h1>
+    <ToolResult
+      feature="manglik"
+      params={params}
+      footer
+      cover={{ title: 'Mangal Doṣa', subtitle: parsed.displayName ?? undefined }}
+      eyebrow="Maṅgala Doṣa"
+      title={parsed.displayName ? `${parsed.displayName}, checked` : 'Your chart, checked'}
+      action="/tools/manglik"
+      submitLabel="Check this chart"
+    >
 
         {/* The verdict ------------------------------------------------- */}
         <section className="surface-card mt-8 p-6 sm:p-8" data-reveal>
@@ -241,17 +227,7 @@ export default async function ManglikPage({ searchParams }: { searchParams: Sear
           </div>
         </section>
 
-        <section className="mt-16 no-print">
-          <h2 className="eyebrow">Another chart</h2>
-          <div className="surface-card mt-5 max-w-xl p-6">
-            <SavedChartPicker action="/tools/manglik" />
-            <BirthForm action="/tools/manglik" submitLabel="Check this chart" />
-          </div>
-        </section>
-
-        <ReportFooter />
-      </div>
-    </div>
+    </ToolResult>
   );
 }
 
