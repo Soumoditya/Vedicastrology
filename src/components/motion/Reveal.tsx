@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 /**
  * Scroll choreography.
@@ -35,8 +36,22 @@ import { useEffect } from 'react';
  * content, which is the right way round.
  *
  * Honours prefers-reduced-motion by never arming at all.
+ *
+ * Re-arms on every navigation, and that is not a nicety. Submitting the
+ * compatibility form pushes to the *same* path with different search params, so
+ * the page does not unmount and this effect used to not run again. The
+ * `reveal-ready` class stayed on the document from the previous arming, the new
+ * content arrived carrying `data-reveal` and no `in`, and the rule that hides
+ * unrevealed elements applied to all of it — with no observer watching it and the
+ * safety timer long since fired. The result was a page that was blank until you
+ * reloaded it, which is exactly what was reported. Depending on the location
+ * means each navigation gets its own observer, its own timer and its own clean
+ * slate.
  */
 export function Reveal() {
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
+
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) return;
@@ -122,7 +137,7 @@ export function Reveal() {
       observer.disconnect();
       document.documentElement.classList.remove('reveal-ready');
     };
-  }, []);
+  }, [pathname, search]);
 
   return null;
 }

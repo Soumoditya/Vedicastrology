@@ -72,7 +72,33 @@ export interface Box {
  * precisely where a stack of labels wants to be and precisely where the old
  * centroid-ish anchor was not.
  */
+/*
+  Memoised, because this is not cheap and its inputs never change.
+
+  Finding the pole samples a 25x25 grid and runs a point-in-polygon test at each
+  candidate: about 625 tests per cell, so roughly 7,500 for a twelve-cell chart,
+  and then a 40-step bisection on top. The geometry is static — the twelve cells of
+  the North Indian chart are the same twelve cells on every render — so paying that
+  again for every chart, every varga switch and every re-render was pure waste, and
+  it showed on the chart page.
+
+  Keyed on the polygon's own coordinates rather than on object identity, so the
+  South Indian geometry, which is rebuilt per ascendant, still hits the cache when
+  it produces the same shape.
+*/
+const boxCache = new Map<string, Box>();
+
 export function inscribedBox(polygon: Point[], aspect = 1.5): Box {
+  const key = `${aspect}|${polygon.map((p) => `${p.x},${p.y}`).join(';')}`;
+  const hit = boxCache.get(key);
+  if (hit) return hit;
+
+  const box = computeInscribedBox(polygon, aspect);
+  boxCache.set(key, box);
+  return box;
+}
+
+function computeInscribedBox(polygon: Point[], aspect: number): Box {
   const xs = polygon.map((p) => p.x);
   const ys = polygon.map((p) => p.y);
   const minX = Math.min(...xs);

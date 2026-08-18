@@ -34,14 +34,16 @@ export default async function DashboardLayout({
         the dashboard now.
       */}
       {/*
-        `min-h-screen` used to sit here, on a wrapper that already lives below the
-        site header, so the content area was a full viewport tall *plus* the header
-        and the page opened with a large gap above "Welcome back". The parent
-        layout already makes this region grow; this only needs the same measure and
-        rhythm the tool pages use, so moving between them does not feel like
-        landing on a different site.
+        No wrapper of its own.
+
+        This had `min-h-screen` and then, after that was removed, its own
+        `max-w-5xl px-5 py-12 sm:py-16` — while the parent layout at
+        `(dashboard)/layout.tsx` already wraps children in exactly that. Two
+        identical frames nested inside each other means the padding applies twice,
+        which is where the 128px of dead space above "Welcome back" came from. The
+        parent owns the measure; this owns nothing.
       */}
-      <main className="mx-auto w-full max-w-5xl px-5 py-12 sm:py-16">{children}</main>
+      {children}
     </>
   );
 }
