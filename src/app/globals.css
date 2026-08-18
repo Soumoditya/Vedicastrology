@@ -97,6 +97,13 @@
   --grain-opacity: 0.05;
   --glow: color-mix(in oklab, var(--color-gold-400) 30%, transparent);
 
+  /* Decorative light sources behind the hero and the closing figure. Tokens
+     rather than literals because they have to be remapped for paper: a cold
+     blue counter-light reads as depth on lacquer and as a grey smudge on
+     cream, which is exactly what it was doing. */
+  --aura-warm: color-mix(in oklab, var(--color-gold-500) 26%, transparent);
+  --aura-cool: color-mix(in oklab, var(--color-ink-500) 55%, transparent);
+
   color-scheme: dark;
 }
 
@@ -135,6 +142,12 @@
   --color-benefic: #1a7d58;
   --color-malefic: #b83a28;
   --color-graha-neutral: #4a5480;
+
+  /* On paper both light sources are warm. There is no such thing as a cold
+     highlight on parchment, and the blue one was painting a large grey-blue
+     slab across the left of the hero. */
+  --aura-warm: color-mix(in oklab, var(--color-gold-600) 16%, transparent);
+  --aura-cool: color-mix(in oklab, var(--color-gold-800) 9%, transparent);
 
   color-scheme: light;
 }
@@ -271,6 +284,62 @@ body::after {
 /* ==========================================================================
    Ambient layers
    ========================================================================== */
+
+/* ==========================================================================
+   The sticky header
+
+   Opaque enough to be a surface. A translucent bar over scrolling text has to
+   be *nearly* solid or the text reads through it, and at 82% it did: the
+   heading on a tool page was legible straight through the nav. The blur is an
+   enhancement layered on top, never the thing doing the work, so a browser
+   without backdrop-filter — or a reader who has asked for less transparency —
+   still gets a header they can read.
+   ========================================================================== */
+.site-header {
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.site-header[data-scrolled='true'] {
+  background: var(--surface);
+  border-bottom-color: var(--border-subtle);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .site-header[data-scrolled='true'] {
+    background: color-mix(in oklab, var(--surface) 94%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .site-header[data-scrolled='true'] {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+/* ==========================================================================
+   The hero headline on a short window
+
+   Display size was driven entirely by viewport *width*, so a 1366x641 laptop
+   window — a 768px screen once browser chrome is taken out, which is an
+   ordinary machine, not an edge case — got the full 84px headline. In English
+   that just fits. Give the same headline the looser leading that Devanagari and
+   Bengali need and it does not, and the paragraph and buttons are pushed off
+   the fold.
+
+   Capping against `vh` in the clamp itself was the first attempt and is close
+   to useless: at these heights the cap lands within a pixel or two of the
+   width-derived size and never bites. A height query is honest about what it
+   is for — tall screens keep the big opening, short ones get a headline that
+   leaves room for the rest of the page.
+   ========================================================================== */
+@media (max-height: 780px) {
+  .hero-title {
+    font-size: clamp(2.25rem, 5.4vw, 3.25rem);
+  }
+}
 
 .starfield {
   position: absolute;
@@ -1144,20 +1213,46 @@ body::after {
    `lang` attribute the layout already sets and applies to everything including
    text this stylesheet has never heard of.
 
-   The display face is Latin only, so headings in Hindi or Bengali fall back to
-   the same Noto face as the body. A Roman capital face has nothing to say about
-   Devanagari, and pairing it badly looks worse than not pairing it at all.
+   The display face is Latin only, so Devanagari and Bengali have to come from
+   Noto. A Roman capital face has nothing to say about Devanagari, and pairing
+   it badly looks worse than not pairing it at all.
+
+   The Indic face is appended as a *fallback*, not substituted for the Latin
+   one, and that ordering is the whole point. Font fallback in CSS is resolved
+   per glyph, not per element: Latin characters are found in Marcellus and
+   rendered from it, Devanagari characters are not and fall through to Noto
+   automatically. Listing Noto first instead — which is what this did — hands
+   Noto every glyph it happens to cover, so a Latin heading on a Hindi page
+   silently lost the brand face. That was not hypothetical: the homepage
+   headline is still English, so on a Bengali page "Your chart, calculated
+   properly." was being set in Noto Sans Bengali.
+
+   This also means no wrapper classes and no cooperation from the translation
+   layer are needed. Mixed-script text inside one heading resolves correctly
+   character by character, which is the common case here.
    ========================================================================== */
-:root:lang(hi) body,
-:root:lang(hi) .font-display,
-:root:lang(hi) .font-quote {
-  font-family: var(--font-devanagari), var(--font-inter), system-ui, sans-serif;
+:root:lang(hi) body {
+  font-family: var(--font-inter), var(--font-devanagari), system-ui, sans-serif;
 }
 
-:root:lang(bn) body,
-:root:lang(bn) .font-display,
+:root:lang(hi) .font-display {
+  font-family: var(--font-display), var(--font-devanagari), system-ui, sans-serif;
+}
+
+:root:lang(hi) .font-quote {
+  font-family: var(--font-quote), var(--font-devanagari), system-ui, sans-serif;
+}
+
+:root:lang(bn) body {
+  font-family: var(--font-inter), var(--font-bengali), system-ui, sans-serif;
+}
+
+:root:lang(bn) .font-display {
+  font-family: var(--font-display), var(--font-bengali), system-ui, sans-serif;
+}
+
 :root:lang(bn) .font-quote {
-  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-quote), var(--font-bengali), system-ui, sans-serif;
 }
 
 /*
@@ -1169,7 +1264,13 @@ body::after {
 */
 :root:lang(hi) .font-display,
 :root:lang(bn) .font-display {
-  line-height: 1.35;
+  /* 1.25, not 1.35. Both scripts need more room than Latin display leading
+     allows — Bengali hangs from a headline and Devanagari stacks matras above
+     and below — but 1.35 on a headline set at 84px produced a 340px block that
+     filled a short laptop window on its own. 1.25 still clears the matras at
+     display sizes. The hero's own size is capped against viewport height as
+     well as width, so no heading can eat the fold in any language. */
+  line-height: 1.25;
 }
 
 /*

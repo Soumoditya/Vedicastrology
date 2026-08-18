@@ -20,19 +20,19 @@ export default function HomePage() {
         {/* Light source behind the figure. */}
         <div
           aria-hidden
-          className="aura pointer-events-none absolute right-[-10%] top-[-8%] -z-10 h-[46rem] w-[46rem] rounded-full blur-[120px]"
+          className="aura pointer-events-none absolute right-[-10%] top-[-8%] -z-10 h-[46rem] w-[46rem] rounded-full blur-[80px]"
           style={{
             background:
-              'radial-gradient(circle, color-mix(in oklab, var(--color-gold-500) 26%, transparent), transparent 62%)',
+              'radial-gradient(circle, var(--aura-warm), transparent 62%)',
           }}
         />
         {/* A cold counter-light, so the warm side has something to read against. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-[-20%] left-[-15%] -z-10 h-[36rem] w-[36rem] rounded-full blur-[130px]"
+          className="pointer-events-none absolute bottom-[-20%] left-[-15%] -z-10 h-[36rem] w-[36rem] rounded-full blur-[90px]"
           style={{
             background:
-              'radial-gradient(circle, color-mix(in oklab, var(--color-ink-500) 55%, transparent), transparent 65%)',
+              'radial-gradient(circle, var(--aura-cool), transparent 65%)',
           }}
         />
 
@@ -64,7 +64,7 @@ export default function HomePage() {
               designed rather than assembled.
             */}
             <h1
-              className="font-display mt-6 text-[clamp(2.75rem,8vw,5.25rem)] leading-[0.98]"
+              className="hero-title font-display mt-6 text-[clamp(2.75rem,8vw,5.25rem)] leading-[0.98]"
               style={{ color: 'var(--text-primary)' }}
             >
               <span className="block" data-reveal style={{ '--reveal-delay': '60ms' } as React.CSSProperties}>
@@ -355,10 +355,10 @@ export default function HomePage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden
-          className="aura pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px]"
+          className="aura pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
           style={{
             background:
-              'radial-gradient(circle, color-mix(in oklab, var(--color-gold-500) 20%, transparent), transparent 65%)',
+              'radial-gradient(circle, var(--aura-warm), transparent 65%)',
           }}
         />
 

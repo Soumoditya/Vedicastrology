@@ -46,21 +46,22 @@ export function Header({
   return (
     <header
       className="site-header sticky top-0 z-50 transition-all duration-500"
-      style={{
-        transitionTimingFunction: 'var(--ease-out-soft)',
-        background: scrolled
-          ? 'color-mix(in oklab, var(--surface) 82%, transparent)'
-          : 'transparent',
-        backdropFilter: scrolled ? 'blur(14px) saturate(1.4)' : 'none',
-        borderBottom: `1px solid ${scrolled ? 'var(--border-subtle)' : 'transparent'}`,
-      }}
+      /*
+        The scrolled background lives in the stylesheet rather than here, so it
+        can have a no-backdrop-filter fallback and honour
+        prefers-reduced-transparency. It was 82% opaque with a blur, which
+        leaves 18% of the page showing through: on the yogas page the h1 was
+        legible straight through the nav.
+      */
+      data-scrolled={scrolled ? 'true' : 'false'}
+      style={{ transitionTimingFunction: 'var(--ease-out-soft)' }}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:h-[4.5rem]">
         <Link href="/" aria-label={`${SITE.name} home`} className="shrink-0">
           <Wordmark />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV_LINKS.map((link) => {
             const active = pathname.startsWith(link.href);
             return (
@@ -85,12 +86,22 @@ export function Header({
 
         <div className="flex items-center gap-2">
           {/*
-            Currency and language move into the mobile menu below the small
-            breakpoint. Four controls plus a wordmark plus a menu button does not
-            fit a 390px phone: adding the language switch pushed the top bar 21px
-            past the viewport on an iPhone 13, which scrolled every page sideways.
+            Everything secondary collapses into the menu below `lg`, not below
+            `sm`.
+
+            The original split had the nav appear at `md` (768px) while currency,
+            language and the booking link appeared at `sm` (640px), so between
+            768px and roughly 900px the bar carried a wordmark, four nav links,
+            currency, language, theme, account, the booking pill *and* — because
+            the menu button hid at `md` — nothing to relieve it. At 800px that
+            put the control cluster 72px past the viewport and scrolled every
+            page sideways, which is the same bug the `sm` gate was added to fix,
+            one breakpoint further up.
+
+            One breakpoint for the whole switch, so there is no band where the
+            bar is asked to hold both halves.
           */}
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             <CurrencySwitcher regions={regions} current={currentRegion} />
             <LanguageSwitcher current={locale} />
           </div>
@@ -100,7 +111,7 @@ export function Header({
           <Link
             href="/services"
             className="hidden rounded-full border px-4 py-2 text-xs font-medium
-                       tracking-wide transition-all duration-300 sm:inline-block"
+                       tracking-wide transition-all duration-300 lg:inline-block"
             style={{
               borderColor: 'var(--border-strong)',
               color: 'var(--color-gold-200)',
@@ -115,7 +126,7 @@ export function Header({
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? labels['nav.menuClose'] ?? 'Close menu' : labels['nav.menuOpen'] ?? 'Open menu'}
             aria-expanded={menuOpen}
-            className="grid h-9 w-9 place-items-center rounded-md md:hidden"
+            className="grid h-9 w-9 place-items-center rounded-md lg:hidden"
             style={{ color: 'var(--text-secondary)' }}
           >
             <span className="relative block h-3.5 w-5">
@@ -146,7 +157,7 @@ export function Header({
 
       {/* Mobile menu */}
       <div
-        className="overflow-hidden transition-[max-height,opacity] duration-400 md:hidden"
+        className="overflow-hidden transition-[max-height,opacity] duration-400 lg:hidden"
         style={{
           maxHeight: menuOpen ? '32rem' : '0',
           opacity: menuOpen ? 1 : 0,
@@ -168,7 +179,7 @@ export function Header({
             </Link>
           ))}
           <div
-            className="flex items-center gap-2 border-b py-3 sm:hidden"
+            className="flex items-center gap-2 border-b py-3 lg:hidden"
             style={{ borderColor: 'var(--border-subtle)' }}
           >
             <CurrencySwitcher regions={regions} current={currentRegion} />
