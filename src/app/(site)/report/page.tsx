@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 
 import { buildFullReport } from '@/lib/report/build';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
+import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { chartToDataUri } from '@/lib/chart-render/svgString';
 import { sarvaVerdict } from '@/lib/astro/ashtakavarga';
 import { RASHI_SYMBOLS } from '@/lib/astro/constants';
@@ -34,6 +35,13 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
   if (gate) return gate;
 
   const params = await searchParams;
+
+  // A signed-in visitor with a saved default chart should never be shown
+
+  // a blank form. `?new=1` is the way to one deliberately.
+
+  await redirectToSavedChart(params, '/report');
+
 
   if (!hasBirthQuery(params)) {
     return (

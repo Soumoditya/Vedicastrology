@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
 import { getT } from '@/lib/i18n/server';
+import { getDefaultChart, withChart } from '@/lib/astro/current-chart';
 
 export const metadata: Metadata = {
   title: 'Free Vedic Astrology Tools',
@@ -21,9 +22,15 @@ export default async function ToolsPage() {
     that merely needs an account is still listed, with a mark, because that is
     an invitation rather than a dead end.
   */
-  const [access, { t }] = await Promise.all([
+  /*
+    The saved chart is fetched here so every card can carry it. A card that
+    links to a bare path lands on a blank form, which is what made saving a
+    chart feel like it had done nothing.
+  */
+  const [access, { t }, chart] = await Promise.all([
     canUseAll(TOOL_LINKS.map((tool) => tool.feature)),
     getT(),
+    getDefaultChart(),
   ]);
   const tools = TOOL_LINKS.filter(
     (tool) => access[tool.feature].reason !== 'disabled',
@@ -59,7 +66,7 @@ export default async function ToolsPage() {
           {tools.map((tool) => (
             <Link
               key={tool.href}
-              href={tool.href}
+              href={withChart(tool.href, chart)}
               className="surface-card group relative overflow-hidden p-6 transition-all duration-500"
               style={{ transitionTimingFunction: 'var(--ease-out-soft)' }}
             >

@@ -11,6 +11,7 @@ import {
 } from '@/lib/astro/transits';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
+import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { formatDms } from '@/lib/astro/zodiac';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
@@ -66,6 +67,13 @@ export default async function TransitsPage({
   if (gate) return gate;
 
   const params = await searchParams;
+
+  // A signed-in visitor with a saved default chart should never be shown
+
+  // a blank form. `?new=1` is the way to one deliberately.
+
+  await redirectToSavedChart(params, '/tools/transits');
+
 
   if (!hasBirthQuery(params)) {
     return (

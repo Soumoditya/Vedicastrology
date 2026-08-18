@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { CHECK_FEATURES, TOOL_LINKS } from '@/lib/site';
 import { canUseAll } from '@/lib/features/flags';
+import { chartQueryString, getDefaultChart } from '@/lib/astro/current-chart';
 
 /**
  * The journey rail.
@@ -54,6 +55,17 @@ export async function JourneyRail({
       built.set(key, Array.isArray(value) ? value[0] : value);
     }
     suffix = built.toString();
+  }
+
+  /*
+    With no chart in the page's own params every step would link to a bare path
+    and the rail would walk somebody from one empty form to the next. Falling
+    back to the saved default keeps the same chart along the whole path, which
+    is the entire point of the rail.
+  */
+  if (!suffix) {
+    const fallback = await getDefaultChart();
+    if (fallback) suffix = chartQueryString(fallback);
   }
 
   const byFeature = new Map(TOOL_LINKS.map((t) => [t.feature, t]));

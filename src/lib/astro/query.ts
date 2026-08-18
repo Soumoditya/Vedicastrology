@@ -22,6 +22,14 @@ export const birthQuerySchema = z.object({
   name: z.string().optional(),
   /** Birth time not known, the chart is cast but flagged throughout. */
   unknown: z.coerce.boolean().optional(),
+  /**
+   * Needed by the rules that are not symmetric between two charts: Guna Milan
+   * counts Rajju, Vedha, Stri-Dirgha and Mahendra from the bride's nakshatra to
+   * the groom's, and Manglik uses a different house set for each. Carried in
+   * the URL like everything else so a shared result reproduces exactly.
+   * Withheld is a legitimate answer and is not the same as absent.
+   */
+  g: z.enum(['male', 'female', 'undisclosed']).optional(),
   ay: z
     .enum([
       'lahiri',
@@ -47,6 +55,8 @@ export interface ParsedBirthQuery {
   birth: BirthData;
   settings: ChartSettings;
   displayName?: string;
+  /** Absent means never asked; 'undisclosed' means asked and declined. */
+  gender?: 'male' | 'female' | 'undisclosed';
 }
 
 /** Parse URL search params into engine inputs. Throws on invalid input. */
@@ -86,6 +96,7 @@ export function parseBirthQuery(
       includeOuter: false,
     },
     displayName: q.name,
+    gender: q.g,
   };
 }
 
@@ -106,6 +117,7 @@ export function toBirthQueryString(input: {
   place: string;
   name?: string;
   timeUnknown?: boolean;
+  gender?: string;
   ayanamsa?: AyanamsaName;
   houseSystem?: HouseSystem;
 }): string {
@@ -118,6 +130,9 @@ export function toBirthQueryString(input: {
   p.set('place', input.place);
   if (input.name) p.set('name', input.name);
   if (input.timeUnknown) p.set('unknown', '1');
+  if (input.gender === 'male' || input.gender === 'female' || input.gender === 'undisclosed') {
+    p.set('g', input.gender);
+  }
   if (input.ayanamsa && input.ayanamsa !== 'lahiri') p.set('ay', input.ayanamsa);
   if (input.houseSystem && input.houseSystem !== 'whole_sign') {
     p.set('hs', input.houseSystem);

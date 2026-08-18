@@ -46,6 +46,11 @@ export interface BirthProfile {
   longitude: number;
   gender: string | null;
   notes: string | null;
+  /**
+   * The chart this user means when they have not said which. At most one per
+   * user, enforced by a partial unique index rather than by application code.
+   */
+  is_default: boolean;
   created_at: string;
   updated_at: string;
 }

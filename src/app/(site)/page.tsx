@@ -2,12 +2,20 @@ import Link from 'next/link';
 
 import { BirthForm } from '@/components/forms/BirthForm';
 import { SITE, TOOL_LINKS } from '@/lib/site';
+import { getDefaultChart, withChart } from '@/lib/astro/current-chart';
 import { HeroYantra } from '@/components/site/HeroYantra';
 import { Shloka } from '@/components/ornament/Shloka';
 import { Ganesha, Om, OrnamentRule } from '@/components/ornament/Ornaments';
 import { Parallax, Reveal } from '@/components/motion/Reveal';
 
-export default function HomePage() {
+export default async function HomePage() {
+  /*
+    The saved chart, so the list below links straight to it. Somebody who has
+    saved a chart and comes back to the home page should be one tap from
+    reading it, not one tap from typing their birth details in again.
+  */
+  const chart = await getDefaultChart();
+
   return (
     <>
       <Reveal />
@@ -205,7 +213,7 @@ export default function HomePage() {
             {TOOL_LINKS.map((tool, i) => (
               <li key={tool.href} data-reveal style={{ '--reveal-delay': `${i * 60}ms` } as React.CSSProperties}>
                 <Link
-                  href={tool.href}
+                  href={withChart(tool.href, chart)}
                   className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 border-t py-7 transition-colors duration-500 sm:gap-6"
                 >
                   <span

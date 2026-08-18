@@ -12,6 +12,7 @@ import { AccountLinks, AccountMenu, type AccountState } from './AccountMenu';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/locales';
 import type { Region } from '@/lib/supabase/types';
+import { ChartSwitcher, type ChartOption } from '@/components/chart/ChartSwitcher';
 
 const SIGNED_OUT: AccountState = { signedIn: false, displayName: null, isAdmin: false };
 
@@ -21,6 +22,7 @@ export function Header({
   account = SIGNED_OUT,
   locale = DEFAULT_LOCALE,
   labels = {},
+  charts = [],
 }: {
   regions?: Region[];
   currentRegion?: Region | null;
@@ -28,6 +30,8 @@ export function Header({
   locale?: Locale;
   /** Translated navigation labels, resolved on the server. */
   labels?: Record<string, string>;
+  /** Saved charts, so the header can say whose chart is open. */
+  charts?: ChartOption[];
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -104,6 +108,9 @@ export function Header({
           <div className="hidden items-center gap-2 lg:flex">
             <CurrencySwitcher regions={regions} current={currentRegion} />
             <LanguageSwitcher current={locale} />
+          </div>
+          <div className="hidden md:block">
+            <ChartSwitcher charts={charts} />
           </div>
           <ThemeToggle />
           <AccountMenu account={account} labels={labels} />

@@ -5,6 +5,7 @@ import { castChart, isWaxingMoon, moonRashi } from '@/lib/astro/chart';
 import { buildVarga, COMMON_VARGAS } from '@/lib/astro/divisional';
 import { buildVimshottari, dashaAt, formatBalance } from '@/lib/astro/dasha';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
+import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
 import { GRAHA_NAMES_SA } from '@/lib/astro/constants';
 import { formatDms } from '@/lib/astro/zodiac';
@@ -73,6 +74,13 @@ export default async function KundliPage({
   if (gate) return gate;
 
   const params = await searchParams;
+
+  // A signed-in visitor with a saved default chart should never be shown
+
+  // a blank form. `?new=1` is the way to one deliberately.
+
+  await redirectToSavedChart(params, '/tools/kundli');
+
 
   if (!hasBirthQuery(params)) {
     return <KundliIntro />;

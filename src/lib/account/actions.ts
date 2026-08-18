@@ -65,8 +65,20 @@ export async function saveBirthProfile(
   const d = parsed.data;
   const timeUnknown = d.time_unknown ?? false;
 
+  /*
+    The first chart somebody saves becomes their default, because a person with
+    one saved chart plainly means that one and should never be asked for their
+    birth details again. Later charts do not steal the flag: switching default
+    is a deliberate act, not a side effect of saving a partner's chart.
+  */
+  const { count: existing } = await supabase
+    .from('birth_profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
   const { error } = await supabase.from('birth_profiles').insert({
     user_id: user.id,
+    is_default: (existing ?? 0) === 0,
     label: d.label,
     person_name: d.person_name ?? null,
     birth_date: d.birth_date,
@@ -94,8 +106,44 @@ export async function saveBirthProfile(
     gender: d.gender ?? null,
   });
 
-  revalidatePath('/dashboard');
+  // The header names the current chart on every page, and the tool links carry
+  // it, so the whole tree is stale after a save, not just the dashboard.
+  revalidatePath('/', 'layout');
   return { message: 'Chart saved.' };
+}
+
+/**
+ * Choose which saved chart is the default.
+ *
+ * Clearing the old flag and setting the new one are two statements, and the
+ * partial unique index means the order matters: setting first would collide
+ * with the existing default and fail. Clearing first is safe even if the second
+ * statement never runs, since no default at all simply means the tools ask,
+ * which is the old behaviour rather than a broken one.
+ */
+export async function setDefaultBirthProfile(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from('birth_profiles')
+    .update({ is_default: false })
+    .eq('user_id', user.id)
+    .eq('is_default', true);
+
+  await supabase
+    .from('birth_profiles')
+    .update({ is_default: true })
+    .eq('user_id', user.id)
+    .eq('id', id);
+
+  revalidatePath('/', 'layout');
 }
 
 export async function deleteBirthProfile(formData: FormData): Promise<void> {

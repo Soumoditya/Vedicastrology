@@ -6,6 +6,7 @@ import { ashtakavarga, sarvaVerdict, AV_GRAHAS } from '@/lib/astro/ashtakavarga'
 import { mangalDosha } from '@/lib/astro/matching';
 import { GRAHA_ABBR, RASHI_NAMES_EN, RASHI_SYMBOLS } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
+import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
 import { JourneyRail } from '@/components/chart/JourneyRail';
@@ -57,6 +58,13 @@ export default async function YogaPage({ searchParams }: { searchParams: SearchP
   if (gate) return gate;
 
   const params = await searchParams;
+
+  // A signed-in visitor with a saved default chart should never be shown
+
+  // a blank form. `?new=1` is the way to one deliberately.
+
+  await redirectToSavedChart(params, '/tools/yogas');
+
 
   if (!hasBirthQuery(params)) {
     return (

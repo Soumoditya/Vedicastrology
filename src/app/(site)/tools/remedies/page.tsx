@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { castChart } from '@/lib/astro/chart';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
+import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { remedies, type Remedy } from '@/lib/predictions/remedies';
 import { BirthForm } from '@/components/forms/BirthForm';
 import { gateFor } from '@/components/site/FeatureGate';
@@ -34,6 +35,13 @@ export default async function RemediesPage({ searchParams }: { searchParams: Sea
   if (gate) return gate;
 
   const params = await searchParams;
+
+  // A signed-in visitor with a saved default chart should never be shown
+
+  // a blank form. `?new=1` is the way to one deliberately.
+
+  await redirectToSavedChart(params, '/tools/remedies');
+
 
   if (!hasBirthQuery(params)) {
     return (
