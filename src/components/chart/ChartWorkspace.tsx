@@ -70,8 +70,12 @@ export function ChartWorkspace({
                   setActiveCode(v.code);
                   setSelected(null);
                 }}
-                title={v.signification}
-                className="rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-300"
+                title={`${v.name} (${v.code}) — ${v.signification}`}
+                aria-pressed={isActive}
+                /* 44px minimum: sixteen of these are a real tap target problem
+                   at 30px, and the row wraps rather than scrolling. */
+                className="numeric grid min-h-11 min-w-11 place-items-center rounded-full border px-3
+                           text-xs font-medium transition-all duration-300"
                 style={{
                   borderColor: isActive ? 'var(--border-strong)' : 'var(--border-subtle)',
                   background: isActive

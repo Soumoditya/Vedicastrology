@@ -8,9 +8,9 @@ import {
   southIndianGeometry,
   type ChartGeometry,
   type ChartRenderData,
-  type RenderGraha,
 } from '@/lib/chart-render/geometry';
 import { RASHI_NAMES_EN, RASHI_SYMBOLS } from '@/lib/astro/constants';
+import { inscribedBox, layoutGrahas } from '@/lib/chart-render/layout';
 
 export type ChartStyle = 'north-indian' | 'south-indian';
 
@@ -27,12 +27,6 @@ export interface VedicChartProps {
   className?: string;
 }
 
-/** Colour of a graha label, by functional nature. */
-function grahaColor(g: RenderGraha): string {
-  if (g.nature === 'benefic') return 'var(--color-benefic)';
-  if (g.nature === 'malefic') return 'var(--color-malefic)';
-  return 'var(--color-graha-neutral)';
-}
 
 /**
  * The chart drawing.
@@ -73,7 +67,8 @@ export function VedicChart({
   return (
     <div className={`relative ${className}`}>
       <svg
-        viewBox="-3 -3 106 106"
+        /* Room for the plate frame, which sits outside the 0-100 field. */
+        viewBox="-5.5 -5.5 111 111"
         className="h-auto w-full overflow-visible"
         role="img"
         aria-label={
@@ -107,16 +102,6 @@ export function VedicChart({
             <stop offset="100%" stopColor="var(--color-gold-300)" />
           </linearGradient>
 
-          {/* Subtle inner glow behind the whole figure. */}
-          <radialGradient id={`${uid}-aura`} cx="50%" cy="50%" r="50%">
-            <stop
-              offset="0%"
-              stopColor="var(--color-gold-500)"
-              stopOpacity="0.10"
-            />
-            <stop offset="100%" stopColor="var(--color-gold-500)" stopOpacity="0" />
-          </radialGradient>
-
           <filter id={`${uid}-soft`} x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="0.6" result="blur" />
             <feMerge>
@@ -126,7 +111,34 @@ export function VedicChart({
           </filter>
         </defs>
 
-        <rect x="-3" y="-3" width="106" height="106" fill={`url(#${uid}-aura)`} />
+        {/*
+          The plate.
+
+          Paper, then a heavy outer rule, then a hairline inside it: the double
+          border a printed kundli has, and the thing whose absence made this look
+          weak and unfinished. Drawn slightly outside the 0–100 field so the
+          frame sits around the chart rather than clipping its outermost lines.
+        */}
+        <rect
+          x="-4"
+          y="-4"
+          width="108"
+          height="108"
+          rx="0.5"
+          fill="var(--plate-paper)"
+          stroke="var(--plate-ink)"
+          strokeWidth="1.1"
+        />
+        <rect
+          x="-1.6"
+          y="-1.6"
+          width="103.2"
+          height="103.2"
+          fill="none"
+          stroke="var(--plate-rule)"
+          strokeWidth="0.3"
+          opacity="0.55"
+        />
 
         {/* Cell fills sit beneath the frame so the gold lines stay crisp. */}
         <g>
@@ -138,7 +150,7 @@ export function VedicChart({
                 points={polygonToPoints(cell.polygon)}
                 fill={
                   isActive
-                    ? 'color-mix(in oklab, var(--color-gold-500) 14%, transparent)'
+                    ? 'color-mix(in oklab, var(--plate-highlight) 55%, transparent)'
                     : 'transparent'
                 }
                 className="transition-[fill] duration-300"
@@ -150,9 +162,9 @@ export function VedicChart({
 
         {/* The frame itself. */}
         <g
-          stroke={`url(#${uid}-gold)`}
-          strokeWidth="0.5"
-          strokeLinecap="round"
+          stroke="var(--plate-rule)"
+          strokeWidth="0.45"
+          strokeLinecap="square"
           fill="none"
         >
           {geometry.frame.map((line, i) => (
@@ -184,25 +196,27 @@ export function VedicChart({
             const isAscendant = cell.house === 1;
             const grahas = house.grahas;
 
-            // A stellium can put six or more grahas in one house. Stacking them
-            // all in a single column runs straight out of the cell, so past the
-            // cell's capacity the labels move to two columns, the type shrinks
-            // to a floor, and degrees are dropped. Corner triangles hold less
-            // than the central rhombi, which is what `capacity` encodes.
-            const twoColumns = grahas.length > cell.capacity;
-            const columns = twoColumns ? 2 : 1;
-            const rows = Math.ceil(grahas.length / columns);
+            /*
+              Laid out inside the cell's own shape, not around a point.
 
-            const fontSize = twoColumns ? 3 : grahas.length > 3 ? 3.5 : 4;
-            const lineHeight = fontSize * 1.3;
-            const columnWidth = fontSize * 3.1;
+              The old version stacked labels around `contentAt` and used a
+              `capacity` number to guess when to compact. A point knows nothing
+              about the polygon around it, so four grahas in a corner triangle ran
+              out through the diagonal into the next house — which is exactly what
+              happened to the 9th in a real chart, with Moon, Jupiter, Mars and Sun
+              sharing it.
 
-            // Degrees are the first thing to go: the sign a graha occupies
-            // matters far more than its exact degree when reading a crowded
-            // house, and keeping them would force the type below legibility.
-            const withDegrees = showDegrees && !twoColumns && grahas.length <= 3;
-
-            const startY = cell.contentAt.y - ((rows - 1) * lineHeight) / 2;
+              `inscribedBox` finds the largest box that actually fits the cell and
+              `layoutGrahas` fills it, stepping the type down and adding columns
+              only when it must. Both are pure functions in chart-render/layout so
+              a test can assert containment for one to nine grahas in every cell
+              of every style, which is the property that was quietly false.
+            */
+            const box = inscribedBox(cell.polygon);
+            const layout = layoutGrahas(box, grahas.length, {
+              wantDegrees: showDegrees,
+            });
+            const { fontSize, withDegrees } = layout;
 
             return (
               <g key={`content-${cell.house}`}>
@@ -213,11 +227,8 @@ export function VedicChart({
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontSize="4.6"
-                  fill={
-                    isAscendant ? 'var(--color-gold-200)' : 'var(--color-gold-500)'
-                  }
-                  fontWeight={isAscendant ? 600 : 400}
-                  opacity={isAscendant ? 1 : 0.75}
+                  fill={isAscendant ? 'var(--plate-accent)' : 'var(--plate-numeral)'}
+                  fontWeight={isAscendant ? 600 : 500}
                   /* Inter, not the display face: Marcellus has no lining
                      figures, so its 1 and 0 read as I and O and the rashi
                      numbers — the actual content of the chart — become
@@ -232,24 +243,17 @@ export function VedicChart({
 
                 {/* Grahas. */}
                 {grahas.map((g, i) => {
-                  // Fill column by column so a two column layout reads down
-                  // the left side first, the way a list normally would.
-                  const column = Math.floor(i / rows);
-                  const row = i % rows;
-
-                  const x =
-                    cell.contentAt.x + (column - (columns - 1) / 2) * columnWidth;
-                  const y = startY + row * lineHeight;
+                  const at = layout.positions[i];
 
                   return (
                     <text
                       key={g.graha}
-                      x={x}
-                      y={y}
+                      x={at.x}
+                      y={at.y}
                       textAnchor="middle"
                       dominantBaseline="central"
                       fontSize={fontSize}
-                      fill={grahaColor(g)}
+                      fill="var(--plate-ink)"
                       fontWeight={500}
                       style={{
                         fontFamily: 'var(--font-body)',
@@ -261,17 +265,17 @@ export function VedicChart({
                         <tspan
                           fontSize={fontSize * 0.65}
                           dy={-fontSize * 0.3}
-                          opacity="0.85"
+                          fill="var(--plate-ink-soft)"
                         >
                           ℞
                         </tspan>
                       )}
                       {withDegrees && g.degree !== undefined && (
                         <tspan
-                          fontSize="2.7"
+                          fontSize={fontSize * 0.72}
                           dy={g.retrograde ? fontSize * 0.3 : 0}
                           dx="0.6"
-                          opacity="0.6"
+                          fill="var(--plate-ink-soft)"
                         >
                           {Math.floor(g.degree)}°
                         </tspan>
@@ -287,10 +291,7 @@ export function VedicChart({
         {/* Ascendant marker, a small gold tick on the first house. */}
         {style === 'north-indian' && (
           <g opacity="0.9" filter={`url(#${uid}-soft)`}>
-            <path
-              d="M 50 2.5 L 52 6 L 48 6 Z"
-              fill="var(--color-gold-300)"
-            />
+            <path d="M 50 2.5 L 52 6 L 48 6 Z" fill="var(--plate-accent)" />
           </g>
         )}
 

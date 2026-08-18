@@ -46,6 +46,18 @@ export default async function DashboardPage() {
     lifeEvents = row as never;
   }
 
+  /*
+    Whether anything has actually been answered, which decides if the optional
+    research questions open on arrival. A row exists as soon as the chart is
+    contributed, so its presence proves nothing; only a non-empty value does.
+  */
+  const hasLifeEvents = Boolean(
+    lifeEvents &&
+      Object.values(lifeEvents as Record<string, unknown>).some((value) =>
+        Array.isArray(value) ? value.length > 0 : value !== null && value !== '',
+      ),
+  );
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -135,19 +147,48 @@ export default async function DashboardPage() {
         {profile.research_consent && (
           <>
             <div className="rule-gold my-8" />
-            <h3 className="font-display text-base" style={{ color: 'var(--color-gold-200)' }}>
-              A little more, if you are willing
-            </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              Chart positions alone can only show what is common. To test whether
-              a classical rule actually holds, the research needs something to
-              test it against. Every field below is optional, and you can change
-              or clear any of them at any time.
-            </p>
-            <ResearchProfileForm
-              values={lifeEvents}
-              healthConsent={profile.health_research_consent}
-            />
+
+            {/*
+              Shut until asked for.
+
+              This was expanded by default, so a page about the charts you have
+              saved opened with eight optional research questions already on
+              screen — gender, relationship status, the year you married, how many
+              children, when the first was born. Asking all of that unprompted
+              reads as a demand rather than an invitation, which is the opposite
+              of what an optional research contribution should feel like.
+
+              A native `details` rather than a state hook: it works with no
+              JavaScript, it is a real disclosure to a screen reader, and the
+              browser handles the keyboard for us. It opens by default only for
+              somebody who has already answered something, so returning to check
+              or change an answer does not mean hunting for it.
+            */}
+            <details open={hasLifeEvents} className="group">
+              <summary
+                className="flex min-h-11 cursor-pointer list-none items-center gap-2"
+                style={{ color: 'var(--color-gold-200)' }}
+              >
+                <span
+                  aria-hidden
+                  className="text-xs transition-transform duration-300 group-open:rotate-90"
+                >
+                  ▸
+                </span>
+                <span className="font-display text-base">A little more, if you are willing</span>
+              </summary>
+
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Chart positions alone can only show what is common. To test whether
+                a classical rule actually holds, the research needs something to
+                test it against. Every field below is optional, and you can change
+                or clear any of them at any time.
+              </p>
+              <ResearchProfileForm
+                values={lifeEvents}
+                healthConsent={profile.health_research_consent}
+              />
+            </details>
           </>
         )}
       </section>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { DateTime } from 'luxon';
 
 import { castChart, isWaxingMoon, moonRashi } from '@/lib/astro/chart';
-import { buildVarga, COMMON_VARGAS } from '@/lib/astro/divisional';
+import { ALL_VARGAS, buildVarga } from '@/lib/astro/divisional';
 import { buildVimshottari, dashaAt, formatBalance } from '@/lib/astro/dasha';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
@@ -103,7 +103,16 @@ export default async function KundliPage({
   const zone = chart.meta.timezone;
 
   // Divisional charts.
-  const vargas: WorkspaceVarga[] = COMMON_VARGAS.map((code) => {
+  /*
+    All sixteen, not seven.
+
+    `ALL_VARGAS` has held the full shodashavarga since the engine was written and
+    the page offered `COMMON_VARGAS` — seven of them — while the home page and the
+    tool card both promised "all sixteen divisional charts". The rules for every
+    one are already implemented, including the unequal Trimsamsa divisions, so
+    there was nothing to compute, only something to show.
+  */
+  const vargas: WorkspaceVarga[] = ALL_VARGAS.map((code) => {
     if (code === 'D1') {
       return {
         code,

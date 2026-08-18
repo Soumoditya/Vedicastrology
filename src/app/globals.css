@@ -61,6 +61,26 @@
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-quote: var(--font-cormorant), Georgia, serif;
 
+  /* -- The chart plate. ---------------------------------------------------
+        A kundli is a printed diagram: dark ink ruled on paper. Drawing it in
+        gold on the site's blue-black ground put four colour systems on one
+        figure — the ink ground, three tones of gold, and benefic green against
+        malefic red — and the result read as a widget rather than as a chart.
+
+        So the chart is its own plate, on paper, and the same paper in both
+        themes: in dark mode it reads as a printed sheet laid on the page, and in
+        light mode as the page's own stock. One accent, the sindoor vermilion,
+        used once for the ascendant. Benefic and malefic move to the table and the
+        legend, where a word states them better than a colour to be decoded. */
+  --plate-paper: #efe6d0;
+  --plate-paper-edge: #e3d7bb;
+  --plate-ink: #221a0c;
+  --plate-ink-soft: #6d604a;
+  --plate-rule: #3d3325;
+  --plate-numeral: #7a5a10;
+  --plate-accent: #b8390f;
+  --plate-highlight: #d9c690;
+
   /* -- Figures. -----------------------------------------------------------
         Marcellus ships no lining figures and its advance widths are wildly
         uneven: at 100px its `1` is 29.5px against `0` at 80.6px. In running
