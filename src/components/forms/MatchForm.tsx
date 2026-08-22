@@ -56,8 +56,8 @@ export function MatchForm({ prefillA }: { prefillA?: MatchPrefill }) {
     e.preventDefault();
     setError(null);
 
-    if (!a.date || !a.place) return setError('Please complete the first person’s details.');
-    if (!b.date || !b.place) return setError('Please complete the second person’s details.');
+    if (!a.date || !a.place) return setError('Please complete the female chart’s details.');
+    if (!b.date || !b.place) return setError('Please complete the male chart’s details.');
 
     const params = new URLSearchParams();
     for (const [prefix, person] of [['a', a], ['b', b]] as const) {
@@ -76,20 +76,26 @@ export function MatchForm({ prefillA }: { prefillA?: MatchPrefill }) {
   return (
     <form onSubmit={submit} className="space-y-8" noValidate>
       {/*
-        Bride and groom, not first and second.
+        Female and male, not first and second.
 
-        Varna and Tara are counted from the bride's chart to the groom's, so the
-        engine's `matchCharts(bride, groom)` is directional and always was. The
-        form, though, asked for a "first person" and a "second person" and passed
-        them in the order they were typed — so the score quietly depended on which
-        box somebody filled in first, and nothing on the page said so. Naming the
-        two roles is the whole fix.
+        Varna and Tara are counted in one direction, so the engine's
+        `matchCharts(bride, groom)` is directional and always was. The form,
+        though, asked for a "first person" and a "second person" and passed them
+        in the order they were typed — so the score quietly depended on which box
+        somebody filled in first, and nothing on the page said so. Naming the two
+        roles is the whole fix.
+
+        Labelled by sex rather than by wedding role: this tool gets used to
+        compare two charts, which is not always a marriage being arranged, and
+        "bride" and "groom" assume an occasion nobody has mentioned. The classical
+        rule is untouched — the female chart occupies the position the texts call
+        the bride's, which is why the engine's field names still read that way.
       */}
-      <PersonFields legend="Bride" person={a} onChange={setA} idPrefix="a" />
+      <PersonFields legend="Female" person={a} onChange={setA} idPrefix="a" />
 
       <div className="rule-gold" />
 
-      <PersonFields legend="Groom" person={b} onChange={setB} idPrefix="b" />
+      <PersonFields legend="Male" person={b} onChange={setB} idPrefix="b" />
 
       {error && (
         <p

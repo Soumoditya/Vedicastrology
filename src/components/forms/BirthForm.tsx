@@ -154,14 +154,35 @@ export function BirthForm({
         </Field>
       </div>
 
+      <label className="flex cursor-pointer items-start gap-2.5 text-sm">
+        <input
+          type="checkbox"
+          checked={timeUnknown}
+          onChange={(e) => setTimeUnknown(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--color-gold-500)]"
+        />
+        <span style={{ color: 'var(--text-secondary)' }}>
+          {s('form.timeUnknown', 'I don’t know the time of birth')}
+          <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>
+            {s(
+              'form.timeUnknownNote',
+              'The chart is still cast, but the ascendant, houses and dasha dates cannot be relied on, everything affected is marked.',
+            )}
+          </span>
+        </span>
+      </label>
+
       {/*
         Asked, and said why.
 
-        Guna Milan counts Varna and Tara from the bride's chart to the groom's, so
-        a comparison needs to know which chart is which — and the page was deciding
-        that from whichever form happened to be filled in first. Nothing else in a
-        chart changes, and saying so plainly is better than letting somebody wonder
-        what is being done with it.
+        Guna Milan counts Varna and Tara in one direction — from the female chart
+        to the male one — so a comparison needs to know which chart is which, and
+        the page was deciding that from whichever form happened to be filled in
+        first. The two roles are labelled Female and Male on the comparison form;
+        the classical texts call the same two positions bride and groom, which is
+        what the engine's own field names still say. Nothing else in a chart
+        changes, and saying so plainly is better than letting somebody wonder what
+        is being done with it.
       */}
       <fieldset>
         <legend className="mb-1.5 text-xs font-medium uppercase tracking-[0.12em]"
@@ -206,28 +227,10 @@ export function BirthForm({
         <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
           {s(
             'form.genderNote',
-            'Used only where a classical rule needs it: comparing two charts counts some of the eight koots from the bride’s chart to the groom’s. Nothing else in your chart depends on it.',
+            'Used only where a classical rule needs it: comparing two charts counts some of the eight koots from the female chart to the male one. Nothing else in your chart depends on it.',
           )}
         </p>
       </fieldset>
-
-      <label className="flex cursor-pointer items-start gap-2.5 text-sm">
-        <input
-          type="checkbox"
-          checked={timeUnknown}
-          onChange={(e) => setTimeUnknown(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--color-gold-500)]"
-        />
-        <span style={{ color: 'var(--text-secondary)' }}>
-          {s('form.timeUnknown', 'I don’t know the time of birth')}
-          <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>
-            {s(
-              'form.timeUnknownNote',
-              'The chart is still cast, but the ascendant, houses and dasha dates cannot be relied on, everything affected is marked.',
-            )}
-          </span>
-        </span>
-      </label>
 
       <PlaceField
         id={`${uid}-place`}

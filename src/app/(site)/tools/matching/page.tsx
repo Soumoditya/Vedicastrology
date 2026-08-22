@@ -127,7 +127,18 @@ export default async function MatchingPage({
       <div className="relative">
         <Reveal />
         <div className="starfield" aria-hidden />
-        <div className="relative mx-auto max-w-3xl px-5 py-16 sm:py-20">
+        {/*
+          The same frame as every other tool page.
+
+          This branch used to be `max-w-3xl` while `ToolResult` — which every
+          other tool renders inside — is `max-w-5xl` with `py-12 sm:py-16`. The
+          rail is identical markup on all of them, so at 768px its seven equal
+          columns squeezed and its labels dropped to the `lg:` hidden state,
+          which is why it read as a smaller, different rail here and nowhere
+          else. The frame is the fix; the reading measure is restored by the
+          inner wrapper, since a birth form 1024px wide is not an improvement.
+        */}
+        <div className="report-body relative mx-auto max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16">
           {/*
             The dead-end fix. Arriving here from a chart, the rail stays present
             so there is always a way back to the rest of that chart rather than
@@ -135,6 +146,7 @@ export default async function MatchingPage({
           */}
           {carried && <JourneyRail current="matching" query={personQuery(carried)} />}
 
+          <div className="mx-auto max-w-3xl">
           <header className="max-w-xl">
             <p className="eyebrow" data-reveal>Guṇa Milan</p>
             <h1
@@ -163,14 +175,23 @@ export default async function MatchingPage({
 
           <p className="mt-6 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             Birth times are not needed for the score. Guna Milan rests entirely
-            on each Moon's nakshatra and rashi, so a date and place is enough.
+            on each Moon&rsquo;s nakshatra and rashi, so a date and place is enough.
             A known time only sharpens the Mangal dosha check.
           </p>
+          </div>
         </div>
       </div>
     );
   }
 
+  /*
+    The form's Female column is the engine's `bride` argument and its Male column
+    the `groom`. That mapping is the whole of the rename: Guna Milan is
+    directional — Varna scores when the groom's varna equals or exceeds the
+    bride's, and Tara counts forward from one nakshatra to the other — so the
+    two positions are not interchangeable, and `matchCharts` keeps the classical
+    names its rules are written in. Only what a reader is shown has changed.
+  */
   const brideChart = castChart(bride.birth);
   const groomChart = castChart(groom.birth);
   const result = matchCharts(brideChart, groomChart);
@@ -196,7 +217,7 @@ export default async function MatchingPage({
         forcing it through would mean teaching the shell about a case it does not
         have. What had to be shared is the frame, and that is shared.
       */}
-      <div className="report-body relative mx-auto max-w-5xl px-5 py-12 sm:py-16">
+      <div className="report-body relative mx-auto max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16">
         {/* The path continues on the bride's chart, so there is a way onward
             from a match rather than a dead stop. */}
         <JourneyRail current="matching" query={personQuery(bride)} />
@@ -206,7 +227,7 @@ export default async function MatchingPage({
           style={{ color: 'var(--text-primary)' }}
           data-reveal
         >
-          {bride.name ?? 'The bride'} and {groom.name ?? 'The groom'}
+          {bride.name ?? 'Female'} and {groom.name ?? 'Male'}
         </h1>
 
         {/* The score */}
@@ -237,8 +258,8 @@ export default async function MatchingPage({
 
         {/* Both Moons */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <MoonCard label={bride.name ?? 'The bride'} data={result.bride} />
-          <MoonCard label={groom.name ?? 'The groom'} data={result.groom} />
+          <MoonCard label={bride.name ?? 'Female'} data={result.bride} />
+          <MoonCard label={groom.name ?? 'Male'} data={result.groom} />
         </div>
 
         {/* Koot by koot */}
@@ -311,8 +332,8 @@ export default async function MatchingPage({
         <section className="mt-12">
           <h2 className="eyebrow" data-reveal>Mangal dosha</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <MangalCard label={bride.name ?? 'The bride'} dosha={result.mangal.bride} />
-            <MangalCard label={groom.name ?? 'The groom'} dosha={result.mangal.groom} />
+            <MangalCard label={bride.name ?? 'Female'} dosha={result.mangal.bride} />
+            <MangalCard label={groom.name ?? 'Male'} dosha={result.mangal.groom} />
           </div>
           {!result.mangal.balanced && (
             <p

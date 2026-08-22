@@ -24,6 +24,7 @@ const en: Dictionary = {
   'tool.yogas.label': 'Yogas and Doshas',
   'tool.remedies.label': 'Remedies',
   'tool.nakshatra.label': 'Nakshatra Finder',
+  'tool.gemstones.label': 'Gemstones',
 
   'tool.kundli.description':
     'Your complete Vedic chart with houses, nakshatras, dignities and all sixteen divisional charts.',
@@ -32,15 +33,17 @@ const en: Dictionary = {
   'tool.dasha.description':
     'Your planetary periods to four levels, with the exact dates each one begins and ends.',
   'tool.transits.description':
-    'Where the grahas are now relative to your chart, including Sade Sati and its phases.',
+    'Today drawn on your own chart, counted from the ascendant and from the Moon, and read against both.',
   'tool.matching.description':
     'Ashtakoot matching across all eight koots, with Mangal dosha and its cancellations.',
   'tool.yogas.description':
     'Every combination your chart forms with the reason it was found, plus Manglik, Kalsarpa and Ashtakavarga.',
   'tool.remedies.description':
-    'The traditional measures for whichever grahas your chart shows as needing support, with an honest note on gemstones.',
+    'Every graha in your chart read in turn, with practical advice for the house it sits in and the classical measure for it.',
   'tool.nakshatra.description':
     'Your birth star, its pada, ruling graha and what the classical texts say about it.',
+  'tool.gemstones.description':
+    'Which stones your chart would traditionally be given, how each is worn, and why the tradition puts them last.',
 
 
   // Navigation and chrome
@@ -191,7 +194,7 @@ const en: Dictionary = {
   'form.genderFemale': 'Female',
   'form.genderMale': 'Male',
   'form.genderUndisclosed': 'Prefer not to say',
-  'form.genderNote': 'Used only where a classical rule needs it: comparing two charts counts some of the eight koots from the bride’s chart to the groom’s. Nothing else in your chart depends on it.',
+  'form.genderNote': 'Used only where a classical rule needs it: comparing two charts counts some of the eight koots from the female chart to the male one. Nothing else in your chart depends on it.',
   'form.errDate': 'Please enter the date of birth.',
   'form.errPlace': 'Please choose the place of birth from the list.',
   'form.errTime': 'Please enter the time of birth, or tick “I don’t know the time”.',
@@ -354,15 +357,17 @@ const hi: Dictionary = {
   'tool.yogas.label': 'योग और दोष',
   'tool.remedies.label': 'उपाय',
   'tool.nakshatra.label': 'नक्षत्र खोज',
+  'tool.gemstones.label': 'रत्न',
 
   'tool.kundli.description': 'भाव, नक्षत्र, ग्रह-बल और सोलह वर्ग कुंडलियों सहित पूर्ण वैदिक कुंडली।',
   'tool.panchang.description': 'आज की तिथि, नक्षत्र, योग और करण, वास्तविक सूर्योदय, राहु काल तथा शुभ मुहूर्त के साथ।',
   'tool.dasha.description': 'आपकी दशाएँ चार स्तरों तक, प्रत्येक के आरंभ और समाप्ति की सटीक तिथियों के साथ।',
-  'tool.transits.description': 'आपकी कुंडली के सापेक्ष ग्रहों की वर्तमान स्थिति, साढ़े साती और उसके चरणों सहित।',
+  'tool.transits.description': 'आज का गोचर आपकी अपनी कुंडली पर, लग्न से और चंद्र से गिना हुआ, और दोनों के आधार पर पढ़ा हुआ।',
   'tool.matching.description': 'आठों कूटों पर अष्टकूट मिलान, मंगल दोष और उसके भंग के साथ।',
   'tool.yogas.description': 'आपकी कुंडली में बनने वाला प्रत्येक योग, उसके कारण सहित, तथा मांगलिक, कालसर्प और अष्टकवर्ग।',
-  'tool.remedies.description': 'जिन ग्रहों को बल की आवश्यकता है उनके पारंपरिक उपाय, रत्नों पर स्पष्ट टिप्पणी सहित।',
+  'tool.remedies.description': 'कुंडली का प्रत्येक ग्रह क्रम से पढ़ा हुआ, जिस भाव में बैठा है उसके लिए व्यावहारिक सलाह और शास्त्रीय उपाय सहित।',
   'tool.nakshatra.description': 'आपका जन्म नक्षत्र, पाद, स्वामी ग्रह और शास्त्रों में उसका वर्णन।',
+  'tool.gemstones.description': 'आपकी कुंडली में परंपरा किन रत्नों का नाम लेती है, प्रत्येक कैसे धारण किया जाता है, और परंपरा उन्हें अंत में क्यों रखती है।',
 
   // Added with the strings that now read through the dictionary.
   'step.kundli': 'आपकी कुंडली',
@@ -384,7 +389,7 @@ const hi: Dictionary = {
   'form.genderFemale': 'स्त्री',
   'form.genderMale': 'पुरुष',
   'form.genderUndisclosed': 'बताना नहीं चाहते',
-  'form.genderNote': 'केवल वहाँ प्रयोग होता है जहाँ शास्त्रीय नियम माँगता है: दो कुंडलियों के मिलान में आठ कूटों में से कुछ वर-वधू के क्रम से गिने जाते हैं। कुंडली में और कुछ इस पर निर्भर नहीं है।',
+  'form.genderNote': 'केवल वहाँ प्रयोग होता है जहाँ शास्त्रीय नियम माँगता है: दो कुंडलियों के मिलान में आठ कूटों में से कुछ स्त्री की कुंडली से पुरुष की कुंडली के क्रम में गिने जाते हैं। कुंडली में और कुछ इस पर निर्भर नहीं है।',
   'form.errDate': 'कृपया जन्म तिथि भरें।',
   'form.errPlace': 'कृपया सूची से जन्म स्थान चुनें।',
   'form.errTime': 'कृपया जन्म समय भरें, या “मुझे जन्म समय ज्ञात नहीं है” चुनें।',
@@ -547,15 +552,17 @@ const bn: Dictionary = {
   'tool.yogas.label': 'যোগ ও দোষ',
   'tool.remedies.label': 'উপায়',
   'tool.nakshatra.label': 'নক্ষত্র অনুসন্ধান',
+  'tool.gemstones.label': 'রত্ন',
 
   'tool.kundli.description': 'ভাব, নক্ষত্র, গ্রহবল এবং ষোলটি বর্গ কুণ্ডলী সহ সম্পূর্ণ বৈদিক কুণ্ডলী।',
   'tool.panchang.description': 'আজকের তিথি, নক্ষত্র, যোগ ও করণ, প্রকৃত সূর্যোদয়, রাহুকাল এবং শুভ সময়ের সঙ্গে।',
   'tool.dasha.description': 'আপনার দশা চারটি স্তর পর্যন্ত, প্রতিটির শুরু ও শেষের সঠিক তারিখ সহ।',
-  'tool.transits.description': 'আপনার কুণ্ডলীর সাপেক্ষে গ্রহের বর্তমান অবস্থান, সাড়ে সাতি ও তার পর্যায় সহ।',
+  'tool.transits.description': 'আজকের গোচর আপনার নিজের কুণ্ডলীতে, লগ্ন থেকে ও চন্দ্র থেকে গণনা করা, এবং দুটির ভিত্তিতে পড়া।',
   'tool.matching.description': 'আটটি কূটে অষ্টকূট মিলন, মঙ্গল দোষ ও তার ভঙ্গ সহ।',
   'tool.yogas.description': 'আপনার কুণ্ডলীতে গঠিত প্রতিটি যোগ, তার কারণ সহ, এবং মাঙ্গলিক, কালসর্প ও অষ্টকবর্গ।',
-  'tool.remedies.description': 'যে গ্রহগুলির বল প্রয়োজন তাদের প্রথাগত উপায়, রত্ন সম্পর্কে স্পষ্ট মন্তব্য সহ।',
+  'tool.remedies.description': 'কুণ্ডলীর প্রতিটি গ্রহ পর পর পড়া, যে ভাবে বসে আছে তার জন্য বাস্তব পরামর্শ ও শাস্ত্রীয় উপায় সহ।',
   'tool.nakshatra.description': 'আপনার জন্ম নক্ষত্র, পাদ, অধিপতি গ্রহ এবং শাস্ত্রে তার বর্ণনা।',
+  'tool.gemstones.description': 'আপনার কুণ্ডলীতে পরম্পরা কোন রত্নের নাম করে, প্রতিটি কীভাবে ধারণ করা হয়, এবং পরম্পরা কেন সেগুলিকে শেষে রাখে।',
 
   // Added with the strings that now read through the dictionary.
   'step.kundli': 'আপনার কুণ্ডলী',
@@ -577,7 +584,7 @@ const bn: Dictionary = {
   'form.genderFemale': 'নারী',
   'form.genderMale': 'পুরুষ',
   'form.genderUndisclosed': 'বলতে চাই না',
-  'form.genderNote': 'কেবল সেখানেই ব্যবহৃত হয় যেখানে শাস্ত্রীয় নিয়মের প্রয়োজন: দুটি কুণ্ডলী মেলানোর সময় আটটি কূটের কয়েকটি কন্যা থেকে বরের ক্রমে গণনা করা হয়। কুণ্ডলীর আর কিছুই এর উপর নির্ভর করে না।',
+  'form.genderNote': 'কেবল সেখানেই ব্যবহৃত হয় যেখানে শাস্ত্রীয় নিয়মের প্রয়োজন: দুটি কুণ্ডলী মেলানোর সময় আটটি কূটের কয়েকটি স্ত্রীর কুণ্ডলী থেকে পুরুষের কুণ্ডলীর ক্রমে গণনা করা হয়। কুণ্ডলীর আর কিছুই এর উপর নির্ভর করে না।',
   'form.errDate': 'অনুগ্রহ করে জন্ম তারিখ দিন।',
   'form.errPlace': 'অনুগ্রহ করে তালিকা থেকে জন্মস্থান বেছে নিন।',
   'form.errTime': 'অনুগ্রহ করে জন্ম সময় দিন, বা “আমি জন্ম সময় জানি না” বেছে নিন।',
