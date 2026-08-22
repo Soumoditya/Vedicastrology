@@ -22,6 +22,34 @@ import type { ChartPalette } from '@/lib/chart-render/svgString';
 
 export type ThemeKey = 'night' | 'ivory' | 'parchment' | 'classical';
 
+/**
+ * Everything about a ground that is not a colour.
+ *
+ * This block is the answer to "all four look the same, just a different
+ * colour", which was literally true: the sheet carried no theme conditionals at
+ * all, so the four shared one set of faces, sizes, rule weights and cover
+ * layout. A ground is a way of making a book, not a palette.
+ */
+export interface ThemeStyle {
+  /** Body face, as a full CSS stack. */
+  bodyFont: string;
+  /** Display face, for headings and the cover. */
+  displayFont: string;
+  bodySize: string;
+  bodyLeading: string;
+  /** How a section announces itself under its title. */
+  headRule: 'hairline' | 'double' | 'none' | 'numbered';
+  headAlign: 'left' | 'center';
+  /** A drop cap on the opening paragraph of each section. */
+  dropCap: boolean;
+  /** How a table is ruled. */
+  tableStyle: 'ruled' | 'zebra' | 'open';
+  /** Page margins, as a CSS shorthand. A manuscript ground is asymmetric. */
+  pageMargin: string;
+  /** How the cover and part dividers are composed. */
+  plateStyle: 'photographic' | 'bordered' | 'framed' | 'plain';
+}
+
 export interface ReportTheme {
   key: ThemeKey;
   /** Shown in the theme switcher. */
@@ -60,6 +88,7 @@ export interface ReportTheme {
     back: string;
     page: string;
   };
+  style: ThemeStyle;
   chart: ChartPalette;
 }
 
@@ -104,6 +133,18 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
       */
       page: '/report/mandala.jpg',
     },
+    style: {
+      bodyFont: "'Inter', ui-sans-serif, system-ui, sans-serif",
+      displayFont: "'Marcellus', Georgia, serif",
+      bodySize: '10pt',
+      bodyLeading: '1.55',
+      headRule: 'hairline',
+      headAlign: 'left',
+      dropCap: false,
+      tableStyle: 'ruled',
+      pageMargin: '16mm 15mm 18mm',
+      plateStyle: 'photographic',
+    },
     chart: {
       background: '#0a0a16',
       rule: '#c9a227',
@@ -132,6 +173,18 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
     panel: '#F4EDDF',
     coverPaper: '#F6EFE0',
     coverInk: '#241C14',
+    style: {
+      bodyFont: "'Spectral', Georgia, serif",
+      displayFont: "'Marcellus', Georgia, serif",
+      bodySize: '10.5pt',
+      bodyLeading: '1.6',
+      headRule: 'double',
+      headAlign: 'center',
+      dropCap: false,
+      tableStyle: 'ruled',
+      pageMargin: '18mm 17mm 20mm',
+      plateStyle: 'bordered',
+    },
     chart: {
       background: '#FFFDF7',
       rule: '#B08C3A',
@@ -159,6 +212,19 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
     panel: '#EEE4D2',
     coverPaper: '#EFE5D1',
     coverInk: '#3A2E22',
+    style: {
+      bodyFont: "'EB Garamond', Georgia, serif",
+      displayFont: "'Cormorant Garamond', Georgia, serif",
+      bodySize: '11.5pt',
+      bodyLeading: '1.62',
+      headRule: 'none',
+      headAlign: 'left',
+      dropCap: true,
+      tableStyle: 'open',
+      /* Asymmetric, as a manuscript is: a wide outer margin to hold it by. */
+      pageMargin: '20mm 26mm 22mm 16mm',
+      plateStyle: 'framed',
+    },
     chart: {
       background: '#FBF6EA',
       rule: '#A9884E',
@@ -186,6 +252,18 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
     panel: '#F7F3EA',
     coverPaper: '#FDFAF3',
     coverInk: '#1A1A1A',
+    style: {
+      bodyFont: "'Libre Baskerville', Georgia, serif",
+      displayFont: "'Libre Baskerville', Georgia, serif",
+      bodySize: '9.5pt',
+      bodyLeading: '1.5',
+      headRule: 'numbered',
+      headAlign: 'left',
+      dropCap: false,
+      tableStyle: 'zebra',
+      pageMargin: '15mm 14mm 16mm',
+      plateStyle: 'plain',
+    },
     chart: {
       background: '#FFFFFF',
       rule: '#C9A227',

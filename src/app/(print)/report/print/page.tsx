@@ -3,11 +3,10 @@ import Link from 'next/link';
 
 import { buildFullReport } from '@/lib/report/build';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
-import { pagedCss, printCss } from '@/lib/report/pagedCss';
+import { printCss } from '@/lib/report/pagedCss';
 import { resolveTheme, THEME_LIST } from '@/lib/report/themes';
 import { getNames } from '@/lib/i18n/server';
 import { gateFor } from '@/components/site/FeatureGate';
-import { Paginate } from '@/components/report/Paginate';
 import { ReportDocument } from '@/components/report/ReportDocument';
 
 export const metadata: Metadata = {
@@ -20,24 +19,18 @@ export const dynamic = 'force-dynamic';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /**
- * The report, ready to print.
+ * The report, as the printer sees it.
  *
- * This renders immediately. It used to hand the document to Paged.js first, and
- * that was the wrong default: Paged.js is what makes real page numbers possible,
- * but it fragments forty pages on the main thread before anything appears, it is
- * slow on a modest machine, and on this document it has stalled outright. A
- * button somebody presses to get a PDF cannot begin with a wait of unknown
- * length that sometimes never ends.
+ * This page is mostly not for people any more. `/api/report/pdf` loads it in
+ * headless Chrome and returns the bytes, so this is the document Chrome
+ * fragments — nothing here simulates a sheet, because the real page box does
+ * that better than any div could.
  *
- * So the browser paginates by default. Every section still starts on a new page,
- * because that is a plain `break-before: page` and browsers have always honoured
- * it; the art, the themes and the layout are identical. What the browser cannot
- * do is print a page number, since Chrome has never implemented `@page` margin
- * boxes — that is the one thing `?paged=1` still buys, for anyone willing to
- * wait for it.
- *
- * Both modes render the same `ReportDocument`, so nothing can drift between
- * them.
+ * It stays reachable by hand, with a theme switcher, because being able to open
+ * the thing the PDF is made from and look at it in a normal tab is what makes a
+ * layout bug findable. The switcher carries `no-print`, which now genuinely
+ * means "not on paper" rather than "not anywhere" — that rule used to be emitted
+ * unscoped and hid this toolbar on every ground.
  */
 export default async function ReportPrintPage({ searchParams }: { searchParams: SearchParams }) {
   const gate = await gateFor('full_report', '/report');
@@ -50,8 +43,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
     return (
       <Fallback>
         This page needs birth details in its address. Open the report from{' '}
-        <Link href="/tools/kundli">your chart</Link> and use the download button
-        there.
+        <Link href="/tools/kundli">your chart</Link> and use the download button there.
       </Fallback>
     );
   }
@@ -69,25 +61,14 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
   });
   const { n } = await getNames();
 
-  const gender = genderOf(params);
-  const auto = params.auto === '1';
-  const paged = params.paged === '1';
-
-  // Carry the chart across when switching theme, so comparing four grounds does
-  // not mean re-entering the birth details four times.
   const carried = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || key === 'theme' || key === 'auto') continue;
+    if (value === undefined || key === 'theme') continue;
     carried.set(key, Array.isArray(value) ? value[0] : value);
   }
 
   return (
     <>
-      {/*
-        The only thing on this route that is not the document. `.no-print` keeps
-        it out of the paper, and Paged.js leaves it alone because it sits outside
-        the tree handed to the previewer.
-      */}
       <div className="print-toolbar no-print">
         <span>Ground:</span>
         {THEME_LIST.map((t) => (
@@ -104,38 +85,11 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
         <a href={`/report?${carried.toString()}`}>Back to the readable version</a>
       </div>
 
-      {paged ? (
-        <Paginate css={pagedCss(theme, r.displayName ?? 'Vedic Astrologey')} autoPrint={auto}>
-          <ReportDocument r={r} n={n} theme={theme} gender={gender} />
-        </Paginate>
-      ) : (
-        <>
-          <style>{printCss(theme)}</style>
-          <div className="rp-doc">
-            <ReportDocument r={r} n={n} theme={theme} gender={gender} />
-          </div>
-          {auto && <AutoPrint />}
-        </>
-      )}
+      <style>{printCss(theme)}</style>
+      <div className="rp-doc rp-root">
+        <ReportDocument r={r} n={n} theme={theme} gender={genderOf(params)} />
+      </div>
     </>
-  );
-}
-
-/**
- * Opens the print dialogue once the document has painted.
- *
- * Two frames rather than one: the first lets layout settle, the second lets the
- * chart plates paint. Printing before that gives a document with gaps where the
- * charts should be.
- */
-function AutoPrint() {
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html:
-          'requestAnimationFrame(function(){requestAnimationFrame(function(){window.print()})})',
-      }}
-    />
   );
 }
 

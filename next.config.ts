@@ -2,12 +2,18 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /**
-   * `sweph` is a native addon. It must stay external to the bundler, and its
-   * prebuilt binary plus the ephemeris data files must be traced into the
-   * serverless function — otherwise Swiss Ephemeris silently degrades to its
-   * lower-precision built-in mode at runtime, with no visible error.
+   * Native and binary packages that must stay out of the bundler.
+   *
+   * `sweph` is a native addon: its prebuilt binary plus the ephemeris data files
+   * have to be traced into the serverless function, or Swiss Ephemeris silently
+   * degrades to its lower-precision built-in mode at runtime with no visible
+   * error.
+   *
+   * `@sparticuz/chromium` and `puppeteer-core` back the PDF route. Chromium
+   * ships as a brotli archive that is unpacked to /tmp at cold start, which only
+   * works if the bundler leaves the package alone.
    */
-  serverExternalPackages: ['sweph'],
+  serverExternalPackages: ['sweph', '@sparticuz/chromium', 'puppeteer-core'],
 
   outputFileTracingIncludes: {
     '/**': ['./ephe/**/*', './node_modules/sweph/prebuilds/**/*'],
@@ -15,25 +21,6 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
-  },
-
-  /*
-    Paged.js, forced onto its prebuilt bundle.
-
-    Two separate problems, one alias. The package entry is ESM *source* that
-    pulls in `event-emitter` and `es5-ext`; through Turbopack's interop that shim
-    arrives with `contains.call` not a function, and Paged.js throws while
-    constructing its handlers. And its `exports` map declares no subpath entries,
-    so importing `pagedjs/dist/paged.esm.js` directly cannot resolve at all.
-
-    `dist/paged.esm.js` is the same library with its dependencies already bundled
-    in, which is the shape that works. Aliasing the bare specifier is the only
-    way to reach it.
-  */
-  turbopack: {
-    resolveAlias: {
-      pagedjs: './node_modules/pagedjs/dist/paged.esm.js',
-    },
   },
 
   experimental: {

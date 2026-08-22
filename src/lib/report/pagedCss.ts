@@ -1,7 +1,8 @@
+import { REPORT_FONT_FACE } from './fontFace';
 import type { ReportTheme } from './themes';
 
 /**
- * The stylesheet Paged.js is handed.
+ * The report stylesheet.
  *
  * Kept as a string rather than living in `globals.css` for a reason that is not
  * stylistic: the `Previewer` API only parses sheets passed to it. It does not go
@@ -28,7 +29,7 @@ import type { ReportTheme } from './themes';
  * not be torn — a chart, a table row, a finding — and nothing else. Every extra
  * break is a half-empty page, and half-empty pages were half the complaint.
  */
-export function pagedCss(theme: ReportTheme, personName: string): string {
+function baseCss(theme: ReportTheme): string {
   const t = theme;
 
   /*
@@ -40,25 +41,110 @@ export function pagedCss(theme: ReportTheme, personName: string): string {
     printed on something — and every line of type still sits at full contrast
     against it, which was the condition for putting a picture behind text at all.
   */
+  /*
+    A quiet ground behind the body text.
+
+    It hangs off '.rp-section' and '.rp-plate' rather than off the document,
+    because those are the boxes that map to sheets. The old version put it on a
+    'position: fixed' pseudo-element, which is viewport-sized rather than
+    page-sized: on screen it was one wash that did not scroll, and in print
+    Chrome painted it on page one only. A background on a fragmented box repeats
+    per fragment, which is what a paper ground should do.
+  */
   const pageGround = t.art
     ? `
-.rp-doc::before, .pagedjs_page::before {
-  content: "";
-  position: fixed;
-  inset: 0;
+.rp-section, .rp-toc {
   background-image: url("${t.art.page}");
-  background-size: cover;
-  background-position: 50% 30%;
-  opacity: 0.06;
-  pointer-events: none;
-  z-index: 0;
+  background-size: 150mm auto;
+  background-position: 50% 42%;
+  background-repeat: no-repeat;
 }
-.rp-doc > *, .pagedjs_page > * { position: relative; z-index: 1; }
 `
     : '';
 
+
+  /*
+    A plate is one whole page, so its height has to come from the page box it
+    will sit in rather than from a number typed once and shared by four grounds.
+
+    That sharing is not a tidiness point. A box taller than the content box can
+    never fit, so the fragmenter pushes it to a fresh page, where it still does
+    not fit, forever: 246mm was safe under night's 16/18mm margins and three
+    millimetres too tall under parchment's 20/22mm plus its 6mm frame inset.
+    The same arithmetic produced a two-thousand-page report once already.
+  */
+  const pm = t.style.pageMargin.trim().split(/s+/).map((v) => Number.parseFloat(v));
+  const marginTop = pm[0];
+  const marginBottom = pm.length >= 3 ? pm[2] : pm[0];
+  const frameInset = t.style.plateStyle === 'framed' ? 12 : 0;
+  /* Two millimetres of slack, so sub-pixel rounding cannot tip it over. */
+  const plateHeight = 297 - marginTop - marginBottom - frameInset - 2;
+
+  /*
+    Night keeps the hairline it always had. Ivory doubles it in kumkum, the way
+    a patrika rules a heading. Parchment drops the rule entirely and opens with a
+    drop cap instead, which is how a manuscript starts a chapter. Classical
+    numbers its sections, because a reference book is navigated rather than read.
+  */
+  const headRule =
+    t.style.headRule === 'double'
+      ? `.rp-section-sanskrit { border-bottom: 2.4pt double ${t.accent}; }`
+      : t.style.headRule === 'none'
+        ? `.rp-section-sanskrit { border-bottom: none; padding-bottom: 0; margin-bottom: 4mm; }`
+        : t.style.headRule === 'numbered'
+          ? `.rp-section { counter-increment: rp-part; }
+.rp-section-title::before {
+  content: counter(rp-part) ".  ";
+  color: ${t.muted};
+  font-variant-numeric: tabular-nums;
+}
+.rp-section-sanskrit { border-bottom: 0.6pt solid ${t.rule}; }`
+          : `.rp-section-sanskrit { border-bottom: 0.6pt solid ${t.rule}; }`;
+
+  const dropCap = t.style.dropCap
+    ? `.rp-section > .rp-lede:first-of-type::first-letter,
+.rp-section > .rp-block:first-of-type > .rp-prose:first-of-type::first-letter {
+  float: left;
+  font-family: ${t.style.displayFont};
+  font-size: 3.1em;
+  line-height: 0.82;
+  padding: 1mm 2mm 0 0;
+  color: ${t.accent};
+}`
+    : '';
+
+  /*
+    Ruled is the almanac default. Open removes the body rules and leans on space,
+    which suits a manuscript. Zebra bands alternate rows, which is what makes a
+    dense reference table scannable and is the only one of the three that earns
+    its ink on a page of forty numbers.
+  */
+  const tableSkin =
+    t.style.tableStyle === 'open'
+      ? `.rp-table td { border-bottom: none; padding: 1.9mm 2mm; }
+.rp-table th { border-bottom: 0.5pt solid ${t.rule}; }`
+      : t.style.tableStyle === 'zebra'
+        ? `.rp-table td { border-bottom: none; }
+.rp-table tbody tr:nth-child(even) td { background: ${t.panel}; }`
+        : '';
+
+  /*
+    Night is the only ground with photographs. The other three compose their
+    plates: ivory sets a double border inside the trim, parchment a single
+    hairline frame with generous inset, classical nothing at all.
+  */
+  const plateSkin =
+    t.style.plateStyle === 'bordered'
+      ? `.rp-plate { border: 2.4pt double ${t.rule}; outline: 0.6pt solid ${t.rule}; outline-offset: 3mm; }`
+      : t.style.plateStyle === 'framed'
+        ? `.rp-plate { border: 0.8pt solid ${t.rule}; margin: 6mm; padding: 30mm 24mm; }`
+        : '';
+
   return `
+${REPORT_FONT_FACE}
+
 :root {
+  counter-reset: rp-part;
   --rp-paper: ${t.paper};
   --rp-ink: ${t.ink};
   --rp-muted: ${t.muted};
@@ -73,89 +159,49 @@ export function pagedCss(theme: ReportTheme, personName: string): string {
 
 @page {
   size: A4;
-  margin: 16mm 15mm 18mm;
-
-  @top-left {
-    content: "${escapeCss(personName)}";
-    font-family: var(--font-body), Georgia, serif;
-    font-size: 7.5pt;
-    letter-spacing: 0.06em;
-    color: ${t.muted};
-    padding-bottom: 2mm;
-  }
-
-  @top-right {
-    /*
-      Set per page after pagination rather than by string-set.
-
-      The spec way is a named string: string-set on the heading, string(section)
-      here. Paged.js compiles that to a custom property it fills in itself, and
-      on this document it filled every page with undefined — the handler never
-      captured the heading text. Rather than keep guessing at an under-documented
-      feature, Paginate walks the finished pages and writes this variable, which
-      is the same semantics (the section starting on this page, else the one
-      carried onto it) and can actually be inspected when it goes wrong.
-    */
-    content: var(--rp-running, "");
-    font-family: var(--font-body), Georgia, serif;
-    font-size: 7.5pt;
-    letter-spacing: 0.06em;
-    color: ${t.muted};
-    padding-bottom: 2mm;
-  }
-
-  @bottom-left {
-    content: "vedicastrologey.com";
-    font-size: 7pt;
-    color: ${t.muted};
-    padding-top: 2mm;
-  }
-
-  @bottom-center {
-    content: "Page " counter(page) " of " counter(pages);
-    font-size: 7.5pt;
-    color: ${t.muted};
-    padding-top: 2mm;
-  }
+  margin: ${t.style.pageMargin};
 }
 
 /*
-  Covers and part dividers carry no furniture, done with a class rather than a
-  named page.
+  No margin boxes here, deliberately.
 
-  The obvious way is '@page plate { margin: 0; @top-left { content: none } ... }'
-  and a 'page: plate' on the element. That is the spec, and it is also the one
-  construct that stopped this document paginating at all: with a named page rule
-  in the sheet, Paged.js emitted no pages and no error, whatever the document
-  contained. Every other exotic feature had already been stripped by then —
-  named strings, target counters, animations — and this was what remained.
-
-  Paginate marks each plate page with a data attribute once pagination is done,
-  and the margin boxes are hidden from it. Same result, one fewer feature to be
-  at the mercy of.
+  Page numbers, running headers and the site line used to be declared as
+  '@top-left', '@bottom-center' and friends. Chrome has never implemented CSS
+  margin boxes, so in a browser they printed nothing; Paged.js implements them
+  but stalled on this document, and chasing that cost a round. The PDF is now
+  produced by headless Chrome through /api/report/pdf, whose own
+  'headerTemplate' and 'footerTemplate' number the pages natively and are the
+  only mechanism here that has ever actually worked.
 */
-.pagedjs_page[data-plate] .pagedjs_margin { display: none !important; }
 
 /* ===================================================================== base */
 
 * { box-sizing: border-box; }
 
-html, body {
+.rp-root {
   background: ${t.paper};
   color: ${t.ink};
-  font-family: var(--font-body), Georgia, serif;
-  font-size: 10pt;
-  line-height: 1.55;
+  font-family: ${t.style.bodyFont};
+  font-size: ${t.style.bodySize};
+  line-height: ${t.style.bodyLeading};
   margin: 0;
   padding: 0;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-.pagedjs_page { background: ${t.paper}; }
+/*
+  Nothing on screen belongs in the document.
 
-/* Nothing on screen belongs in the document. */
-.no-print { display: none !important; }
+  Scoped to print, and that scoping is the whole point. Unscoped, this rule is
+  emitted into a global <style> on two screen routes, where it hid the report's
+  own theme switcher on all four grounds and deleted the journey rail from
+  /report. A stylesheet meant for paper must never assert anything about the
+  screen.
+*/
+@media print {
+  .no-print { display: none !important; }
+}
 ${pageGround}
 
 /*
@@ -185,8 +231,12 @@ ${pageGround}
 */
 .rp-section { break-before: page; }
 
+.rp-section, .rp-toc { text-align: ${t.style.headAlign === "center" ? "center" : "left"}; }
+.rp-section .rp-table, .rp-section .rp-grid, .rp-section .rp-prose,
+.rp-section .rp-list, .rp-section .rp-note { text-align: left; }
+
 .rp-section-title {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: ${t.style.displayFont};
   font-size: 16pt;
   font-weight: 400;
   color: ${t.accent};
@@ -200,13 +250,21 @@ ${pageGround}
   color: ${t.muted};
   margin: 0 0 6mm;
   padding-bottom: 3mm;
-  border-bottom: 0.6pt solid ${t.rule};
   break-after: avoid;
 }
 
+/*
+  How a section announces itself, which is one of the things that makes a ground
+  a different book rather than a different colour.
+*/
+${headRule}
+${dropCap}
+${tableSkin}
+${plateSkin}
+
 .rp-block { margin: 0 0 7mm; }
 .rp-block > h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: ${t.style.displayFont};
   font-size: 11.5pt;
   font-weight: 400;
   color: ${t.accent};
@@ -306,7 +364,7 @@ ${pageGround}
 /* ================================================================ furniture */
 
 .rp-verdict {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: ${t.style.displayFont};
   font-size: 14pt;
   color: ${t.accent};
   margin: 0 0 2mm;
@@ -328,22 +386,19 @@ ${pageGround}
 /* ============================================================ cover / plate */
 
 .rp-plate {
+  /*
+    The containing block for '.rp-plate-art', which is 'position: absolute;
+    inset: 0'. Without this the art had no positioned ancestor on the screen
+    route and resolved against the initial containing block instead, so all six
+    plate images rendered at viewport size stacked on top of each other at the
+    top of the document. That is what "you removed the background images" looked
+    like: they were all there, piled up off-plate.
+  */
+  position: relative;
   break-before: page;
   break-after: page;
-  /*
-    A fixed height that fits inside the page's content box, and never split.
-
-    Three shapes hang the paginator and it is worth naming all of them. A height
-    of 297mm — the full sheet — cannot fit a content box of 297 less 34mm of
-    margin, so the box is pushed to a fresh page forever: that is the two
-    thousand page report. A min-height is worse, because every fragment
-    re-asserts the minimum and the box splits without end. And no height at all
-    leaves a flex column that the paginator will try to break in the middle of.
-
-    246mm fits, break-inside keeps it whole, and the plate reads as a full page
-    because its ground is the page's ground.
-  */
-  height: 246mm;
+  /* Sized to this ground's page box; see the note where it is computed. */
+  height: ${plateHeight}mm;
   break-inside: avoid;
   display: flex;
   flex-direction: column;
@@ -387,7 +442,7 @@ ${pageGround}
   margin: 0 0 6mm;
 }
 .rp-plate-title {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: ${t.style.displayFont};
   font-size: 30pt;
   font-weight: 400;
   line-height: 1.1;
@@ -424,14 +479,14 @@ ${pageGround}
 /* ================================================================= contents */
 
 /*
-  No 'string-set' here, and none anywhere else in this sheet.
+  No 'string-set' and no 'target-counter' here.
 
-  Paged.js's named-string handler is registered at setup and runs for every page
-  it lays out. On this document it never produced a value — every page came back
-  'undefined' — and leaving the declaration in place stalled the flow before a
-  single page was emitted, whatever the document contained. Running headers are
-  written from Paginate after pagination instead; this rule has nothing left to
-  contribute but the hang.
+  Both are the spec answers and neither is reachable. Chrome implements no named
+  strings and no target counters, so a contents page cannot read the page its
+  entry landed on from CSS alone. The PDF route measures it instead: after layout
+  in print emulation it reads each section's offset, divides by the page content
+  height, and writes the number in before printing. One pass, exact, and
+  inspectable when it goes wrong.
 */
 .rp-toc { break-before: page; }
 .rp-toc ol { list-style: none; margin: 0; padding: 0; }
@@ -445,18 +500,8 @@ ${pageGround}
 }
 .rp-toc a { color: ${t.ink}; text-decoration: none; flex: 1; }
 /*
-  The page each section landed on, written in after pagination.
-
-  The spec way is 'target-counter(attr(href url), page)', which reads the page
-  counter at the far end of the link. It is also the single most expensive thing
-  you can ask a paginator for: every resolved reference can change the length of
-  the contents page, which changes the page numbers, which requires another
-  pass. On a document this size that either takes forever or does not converge.
-  'attr(href url)' is thinly supported on top of that.
-
-  Paginate fills these from the finished pages instead — one pass, exact, and
-  inspectable. The width is reserved so writing a number in cannot reflow the
-  line it sits on.
+  The page each section landed on, filled in by the PDF route before printing.
+  The width is reserved so writing a number in cannot reflow the line it sits on.
 */
 .rp-toc-page {
   min-width: 3em;
@@ -473,67 +518,49 @@ ${pageGround}
 `;
 }
 
-/** Quotes are the one thing that can break out of a CSS content string. */
-function escapeCss(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
 /**
- * The same stylesheet, for reading on screen.
+ * The document as it is read on screen.
  *
- * `/report` and `/report/print` render one document, so they must not carry two
- * stylesheets that drift. This derives the screen one from the paged one rather
- * than restating it: the page rules go (a browser ignores them anyway, which is
- * the whole reason Paged.js exists), and the page ground is scoped to a wrapper
- * so an ivory report does not repaint the site's dark chrome around it.
+ * Scoped to a wrapper so an ivory report does not repaint the site dark chrome
+ * around it, and with the page rules dropped, which a browser ignores in a
+ * scrolling view anyway. Sections stop starting new pages here, because on
+ * screen there are no pages. That is what the PDF is for.
  */
 export function screenCss(theme: ReportTheme): string {
-  return pagedCss(theme, '')
-    // `@page` and its margin boxes, including one level of nesting.
-    .replace(/@page[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g, '')
-    .replace('html, body {', '.rp-screen {');
+  return (
+    baseCss(theme)
+      .replace(/@page[^{]*{(?:[^{}]|{[^{}]*})*}/g, '')
+      .replace(".rp-root {", ".rp-screen {") +
+    `
+.rp-screen .rp-section { break-before: auto; padding-top: 10mm; }
+.rp-screen .rp-section:first-child { padding-top: 0; }
+.rp-screen .rp-plate { height: auto; min-height: 0; padding: 18mm 16mm; }
+`
+  );
 }
 
 /**
- * The same stylesheet, for the browser's own pagination.
+ * The document as it is printed.
  *
- * Derived from the paged one rather than restated, so the two cannot drift.
- * Two differences, both forced:
- *
- *   The `@page` margin boxes go. Chrome has never implemented them, so they are
- *   dead weight rather than a fallback — this is exactly the gap Paged.js exists
- *   to fill, and the cost of not using it is that a page number cannot be
- *   printed. `@page { size; margin }` itself is kept, because that much browsers
- *   do honour.
- *
- *   `.pagedjs_page` rules go too, since there are no such elements here. The
- *   page ground moves onto the document wrapper instead.
- *
- * Everything that does the actual work — a section starting a page, a chart
- * never being torn, a table head repeating — is plain fragmentation CSS that has
- * worked in browsers for years.
+ * This is what headless Chrome loads at /report/print. Nothing here simulates a
+ * sheet: Chrome fragments the flow against the real page box and its own PDF
+ * pipeline draws the page numbers, so the HTML only has to say where a break
+ * belongs and what must never be torn.
  */
 export function printCss(theme: ReportTheme): string {
-  const full = pagedCss(theme, '');
-
-  const withoutMarginBoxes = full.replace(
-    /@page[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g,
-    `@page { size: A4; margin: 16mm 15mm 18mm; }`,
-  );
-
   return (
-    withoutMarginBoxes.replace('html, body {', '.rp-doc {') +
+    baseCss(theme) +
     `
-/* On screen this is a preview of the paper, so it reads as sheets. */
-.rp-doc {
-  max-width: 210mm;
-  margin: 0 auto;
-  padding: 12mm 15mm;
-}
-
-@media print {
-  .rp-doc { max-width: none; margin: 0; padding: 0; }
-  .print-toolbar { display: none !important; }
+/*
+  The sheet background has to reach the page box, not just the content box.
+  Chrome propagates the background of html/body to the whole page; without
+  this a night report prints dark text-block on white margins.
+*/
+html, body { background: ${theme.paper}; margin: 0; padding: 0; }
+.rp-doc { margin: 0; padding: 0; }
+@media screen {
+  /* Only ever seen when a person opens the print route directly to debug it. */
+  .rp-doc { max-width: 210mm; margin: 0 auto; padding: 12mm 15mm; }
 }
 `
   );

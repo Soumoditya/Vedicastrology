@@ -117,12 +117,12 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             {r.displayName ? `${r.displayName}’s full report` : 'Your full report'}
           </h1>
           <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-            Read it here, or open the paginated version to print or save it.
+            Read it here, or download it as a numbered PDF.
           </p>
         </div>
 
-        <Link
-          href={`/report/print?${query}&theme=${theme.key}&auto=1`}
+        <a
+          href={`/api/report/pdf?${query}&theme=${theme.key}&name=${encodeURIComponent(r.displayName ?? '')}`}
           className="rounded-full px-5 py-2.5 text-sm font-medium"
           style={{
             background: 'linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500))',
@@ -130,7 +130,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
           }}
         >
           Download as PDF
-        </Link>
+        </a>
       </div>
 
       {/*
@@ -158,13 +158,15 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             {t.name}
           </Link>
         ))}
-        <Link
-          href={`/report/print?${query}&theme=${theme.key}`}
+        <a
+          href={`/api/report/pdf?${query}&theme=${theme.key}&inline=1`}
+          target="_blank"
+          rel="noreferrer"
           className="ml-auto"
           style={{ color: 'var(--color-gold-400)' }}
         >
           See it as pages →
-        </Link>
+        </a>
       </div>
 
       {/*
