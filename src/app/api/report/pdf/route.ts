@@ -65,7 +65,9 @@ export async function GET(request: NextRequest) {
 
   const target = new URL('/report/print', originOf(request));
   url.searchParams.forEach((value, key) => {
-    if (key !== 'inline' && key !== 'name') target.searchParams.set(key, value);
+    // 'name' is both the filename and the name printed on the cover, so it has
+    // to travel. Dropping it here is what made every cover read 'Not given'.
+    if (key !== 'inline') target.searchParams.set(key, value);
   });
 
   let browser;
@@ -95,16 +97,43 @@ export async function GET(request: NextRequest) {
     await page.emulateMediaType('print');
 
     const margin = parseMargin(theme.style.pageMargin);
-    await fillContentsPageNumbers(page, margin);
-
-    const pdf = await page.pdf({
-      format: 'A4',
+    const options = {
+      format: 'A4' as const,
       printBackground: true,
       displayHeaderFooter: true,
       margin,
       headerTemplate: '<span></span>',
       footerTemplate: footer(theme.muted),
-    });
+    };
+
+    /*
+      Two passes, because the contents page has to state a fact nobody can
+      compute in advance.
+
+      Chrome implements no target-counter, so the page an entry landed on is not
+      reachable from CSS. Simulating the fragmenter in JavaScript was tried twice
+      and was wrong twice — first by a wide margin, because every section forced
+      a break and abandoned the rest of its page, then by a page or two once
+      break-inside had to be honoured as well. A contents page that is nearly
+      right is worse than one that says nothing.
+
+      So the document is printed, the finished PDF is asked where its own links
+      point, and it is printed again with the answers written in. Chrome emits a
+      real GoTo destination for every in-page anchor, so this is the document's
+      own account of itself rather than a model of it. The second pass reuses the
+      loaded page, so it costs a re-print and not a re-render.
+    */
+    const firstPass = await page.pdf(options);
+    const pages = await contentsPages(firstPass);
+    if (pages.length) {
+      await page.evaluate((numbers: number[]) => {
+        document.querySelectorAll('.rp-toc-page').forEach((slot, i) => {
+          if (numbers[i]) slot.textContent = String(numbers[i]);
+        });
+      }, pages);
+    }
+
+    const pdf = pages.length ? await page.pdf(options) : firstPass;
 
     const name = safeFileName(url.searchParams.get('name') ?? '');
     const disposition = url.searchParams.get('inline') === '1' ? 'inline' : 'attachment';
@@ -150,57 +179,41 @@ async function launch() {
 }
 
 /**
- * Write the real page number against every contents entry.
+ * Ask a finished PDF which page each contents entry points at.
  *
- * The spec answer is target-counter(attr(href url), page), which Chrome does not
- * implement, so the number has to be worked out rather than read.
- *
- * Dividing a section's offset by the page height is the obvious way and it is
- * wrong: every section carries break-before, so each one abandons whatever was
- * left of the previous page, and measuring the flow as if it were continuous
- * undercounts by however much of that space went unused. On this report that was
- * 29 against a true 47.
- *
- * Walking the blocks the way the fragmenter does costs nothing and is exact:
- * a block that forces a break starts a new page, then consumes as many as its
- * own height needs. Checked against the finished PDF, it agrees to the page.
+ * The entries are anchors, so Chrome writes a link annotation for each with a
+ * GoTo destination. Reading them back gives the true page — no layout model, no
+ * drift — and the annotations come out in document order, which is the order the
+ * contents lists them in.
  */
-async function fillContentsPageNumbers(
-  page: Page,
-  margin: { top: string; bottom: string },
-) {
-  const A4_HEIGHT_MM = 297;
-  const contentMm = A4_HEIGHT_MM - mm(margin.top) - mm(margin.bottom);
+async function contentsPages(bytes: Uint8Array): Promise<number[]> {
+  try {
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
 
-  await page.evaluate((contentHeightMm: number) => {
-    const PX_PER_MM = 96 / 25.4;
-    const perPage = contentHeightMm * PX_PER_MM;
+    for (let n = 1; n <= Math.min(doc.numPages, 4); n += 1) {
+      const page = await doc.getPage(n);
+      const links = (await page.getAnnotations())
+        .filter((a) => a.subtype === 'Link' && a.dest)
+        .sort((x, y) => (y.rect?.[1] ?? 0) - (x.rect?.[1] ?? 0));
+      if (links.length < 4) continue;
 
-    const doc = document.querySelector('.rp-doc');
-    if (!doc) return;
-
-    const pageOf = new Map<Element, number>();
-    let current = 1;
-    let first = true;
-    for (const block of Array.from(doc.children)) {
-      if (getComputedStyle(block).breakBefore === 'page' && !first) current += 1;
-      first = false;
-      pageOf.set(block, current);
-      const height = block.getBoundingClientRect().height;
-      current += Math.max(1, Math.ceil(height / perPage)) - 1;
+      const numbers: number[] = [];
+      for (const link of links) {
+        const dest = typeof link.dest === 'string' ? await doc.getDestination(link.dest) : link.dest;
+        const ref = Array.isArray(dest) ? dest[0] : null;
+        if (!ref) { numbers.push(0); continue; }
+        numbers.push((await doc.getPageIndex(ref)) + 1);
+      }
+      return numbers;
     }
-
-    document.querySelectorAll<HTMLAnchorElement>('.rp-toc a[href^="#"]').forEach((link) => {
-      const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
-      const slot = link.parentElement?.querySelector('.rp-toc-page');
-      if (!target || !slot) return;
-      // The contents links at a heading; the page belongs to its top-level block.
-      let block: Element | null = target;
-      while (block && block.parentElement !== doc) block = block.parentElement;
-      const number = block ? pageOf.get(block) : undefined;
-      if (number) slot.textContent = String(number);
-    });
-  }, contentMm);
+  } catch (error) {
+    // A contents page with blank numbers is a smaller failure than no download,
+    // but it must not be a silent one: this failing quietly is exactly how the
+    // numbers went missing the first time.
+    console.error('[report/pdf] could not read contents destinations:', error);
+  }
+  return [];
 }
 
 function footer(colour: string): string {

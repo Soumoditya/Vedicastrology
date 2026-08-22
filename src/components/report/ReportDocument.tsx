@@ -34,7 +34,7 @@ type Names = AstroNames;
  * the screen version and the print version of the covers disagreed about their
  * own height.
  *
- * **Sectioning is the whole design.** Every `<Section>` starts a page and
+ * **Sectioning is the whole design.** A `<Section page>` starts a page and
  * publishes its own title for the running header, so the report's complaint —
  * headings stranded on the first of three physical pages, no way to tell where
  * you were — is answered structurally rather than by guessing at heights. A
@@ -241,7 +241,7 @@ export function ReportDocument({
       </Section>
 
       {/* =========================================================== lagna */}
-      <Section id="lagna" title="Your ascendant" sanskrit="Lagna">
+      <Section page id="lagna" title="Your ascendant" sanskrit="Lagna">
         <p className="rp-lede">
           The sign rising on the eastern horizon at the moment of birth. It is read
           as the body and the bearing — how you meet the world and how the world
@@ -272,7 +272,7 @@ export function ReportDocument({
       </Section>
 
       {/* =========================================================== rashi */}
-      <Section id="rashi" title="Your moon sign" sanskrit="Rāśi">
+      <Section page id="rashi" title="Your moon sign" sanskrit="Rāśi">
         <p className="rp-lede">{rashiFraming(moon.rashi)}</p>
         <p className="rp-meta">
           Moon sign: <strong>{n.rashi(moon.rashi)}</strong> · lord{' '}
@@ -294,7 +294,7 @@ export function ReportDocument({
       </Section>
 
       {/* ======================================================= nakshatra */}
-      <Section id="nakshatra" title="Your birth star" sanskrit="Nakṣatra">
+      <Section page id="nakshatra" title="Your birth star" sanskrit="Nakṣatra">
         <p className="rp-lede">
           The nakshatra is the older layer of the system, and the one a traditional
           astrologer reaches for first when asked what somebody is like. Twenty
@@ -457,7 +457,7 @@ export function ReportDocument({
       </Section>
 
       {/* ========================================================= gochara */}
-      <Section id="gochara" title="Where the sky is now" sanskrit="Gochara">
+      <Section page id="gochara" title="Where the sky is now" sanskrit="Gochara">
         <p className="rp-lede">
           Today&rsquo;s positions laid on the houses of the birth chart, counted twice.
           The ascendant is the frame people expect; the Moon is the frame the
@@ -506,7 +506,7 @@ export function ReportDocument({
         </table>
       </Section>
 
-      <Section id="gochara-reading" title="What today reads as" sanskrit="Gochara Phala">
+      <Section page id="gochara-reading" title="What today reads as" sanskrit="Gochara Phala">
         {r.gochara.paragraphs.map((para, i) => (
           <p key={i} className="rp-prose">{para}</p>
         ))}
@@ -514,7 +514,7 @@ export function ReportDocument({
       </Section>
 
       {/* ======================================================= sade sati */}
-      <Section id="sade-sati" title="Saturn over your Moon" sanskrit="Sāḍe Sātī">
+      <Section page id="sade-sati" title="Saturn over your Moon" sanskrit="Sāḍe Sātī">
         <p className="rp-verdict">
           {r.sadeSati.active && r.sadeSati.currentPhase
             ? `Running now, ${r.sadeSati.currentPhase.phase} phase`
@@ -559,7 +559,7 @@ export function ReportDocument({
       </Section>
 
       {/* ==================================================== ashtakavarga */}
-      <Section id="ashtakavarga" title="Sign strength" sanskrit="Aṣṭakavarga">
+      <Section page id="ashtakavarga" title="Sign strength" sanskrit="Aṣṭakavarga">
         <Block title="Sarvashtakavarga">
           <table className="rp-table">
             <thead>
@@ -635,7 +635,7 @@ export function ReportDocument({
         ))}
       </Section>
 
-      <Section id="gemstones" title="Gemstones" sanskrit="Ratna">
+      <Section page id="gemstones" title="Gemstones" sanskrit="Ratna">
         <p className="rp-prose">
           {r.gemstones.indicated.length === 0
             ? 'A strengthening stone is prescribed for a graha under pressure, and this chart holds none. Anyone selling you one on the strength of this chart is not reading it.'
@@ -737,7 +737,7 @@ function ChartPages({
 }) {
   return (
     <>
-      <Section id={`${code.toLowerCase()}-chart`} title={title} sanskrit={code}>
+      <Section page id={`${code.toLowerCase()}-chart`} title={title} sanskrit={code}>
         <div className="rp-chart">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={uri} alt={title} />
@@ -745,7 +745,7 @@ function ChartPages({
         <Note>{note}</Note>
       </Section>
 
-      <Section id={`${code.toLowerCase()}-reading`} title={`${title} — read`} sanskrit={code}>
+      <Section page id={`${code.toLowerCase()}-reading`} title={`${title} — read`} sanskrit={code}>
         {code === 'D1' ? (
           <table className="rp-table">
             <thead>
@@ -834,10 +834,17 @@ function Divider({
 }
 
 function Section({
-  id, title, sanskrit, children,
-}: { id: string; title: string; sanskrit: string; children: React.ReactNode }) {
+  id, title, sanskrit, page, children,
+}: {
+  id: string;
+  title: string;
+  sanskrit: string;
+  /** Start a fresh sheet. Only for the sections that were asked for one. */
+  page?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="rp-section" id={id}>
+    <section className="rp-section" id={id} data-page={page ? 'true' : undefined}>
       <h2 className="rp-section-title">{title}</h2>
       <p className="rp-section-sanskrit">{sanskrit}</p>
       {children}

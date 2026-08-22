@@ -1,4 +1,4 @@
-import { RASHI_SYMBOLS } from '@/lib/astro/constants';
+import { RASHI_GLYPH_PATHS } from '@/lib/astro/rashi-glyphs';
 
 /**
  * The twelve signs, as a slowly turning disc.
@@ -26,7 +26,9 @@ export function RashiChakra({
 }) {
   const R_OUTER = 96;
   const R_INNER = 66;
-  const R_MARK = 81;
+  /** Drawn glyph size, in viewBox units. */
+const GLYPH = 15;
+const R_MARK = 81;
 
   const spokes = Array.from({ length: 12 }, (_, i) => i * 30);
 
@@ -89,17 +91,26 @@ export function RashiChakra({
                 transformOrigin: `${x.toFixed(2)}px ${y.toFixed(2)}px`,
               }}
             >
-              <text
-                x={x.toFixed(2)}
-                y={y.toFixed(2)}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize="11"
-                fill="var(--color-gold-300)"
+              {/*
+                Drawn, not typed. These were the Unicode zodiac characters in a
+                text node with no font-family, and the face they inherited does
+                not contain that block, so what rendered was a row of .notdef
+                boxes. A path has nothing to fall back to.
+
+                The glyph box is 24 units; it is scaled to GLYPH and moved so its
+                centre lands on this sign's point on the rim.
+              */}
+              <g
+                transform={`translate(${(x - GLYPH / 2).toFixed(2)} ${(y - GLYPH / 2).toFixed(2)}) scale(${(GLYPH / 24).toFixed(4)})`}
+                fill="none"
+                stroke="var(--color-gold-300)"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 opacity="0.85"
               >
-                {RASHI_SYMBOLS[i]}
-              </text>
+                <path d={RASHI_GLYPH_PATHS[i]} />
+              </g>
             </g>
           );
         })}

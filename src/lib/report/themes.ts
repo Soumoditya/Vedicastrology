@@ -48,6 +48,16 @@ export interface ThemeStyle {
   pageMargin: string;
   /** How the cover and part dividers are composed. */
   plateStyle: 'photographic' | 'bordered' | 'framed' | 'plain';
+  /**
+   * Which way the page canvas leans.
+   *
+   * Chrome does not paint the document background into a PDF's page-margin
+   * band — that strip belongs to the user agent, and its colour comes from
+   * 'color-scheme'. Headless Chrome runs dark, so every report printed with a
+   * near-black frame around the paper whatever the ground. Declaring it puts
+   * the band within a shade or two of the sheet instead of fighting it.
+   */
+  colorScheme: 'light' | 'dark';
 }
 
 export interface ReportTheme {
@@ -144,6 +154,7 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
       tableStyle: 'ruled',
       pageMargin: '16mm 15mm 18mm',
       plateStyle: 'photographic',
+      colorScheme: 'dark',
     },
     chart: {
       background: '#0a0a16',
@@ -184,6 +195,7 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
       tableStyle: 'ruled',
       pageMargin: '18mm 17mm 20mm',
       plateStyle: 'bordered',
+      colorScheme: 'light',
     },
     chart: {
       background: '#FFFDF7',
@@ -224,6 +236,7 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
       /* Asymmetric, as a manuscript is: a wide outer margin to hold it by. */
       pageMargin: '20mm 26mm 22mm 16mm',
       plateStyle: 'framed',
+      colorScheme: 'light',
     },
     chart: {
       background: '#FBF6EA',
@@ -263,6 +276,7 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
       tableStyle: 'zebra',
       pageMargin: '15mm 14mm 16mm',
       plateStyle: 'plain',
+      colorScheme: 'light',
     },
     chart: {
       background: '#FFFFFF',

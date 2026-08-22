@@ -144,6 +144,7 @@ function baseCss(theme: ReportTheme): string {
 ${REPORT_FONT_FACE}
 
 :root {
+  color-scheme: ${t.style.colorScheme};
   counter-reset: rp-part;
   --rp-paper: ${t.paper};
   --rp-ink: ${t.ink};
@@ -229,11 +230,25 @@ ${pageGround}
   It also publishes its own name for the running header, so a section that spans
   four sheets is labelled on all four.
 */
-.rp-section { break-before: page; }
+/*
+  A section starts a page only when it was asked to.
 
-.rp-section, .rp-toc { text-align: ${t.style.headAlign === "center" ? "center" : "left"}; }
-.rp-section .rp-table, .rp-section .rp-grid, .rp-section .rp-prose,
-.rp-section .rp-list, .rp-section .rp-note { text-align: left; }
+  Every section used to force one, and that is where the empty half-pages came
+  from: a chart and its one-line note would take a third of a sheet and abandon
+  the rest. The ones that were specifically asked for their own page say so with
+  data-page; everything else flows and is merely kept from being torn.
+*/
+.rp-section { break-inside: auto; padding-top: 4mm; }
+.rp-section[data-page='true'] { break-before: page; }
+.rp-section + .rp-section:not([data-page='true']) {
+  margin-top: 8mm;
+  padding-top: 6mm;
+  border-top: 0.4pt solid ${t.rule}66;
+}
+
+.rp-section-title, .rp-section-sanskrit {
+  text-align: ${t.style.headAlign === 'center' ? 'center' : 'left'};
+}
 
 .rp-section-title {
   font-family: ${t.style.displayFont};
@@ -346,7 +361,15 @@ ${plateSkin}
   text-align: center;
   margin: 0 0 5mm;
 }
-.rp-chart img { width: 118mm; height: auto; display: block; margin: 0 auto; }
+/*
+  A chart page is a chart, so the chart may as well be worth looking at.
+
+  118mm was a thumbnail on a 176mm text block: it filled about a third of the
+  sheet and left the rest blank, which is most of what "never waste page space"
+  was about. Filling the measure also makes the degrees legible, which was the
+  point of printing them.
+*/
+.rp-chart img { width: 100%; max-width: 168mm; height: auto; display: block; margin: 0 auto; }
 .rp-chart-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -553,10 +576,13 @@ export function printCss(theme: ReportTheme): string {
     `
 /*
   The sheet background has to reach the page box, not just the content box.
-  Chrome propagates the background of html/body to the whole page; without
-  this a night report prints dark text-block on white margins.
+
+  !important because the site's own globals.css also styles html and body, the
+  print route sits under the same root layout, and the site is dark by default.
+  Without it an ivory report printed as an ivory panel floating in the site's
+  near-black surface, with the page margins the wrong colour on every sheet.
 */
-html, body { background: ${theme.paper}; margin: 0; padding: 0; }
+html, body { background: ${theme.paper} !important; margin: 0; padding: 0; }
 .rp-doc { margin: 0; padding: 0; }
 @media screen {
   /* Only ever seen when a person opens the print route directly to debug it. */

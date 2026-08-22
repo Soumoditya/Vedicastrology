@@ -12,8 +12,12 @@ const nextConfig: NextConfig = {
    * `@sparticuz/chromium` and `puppeteer-core` back the PDF route. Chromium
    * ships as a brotli archive that is unpacked to /tmp at cold start, which only
    * works if the bundler leaves the package alone.
+   *
+   * `pdfjs-dist` reads the finished PDF back to find where its own links point.
+   * Bundled, its legacy build fails to load and the contents page silently comes
+   * out with no numbers at all, which is how it shipped once already.
    */
-  serverExternalPackages: ['sweph', '@sparticuz/chromium', 'puppeteer-core'],
+  serverExternalPackages: ['sweph', '@sparticuz/chromium', 'puppeteer-core', 'pdfjs-dist'],
 
   outputFileTracingIncludes: {
     '/**': ['./ephe/**/*', './node_modules/sweph/prebuilds/**/*'],
