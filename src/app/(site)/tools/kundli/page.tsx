@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { DateTime } from 'luxon';
 
 import { castChart, isWaxingMoon, moonRashi } from '@/lib/astro/chart';
 import { ALL_VARGAS, buildVarga } from '@/lib/astro/divisional';
-import { buildVimshottari, dashaAt, formatBalance } from '@/lib/astro/dasha';
+import { buildVimshottari, dashaAt } from '@/lib/astro/dasha';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
@@ -45,8 +46,8 @@ export async function generateMetadata({
   const base: Metadata = {
     title: 'Birth Chart (Kundli)',
     description:
-      'Cast an accurate Vedic birth chart with houses, nakshatras, dignities, ' +
-      'divisional charts and Vimshottari dasha. Free, no account needed.',
+      'Cast an accurate Vedic birth chart with houses, nakshatras, dignities ' +
+      'and all sixteen divisional charts. Free, no account needed.',
   };
 
   const card = `/api/og/chart?${query.toString()}`;
@@ -143,8 +144,24 @@ export default async function KundliPage({
     aspectedBy: h.aspectedBy,
   }));
 
-  const dasha = buildVimshottari(chart, { maxLevel: 3 });
+  /*
+    Two levels, not three.
+
+    The mahadasha grid that used to close this page has gone to `/tools/dasha`,
+    which is step three of the same rail and is about nothing else. What is left
+    needing a dasha here is the summary card at the top, which names the running
+    maha and its antar — so the pratyantar level, seven hundred-odd periods of
+    it, was being computed on every request for a section that no longer exists.
+  */
+  const dasha = buildVimshottari(chart, { maxLevel: 2 });
   const active = dashaAt(dasha, new Date());
+
+  // The page's own params, to carry this chart on to the dasha tool.
+  const chartQuery = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    chartQuery.set(key, Array.isArray(value) ? value[0] : value);
+  }
 
   const moon = chart.byGraha.Moon;
   const local = DateTime.fromISO(chart.meta.utcISO).setZone(zone);
@@ -333,60 +350,40 @@ export default async function KundliPage({
           </div>
         </section>
 
-        {/* Dasha */}
-        <section className="mb-14">
-          <SectionHeading
-            eyebrow="Vimśottarī Daśā"
-            title="Planetary periods"
-            note={formatBalance(dasha)}
-          />
+        {/*
+          The periods live at `/tools/dasha`.
 
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {dasha.periods.map((p) => {
-              const isActive = active?.maha.lord === p.lord;
-              return (
-                <div
-                  key={`${p.lord}-${p.start.toISOString()}`}
-                  className="surface-card px-4 py-3"
-                  style={
-                    isActive
-                      ? {
-                          borderColor: 'var(--border-strong)',
-                          background:
-                            'color-mix(in oklab, var(--color-gold-500) 8%, var(--surface-raised))',
-                        }
-                      : undefined
-                  }
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span
-                      className="font-display"
-                      style={{
-                        color: isActive
-                          ? 'var(--color-gold-200)'
-                          : 'var(--text-primary)',
-                      }}
-                    >
-                      {p.lord}
-                    </span>
-                    {isActive && (
-                      <span
-                        className="text-[0.65rem] uppercase tracking-[0.14em]"
-                        style={{ color: 'var(--color-gold-500)' }}
-                      >
-                        Running
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {DateTime.fromJSDate(p.start).setZone(zone).toFormat('d LLL yyyy')}
-                    {' → '}
-                    {DateTime.fromJSDate(p.end).setZone(zone).toFormat('d LLL yyyy')}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+          They were listed here as well, which meant the chart page ended on a
+          grid of nine mahadashas that the very next step of the rail exists to
+          show properly, to four levels and with the balance at birth. Two
+          renderings of one thing is how they drift. The summary card at the top
+          still names what is running, which is a fact about the chart; the
+          periods themselves are a subject, and they have their own page.
+        */}
+        <section className="no-print mb-14" data-reveal>
+          <Link
+            href={`/tools/dasha?${chartQuery.toString()}`}
+            className="surface-card flex flex-wrap items-center justify-between gap-3 px-5 py-4
+                       transition-colors duration-300"
+          >
+            <span>
+              <span
+                className="text-xs uppercase tracking-[0.24em]"
+                style={{ color: 'var(--color-gold-600)' }}
+              >
+                Vimśottarī Daśā
+              </span>
+              <span
+                className="font-display mt-1 block text-lg"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {active ? `${n.graha(active.maha.lord)} is running` : 'Your planetary periods'}
+              </span>
+            </span>
+            <span className="text-sm" style={{ color: 'var(--color-gold-300)' }}>
+              Every period, to four levels <span aria-hidden>→</span>
+            </span>
+          </Link>
         </section>
 
         {/* Provenance, worth stating plainly, since accuracy is the point. */}
@@ -417,7 +414,7 @@ function KundliIntro({ error }: { error?: string }) {
     <div className="relative">
       <div className="starfield" aria-hidden />
 
-      <div className="relative mx-auto max-w-2xl px-5 py-16 sm:py-24">
+      <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <div className="text-center">
           <p
             className="text-xs uppercase tracking-[0.28em]"
@@ -436,8 +433,8 @@ function KundliIntro({ error }: { error?: string }) {
             style={{ color: 'var(--text-secondary)' }}
           >
             Cast an accurate Vedic chart in the North Indian style, with
-            nakshatras, dignities, divisional charts and your Vimshottari dasha.
-            No account needed.
+            nakshatras, dignities and all sixteen divisional charts. No account
+            needed.
           </p>
         </div>
 

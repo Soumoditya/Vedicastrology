@@ -6,9 +6,12 @@ import {
   currentRetrogrades,
   currentTransits,
   gocharaVerdict,
-  sadeSati,
   upcomingIngresses,
 } from '@/lib/astro/transits';
+import { gocharaReading } from '@/lib/predictions/gochara';
+import { transitsToRenderData } from '@/lib/chart-render/adapt';
+import { chartStyleFor, getSettings } from '@/lib/account/settings';
+import { VedicChart } from '@/components/chart/VedicChart';
 import { NAKSHATRA_NAMES, RASHI_NAMES_EN } from '@/lib/astro/constants';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
 import { redirectToSavedChart } from '@/lib/astro/current-chart';
@@ -18,6 +21,7 @@ import { gateFor } from '@/components/site/FeatureGate';
 import { SavedChartPicker } from '@/components/chart/SavedChartPicker';
 import { Reveal } from '@/components/motion/Reveal';
 import { ToolResult } from '@/components/chart/ToolResult';
+import Link from 'next/link';
 
 /**
  * The share card is built from the birth details in the query, so a link to
@@ -37,10 +41,10 @@ export async function generateMetadata({
   }
 
   const base: Metadata = {
-    title: 'Transits and Sade Sati',
+    title: 'Transits',
     description:
-      'Where the grahas stand now relative to your chart, with Sade Sati phase ' +
-      'dates solved against the ephemeris rather than estimated.',
+      'Where the grahas stand today, drawn on your own chart from the ascendant ' +
+      'and from the Moon, graded by ashtakavarga and read against both.',
   };
 
   const card = `/api/og/chart?${query.toString()}`;
@@ -79,7 +83,7 @@ export default async function TransitsPage({
       <div className="relative">
         <Reveal />
         <div className="starfield" aria-hidden />
-        <div className="relative mx-auto max-w-2xl px-5 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-20 sm:pt-12 sm:pb-28">
           <p className="eyebrow" data-reveal>Gochara</p>
           <h1
             className="font-display mt-6 text-[clamp(2.25rem,5.5vw,3.75rem)] leading-[1.02]"
@@ -94,9 +98,10 @@ export default async function TransitsPage({
             style={{ color: 'var(--text-secondary)' }}
             data-reveal
           >
-            Read against your own chart, not in the abstract. Includes Sade Sati
-            with its real phase dates, solved against the ephemeris, so a leg
-            Saturn retrogrades back out of is reported at its true boundaries.
+            Read against your own chart, not in the abstract. Today&rsquo;s
+            positions are drawn twice — counted from your ascendant, and counted
+            from your Moon, which is the frame the classical transit rules were
+            actually written for — and graded by the bindus each sign holds.
           </p>
 
           <div className="surface-card mt-10 p-6 sm:p-8" data-reveal="scale">
@@ -125,12 +130,44 @@ export default async function TransitsPage({
   const now = new Date();
 
   const positions = currentTransits(chart, now);
-  const sade = sadeSati(chart, now);
   const retrogrades = currentRetrogrades(chart, now);
   const ingresses = upcomingIngresses(chart, now, 5).slice(0, 10);
+  const reading = gocharaReading(chart, now);
+  const chartStyle = chartStyleFor(await getSettings());
+
+  const moonRashi = chart.byGraha.Moon.rashi;
+
+  /*
+    The same nine positions, counted from two different points of the birth
+    chart. Neither is a second calculation: `currentTransits` already returns
+    both counts for every graha, so this is only a question of which one the
+    twelve houses are laid out against.
+  */
+  const lagnaChart = transitsToRenderData(
+    positions,
+    'ascendant',
+    chart.ascendant.rashi,
+    'From the ascendant',
+    RASHI_NAMES_EN[chart.ascendant.rashi] + ' lagna',
+  );
+  const chandraChart = transitsToRenderData(
+    positions,
+    'moon',
+    moonRashi,
+    'From the Moon',
+    RASHI_NAMES_EN[moonRashi] + ' chandra lagna',
+  );
 
   const zone = chart.meta.timezone;
   const fmt = (d: Date) => DateTime.fromJSDate(d).setZone(zone).toFormat('d LLL yyyy');
+
+  // This page's own params, so a link out keeps the chart in hand.
+  const carried = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    carried.set(key, Array.isArray(value) ? value[0] : value);
+  }
+  const railQuery = carried.toString();
 
   return (
     <ToolResult
@@ -148,73 +185,106 @@ export default async function TransitsPage({
       submitLabel="Show transits"
     >
 
-        {/* Sade Sati, first because it is what people came for */}
+        {/*
+          The day, drawn.
+
+          Sade Sati used to open this page — a full panel of phase dates for a
+          cycle that has its own tool, one click away in the rail above, and that
+          is about Saturn rather than about today. What a transit page is for is
+          this: where the grahas actually stand, on your own frame, now.
+
+          Two frames, because gochara has two. The ascendant is the one people
+          expect, since it is how a birth chart is drawn. The Moon is the one the
+          classical table of favourable houses was written for, and reading that
+          table from the ascendant instead is the commonest way to get a transit
+          reading quietly wrong. Both are shown; the reading underneath says
+          which frame each statement came from.
+        */}
         <section className="mt-10" data-reveal>
-          <h2 className="eyebrow">Sade Sati</h2>
+          <h2 className="eyebrow">Today, on your chart</h2>
 
-          <div
-            className="surface-card mt-4 p-6"
-            style={
-              sade.active
-                ? { borderColor: 'color-mix(in oklab, var(--color-saffron-400) 40%, transparent)' }
-                : undefined
-            }
-          >
-            {sade.active && sade.currentPhase ? (
-              <>
-                <p
-                  className="font-display text-2xl"
-                  style={{ color: 'var(--color-saffron-300)' }}
+          <div className="mt-5 grid gap-8 sm:grid-cols-2">
+            {[chandraChart, lagnaChart].map((data) => (
+              <div key={data.title}>
+                <h3
+                  className="font-display text-lg"
+                  style={{ color: 'var(--color-gold-200)' }}
                 >
-                  Running now, {sade.currentPhase.phase} phase
+                  {data.title}
+                </h3>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {data.subtitle}
                 </p>
-                <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  Saturn is in {RASHI_NAMES_EN[sade.currentPhase.rashi]}, from{' '}
-                  {fmt(sade.currentPhase.start)} to {fmt(sade.currentPhase.end)}.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="font-display text-2xl" style={{ color: 'var(--color-benefic)' }}>
-                  Not running
-                </p>
-                <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  Saturn is not currently transiting the signs around your Moon.
-                </p>
-              </>
-            )}
-
-            {sade.dhaiya.active && (
-              <p className="mt-3 text-sm" style={{ color: 'var(--color-gold-300)' }}>
-                Saturn is also in {sade.dhaiya.type === 'kantaka' ? 'the 4th' : 'the 8th'} from
-                your Moon, the smaller {sade.dhaiya.type} panoti.
-              </p>
-            )}
-
-            {sade.phases.length > 0 && (
-              <ol className="mt-6 space-y-2">
-                {sade.phases.map((phase) => {
-                  const past = phase.end.getTime() < now.getTime();
-                  const current = sade.currentPhase === phase;
-                  return (
-                    <li
-                      key={`${phase.phase}-${phase.start.toISOString()}`}
-                      className="flex flex-wrap items-baseline justify-between gap-2 border-t py-2.5 text-sm"
-                      style={{ opacity: past ? 0.45 : 1 }}
-                    >
-                      <span style={{ color: current ? 'var(--color-saffron-300)' : 'var(--text-secondary)' }}>
-                        {phase.phase.charAt(0).toUpperCase() + phase.phase.slice(1)} ·{' '}
-                        {RASHI_NAMES_EN[phase.rashi]}
-                      </span>
-                      <span className="tabular-nums text-xs" style={{ color: 'var(--text-muted)' }}>
-                        {fmt(phase.start)} to {fmt(phase.end)}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
+                {/*
+                  Animation off, deliberately. Two charts drawing themselves in
+                  line by line, side by side, is twice the theatre for the same
+                  information, and this page is read rather than unveiled.
+                */}
+                <div className="mt-3">
+                  <VedicChart data={data} style={chartStyle} animate={false} />
+                </div>
+              </div>
+            ))}
           </div>
+
+          <p className="mt-14 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            The grahas shown are today&rsquo;s positions, laid on the houses of
+            your birth chart. The numeral in each house is the rashi, as
+            everywhere else on the site.
+          </p>
+        </section>
+
+        {/* What it reads as */}
+        <section className="mt-12" data-reveal>
+          <h2 className="eyebrow">What today reads as</h2>
+
+          <div className="surface-card mt-5 p-6 sm:p-8">
+            <ul className="flex flex-wrap gap-2">
+              {reading.headline.map((line) => (
+                <li
+                  key={line}
+                  className="rounded-full border px-3.5 py-1.5 text-xs"
+                  style={{
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  {line}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 space-y-4">
+              {reading.paragraphs.map((paragraph) => (
+                <p
+                  key={paragraph}
+                  className="text-sm leading-relaxed"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            <p
+              className="mt-6 border-l pl-4 text-xs leading-relaxed"
+              style={{ color: 'var(--text-muted)', borderColor: 'var(--border-subtle)' }}
+            >
+              {reading.note}
+            </p>
+          </div>
+
+          {/* Saturn over the Moon is its own subject, and has its own tool. */}
+          <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+            Looking for Sade Sati?{' '}
+            <Link
+              href={`/tools/sade-sati?${railQuery}`}
+              style={{ color: 'var(--color-gold-300)' }}
+            >
+              Saturn&rsquo;s seven and a half years over your Moon
+            </Link>{' '}
+            is dated to the day on its own page.
+          </p>
         </section>
 
         {/* Where everything is */}

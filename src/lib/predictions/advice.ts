@@ -3,6 +3,7 @@ import { vargaRashi } from '@/lib/astro/divisional';
 import { GRAHA_DEITY, GRAHA_DIRECTION } from '@/lib/astro/ghataka';
 import { RASHI_LORD, RASHI_NAMES_EN, type AnyGraha, type Graha } from '@/lib/astro/constants';
 import { REMEDY_TABLE } from './remedies';
+import { GRAHA_CAUTION, GRAHA_LEAN, HOUSE_AREA } from './graha-guidance';
 import type { Chart, PlanetPosition } from '@/lib/astro/types';
 
 /**
@@ -63,48 +64,6 @@ export interface AdviceReport {
   headline: string[];
   note: string;
 }
-
-/** House significations, phrased as the part of life rather than the label. */
-const HOUSE_AREA: Record<number, string> = {
-  1: 'health and how you carry yourself',
-  2: 'money kept, family and speech',
-  3: 'courage, effort and siblings',
-  4: 'home, peace of mind and the mother',
-  5: 'children, learning and judgement',
-  6: 'work, obligation and health under strain',
-  7: 'partnership and marriage',
-  8: 'what is hidden, inherited or shared',
-  9: 'belief, fortune and the father',
-  10: 'work in the world and standing',
-  11: 'income, gain and the people around you',
-  12: 'expense, retreat and what is left behind',
-};
-
-/** What to do more of when a graha is running well. */
-const GRAHA_LEAN: Record<string, string> = {
-  Sun: 'Take the visible role rather than the supporting one. Speak to people senior to you directly.',
-  Moon: 'Keep a regular sleep and eating rhythm. Work near water or greenery if you can choose.',
-  Mars: 'Physical effort and clear deadlines suit this period. Start the thing that needs starting.',
-  Mercury: 'Write things down, sign the paperwork, learn the skill. Communication is the lever now.',
-  Jupiter: 'Teach, study, or take the advice of somebody older. Generosity returns during this period.',
-  Venus: 'Attend to relationships and to the look of things. Comfort spent on now is not wasted.',
-  Saturn: 'Do the slow, unglamorous work properly. What is built carefully now outlasts you.',
-  Rahu: 'Unfamiliar ground favours you. Take the foreign, the technical, the unconventional route.',
-  Ketu: 'Withdraw a little. Depth over breadth, and finishing over starting.',
-};
-
-/** What to be careful of when a graha is under strain. */
-const GRAHA_CAUTION: Record<string, string> = {
-  Sun: 'Avoid contests of pride with people who hold authority over you. Being right is not the same as winning.',
-  Moon: 'Guard your rest and your company. Low mood in this period is a passing weather, not a verdict on your life.',
-  Mars: 'Slow down on the road and in argument. Anger costs more than it gains here.',
-  Mercury: 'Read the contract twice. Misunderstandings in this period come from haste, not from bad faith.',
-  Jupiter: 'Do not over-promise. Optimism runs ahead of what can be delivered.',
-  Venus: 'Do not spend to feel better, and do not settle a relationship question in a hurry.',
-  Saturn: 'Expect delay and plan for it rather than fighting it. Cutting corners is the expensive choice now.',
-  Rahu: 'Be wary of a shortcut that seems too good. Verify who you are dealing with.',
-  Ketu: 'Do not let detachment turn into neglect of things that need attending to.',
-};
 
 export function advice(chart: Chart, runningLord?: AnyGraha): AdviceReport {
   const planets = chart.planets;

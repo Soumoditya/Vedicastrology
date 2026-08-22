@@ -7,7 +7,7 @@
  */
 export const SITE = {
   name: 'Vedic Astrologey',
-  tagline: 'Classical Jyotish, calculated precisely.',
+  tagline: 'Classical Jyotish, read with care.',
   description:
     'Accurate Vedic birth charts, panchang, dasha periods and transit ' +
     'readings, calculated with the Swiss Ephemeris. Free chart tools and ' +
@@ -55,7 +55,7 @@ export const TOOL_LINKS = [
     label: 'Transits',
     sanskrit: 'Gochara',
     description:
-      'Where the grahas are now relative to your chart, including Sade Sati and its phases.',
+      'Today drawn on your own chart, counted from the ascendant and from the Moon, and read against both.',
   },
   {
     href: '/tools/matching',
@@ -79,7 +79,15 @@ export const TOOL_LINKS = [
     label: 'Remedies',
     sanskrit: 'Upāya',
     description:
-      'The traditional measures for whichever grahas your chart shows as needing support, with an honest note on gemstones.',
+      'Every graha in your chart read in turn, with practical advice for the house it sits in and the classical measure for it.',
+  },
+  {
+    href: '/tools/gemstones',
+    feature: 'gemstones',
+    label: 'Gemstones',
+    sanskrit: 'Ratna',
+    description:
+      'Which stones your chart would traditionally be given, how each is worn, and why the tradition puts them last.',
   },
   {
     href: '/tools/nakshatra',
@@ -130,7 +138,7 @@ export const TOOL_LINKS = [
  * you do not read a chart by going through them in order, you look one up
  * because somebody has told you that you have it.
  */
-export const CHECK_FEATURES = ['manglik', 'kalsarpa', 'sade_sati'] as const;
+export const CHECK_FEATURES = ['manglik', 'kalsarpa', 'sade_sati', 'gemstones'] as const;
 
 /** The order of understanding a chart, by feature key. */
 export const JOURNEY = ['kundli', 'nakshatra', 'dasha', 'yogas', 'transits', 'remedies', 'matching'] as const;
