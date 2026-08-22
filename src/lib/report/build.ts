@@ -22,7 +22,8 @@ import { currentTransits, sadeSati } from '@/lib/astro/transits';
 import { detectYogas } from '@/lib/astro/yogas';
 import { chartToRenderData, vargaToRenderData } from '@/lib/chart-render/adapt';
 import { advice } from '@/lib/predictions/advice';
-import { remedies } from '@/lib/predictions/remedies';
+import { gemstones, remedies } from '@/lib/predictions/remedies';
+import { gocharaReading } from '@/lib/predictions/gochara';
 import { NAKSHATRA_NAMES, RASHI_LORD, RASHI_NAMES_EN, type AnyGraha } from '@/lib/astro/constants';
 import type { BirthData, Chart } from '@/lib/astro/types';
 import type { ChartRenderData } from '@/lib/chart-render/geometry';
@@ -50,8 +51,15 @@ export interface LifeArea {
   title: string;
   /** Houses this area is read from. */
   houses: number[];
-  /** The karaka, the graha that signifies this area regardless of house. */
-  karaka: string;
+  /**
+   * The karaka, the graha that signifies this area regardless of house.
+   *
+   * Typed as a graha rather than a string, for the same reason the lords on
+   * `identity` are: the report prints it through the translated vocabulary,
+   * which is keyed by graha, and a plain string would let anything through to
+   * be rendered untranslated.
+   */
+  karaka: AnyGraha;
   /** What the chart shows, assembled from the placements involved. */
   findings: string[];
 }
@@ -97,10 +105,17 @@ export interface FullReport {
   };
 
   transits: ReturnType<typeof currentTransits>;
+  /*
+    The transits, read. Same engine the transits tool uses, so the page in the
+    report and the page on the site cannot say different things about the same
+    day — which they would have, sooner or later, as two implementations.
+  */
+  gochara: ReturnType<typeof gocharaReading>;
   sadeSati: ReturnType<typeof sadeSati>;
 
   lifeAreas: LifeArea[];
   remedies: ReturnType<typeof remedies>;
+  gemstones: ReturnType<typeof gemstones>;
   advice: ReturnType<typeof advice>;
 }
 
@@ -214,10 +229,12 @@ export function buildFullReport(
     },
 
     transits: currentTransits(chart, now),
+    gochara: gocharaReading(chart, now),
     sadeSati: sadeSati(chart, now, 90),
 
     lifeAreas: AREAS.map((area) => ({ ...area, findings: readArea(chart, area) })),
     remedies: remedies(chart),
+    gemstones: gemstones(chart),
     advice: advice(chart, running),
   };
 }

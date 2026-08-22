@@ -2,10 +2,33 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "vedic-dev",
+      "name": "vedic-astrology",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3100"
+      ],
+      "port": 3100,
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=1536"
+      }
+    },
+    {
+      "name": "vedic-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "--port",
+        "3200"
+      ],
+      "port": 3200,
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=1536"
+      }
     }
   ]
 }
