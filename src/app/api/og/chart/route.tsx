@@ -118,8 +118,9 @@ function brandCard() {
         <div style={{ display: 'flex', fontSize: 22, letterSpacing: 8, color: GOLD_SOFT }}>
           {SITE.name.toUpperCase()}
         </div>
+        {/* From SITE, for the same reason as the sibling route. */}
         <div style={{ display: 'flex', fontSize: 68, marginTop: 26, maxWidth: 900 }}>
-          Classical Jyotish, calculated precisely.
+          {SITE.tagline}
         </div>
         <div style={{ display: 'flex', marginTop: 34, height: 1, background: GOLD_SOFT, width: 260 }} />
         <div style={{ display: 'flex', fontSize: 22, marginTop: 26, color: MUTED }}>

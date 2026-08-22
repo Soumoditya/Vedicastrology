@@ -80,7 +80,7 @@ export default async function DashboardLayout({
         labels={nav.labels}
       />
       <main className="flex-1">
-        <div className="mx-auto max-w-5xl px-5 py-12 sm:py-16">{children}</div>
+        <div className="mx-auto max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16">{children}</div>
       </main>
       <Footer />
     </>

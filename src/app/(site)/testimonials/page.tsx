@@ -58,7 +58,7 @@ export default async function TestimonialsPage() {
         />
       )}
 
-      <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-24">
+      <div className="relative mx-auto max-w-4xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <header className="max-w-xl">
           <p className="eyebrow" data-reveal>In their words</p>
           <h1

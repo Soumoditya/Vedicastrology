@@ -81,7 +81,7 @@ export async function ToolResult({
       <Reveal />
       <div className="starfield" aria-hidden />
 
-      <div className="report-body relative mx-auto max-w-5xl px-5 py-12 sm:py-16">
+      <div className="report-body relative mx-auto max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16">
         {cover && <ReportCover title={cover.title} subtitle={cover.subtitle} />}
 
         <JourneyRail current={feature} params={params} />

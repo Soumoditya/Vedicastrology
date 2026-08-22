@@ -33,7 +33,7 @@ export async function ToolIntro({
     <div className="relative">
       <Reveal />
       <div className="starfield" aria-hidden />
-      <div className="relative mx-auto max-w-2xl px-5 py-20 sm:py-28">
+      <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-20 sm:pt-12 sm:pb-28">
         <p className="eyebrow" data-reveal>
           {eyebrow}
         </p>

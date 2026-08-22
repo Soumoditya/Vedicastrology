@@ -32,8 +32,11 @@ export default async function Image() {
         <div style={{ display: 'flex', fontSize: 22, letterSpacing: 8, color: '#8c7220' }}>
           {SITE.name.toUpperCase()}
         </div>
+        {/* Read from SITE, not retyped: this literal and the one in
+            api/og/chart both had to be found by hand the last time the tagline
+            changed, and one of them would have been missed. */}
         <div style={{ display: 'flex', fontSize: 68, marginTop: 26, maxWidth: 900 }}>
-          Classical Jyotish, calculated precisely.
+          {SITE.tagline}
         </div>
         <div style={{ display: 'flex', marginTop: 34, height: 1, background: '#8c7220', width: 260 }} />
         <div style={{ display: 'flex', fontSize: 22, marginTop: 26, color: '#a49e90' }}>

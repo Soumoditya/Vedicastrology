@@ -54,6 +54,33 @@ export const SHLOKAS: Record<string, Shloka> = {
       'to what does not die.',
     source: 'Bṛhadāraṇyaka Upaniṣad 1.3.28',
   },
+
+  /*
+    Varāhamihira, arguing for the discipline itself.
+
+    This one comes from a jyotiṣa text rather than being borrowed from the
+    Upaniṣads, which is why it closes the home page: it is the tradition making
+    its own case, and the lamp-and-Sun image is the site's light motif stated by
+    a sixth-century astronomer rather than by the marketing.
+
+    Two things about this record are deliberate. The transliteration is derived
+    from the Devanagari rather than quoted from an edition. And the source
+    carries no chapter and verse number: it belongs to the opening chapter on
+    the sāṃvatsara, but citing a number nobody has checked against a printed
+    edition is precisely what this site tells its readers not to accept. Add the
+    number once someone has verified it.
+  */
+  varahamihira: {
+    key: 'varahamihira',
+    sanskrit:
+      'अप्रदीपाः यथा रात्रावनादित्यं यथा नभः ।\nतथा सांवत्सरोऽविद्वान् ज्योतिःशास्त्रविवर्जितः ॥',
+    transliteration:
+      "apradīpāḥ yathā rātrāv anādityaṃ yathā nabhaḥ,\ntathā sāṃvatsaro'vidvān jyotiḥśāstra-vivarjitaḥ",
+    translation:
+      'As night is without a lamp and the sky without the Sun, so is one who ' +
+      'deals with time without knowledge of Jyotiṣa.',
+    source: 'Varāhamihira, Bṛhat Saṃhitā',
+  },
 };
 
 /** Ordered, for anywhere that wants to show more than one. */

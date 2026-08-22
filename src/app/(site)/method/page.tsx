@@ -30,7 +30,7 @@ export default function MethodPage() {
       <Reveal />
       <div className="starfield" aria-hidden />
 
-      <div className="relative mx-auto max-w-2xl px-5 py-16 sm:py-24">
+      <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <p className="eyebrow" data-reveal>
           Method
         </p>

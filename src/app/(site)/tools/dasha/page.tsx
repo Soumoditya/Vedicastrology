@@ -74,7 +74,7 @@ export default async function DashaPage({ searchParams }: { searchParams: Search
       <div className="relative">
         <Reveal />
         <div className="starfield" aria-hidden />
-        <div className="relative mx-auto max-w-2xl px-5 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-20 sm:pt-12 sm:pb-28">
           <p className="eyebrow" data-reveal>Vimśottarī Daśā</p>
           <h1
             className="font-display mt-6 text-[clamp(2.25rem,5.5vw,3.75rem)] leading-[1.02]"

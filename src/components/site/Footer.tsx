@@ -19,8 +19,8 @@ export function Footer() {
               className="mt-4 max-w-xs text-sm leading-relaxed"
               style={{ color: 'var(--text-muted)' }}
             >
-              {SITE.tagline} Charts computed with the Swiss Ephemeris, using the
-              Lahiri ayanamsa.
+              {SITE.tagline} Every chart is cast from the Swiss Ephemeris with
+              the Lahiri ayanamsa, and you can check the working yourself.
             </p>
             <a
               href={SITE.instagramUrl}

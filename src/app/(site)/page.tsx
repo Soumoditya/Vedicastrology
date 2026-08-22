@@ -6,7 +6,10 @@ import { getDefaultChart, withChart } from '@/lib/astro/current-chart';
 import { HeroYantra } from '@/components/site/HeroYantra';
 import { Shloka } from '@/components/ornament/Shloka';
 import { Ganesha, OrnamentRule } from '@/components/ornament/Ornaments';
+import { NavagrahaOrbit } from '@/components/ornament/NavagrahaOrbit';
+import { ToolMark } from '@/components/ornament/ToolMark';
 import { Parallax, Reveal } from '@/components/motion/Reveal';
+import { getT } from '@/lib/i18n/server';
 
 export default async function HomePage() {
   /*
@@ -14,7 +17,7 @@ export default async function HomePage() {
     saved a chart and comes back to the home page should be one tap from
     reading it, not one tap from typing their birth details in again.
   */
-  const chart = await getDefaultChart();
+  const [chart, { t }] = await Promise.all([getDefaultChart(), getT()]);
 
   return (
     <>
@@ -44,7 +47,7 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-8 lg:pt-20">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-10 lg:grid-cols-[1.15fr_1fr] lg:gap-8 lg:pt-12">
           <div>
             {/* The invocation. Ganesha is addressed before any undertaking is
                 begun, and casting a chart is one, so the site opens with it. */}
@@ -53,12 +56,19 @@ export default async function HomePage() {
               data-reveal
               style={{ color: 'var(--color-gold-400)' }}
             >
+              {/*
+                The mark, without half a verse beside it.
+
+                This carried the first four words of the Ganesha invocation and
+                stopped — while the complete verse sat unused in `shlokas.ts`
+                and the closing section now renders a real one properly. Showing
+                a fragment of a shloka is worse than showing none, and two
+                shlokas on one page is one too many, so the Ganesha mark stays
+                and the truncated line goes.
+              */}
               <Ganesha size={26} className="shrink-0" />
-              <p className="text-[0.8rem] leading-snug" style={{ color: 'var(--color-gold-400)' }}>
-                <span lang="sa" style={{ fontFamily: 'var(--font-devanagari), serif' }}>
-                  वक्रतुण्ड महाकाय
-                </span>
-                <span style={{ color: 'var(--text-muted)' }}> · a beginning without obstacles</span>
+              <p className="text-[0.8rem] leading-snug" style={{ color: 'var(--text-muted)' }}>
+                A beginning without obstacles
               </p>
             </div>
 
@@ -189,6 +199,40 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ========================================================= Quick cast */}
+      <section className="mx-auto max-w-6xl px-5 py-28">
+        <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
+          <div data-reveal="left">
+            <h2
+              className="font-display mt-5 text-[clamp(2rem,4vw,3rem)] leading-[1.05]"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Start with your own.
+            </h2>
+            <p
+              className="mt-6 max-w-md text-[0.9375rem] leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Your birth details, and you get the full rashi chart, your
+              nakshatra and pada, every divisional chart, and the dasha period
+              you are running right now.
+            </p>
+            <p
+              className="mt-4 max-w-md text-[0.9375rem] leading-relaxed"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Do not know your birth time? Cast it anyway. The chart will mark
+              clearly which parts you can rely on and which you cannot, rather
+              than presenting a guess as fact.
+            </p>
+          </div>
+
+          <div className="surface-card p-7 sm:p-9" data-reveal="scale">
+            <BirthForm action="/tools/kundli" submitLabel="Cast my chart" />
+          </div>
+        </div>
+      </section>
+
       {/* ============================================================== Tools */}
       <section className="mx-auto max-w-6xl px-5 py-28">
         <div className="grid gap-12 lg:grid-cols-[22rem_1fr] lg:gap-20">
@@ -203,14 +247,14 @@ export default async function HomePage() {
             >
               Study your own chart first.
             </h2>
+            {/* From the dictionary, so the home page and /tools cannot drift
+                apart the way they already had. */}
             <p
               className="mt-6 text-[0.9375rem] leading-relaxed"
               style={{ color: 'var(--text-secondary)' }}
               data-reveal
             >
-              These run the same calculations I use in a paid reading. They are
-              free because a chart you can check yourself is worth more than one
-              you are asked to take on trust. No account, no email.
+              {t('tools.intro')}
             </p>
           </div>
 
@@ -224,13 +268,19 @@ export default async function HomePage() {
               <li key={tool.href} data-reveal style={{ '--reveal-delay': `${i * 60}ms` } as React.CSSProperties}>
                 <Link
                   href={withChart(tool.href, chart)}
-                  className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 border-t py-7 transition-colors duration-500 sm:gap-6"
+                  className="group grid grid-cols-[2.5rem_1fr_auto] items-start gap-4 border-t py-7 transition-colors duration-500 sm:gap-6"
                 >
+                  {/*
+                    A mark, not a numeral. `01` through `12` read as a table of
+                    contents — an order to work through — when this is a set of
+                    instruments to pick from. Nobody starts at the birth chart
+                    and works down to the full report.
+                  */}
                   <span
-                    className="numeric text-sm"
+                    className="transition-colors duration-300 group-hover:text-[var(--color-gold-300)]"
                     style={{ color: 'var(--color-gold-600)' }}
                   >
-                    {String(i + 1).padStart(2, '0')}
+                    <ToolMark feature={tool.feature} size={26} />
                   </span>
 
                   <span className="min-w-0">
@@ -273,40 +323,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================= Quick cast */}
-      <section className="mx-auto max-w-6xl px-5 py-28">
-        <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
-          <div data-reveal="left">
-            <h2
-              className="font-display mt-5 text-[clamp(2rem,4vw,3rem)] leading-[1.05]"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Start with your own.
-            </h2>
-            <p
-              className="mt-6 max-w-md text-[0.9375rem] leading-relaxed"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Your birth details, and you get the full rashi chart, your
-              nakshatra and pada, every divisional chart, and the dasha period
-              you are running right now.
-            </p>
-            <p
-              className="mt-4 max-w-md text-[0.9375rem] leading-relaxed"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              Do not know your birth time? Cast it anyway. The chart will mark
-              clearly which parts you can rely on and which you cannot, rather
-              than presenting a guess as fact.
-            </p>
-          </div>
-
-          <div className="surface-card p-7 sm:p-9" data-reveal="scale">
-            <BirthForm action="/tools/kundli" submitLabel="Cast my chart" />
-          </div>
-        </div>
-      </section>
-
       {/* ============================================================ Closing */}
       <section className="relative overflow-hidden">
         <div
@@ -319,9 +335,27 @@ export default async function HomePage() {
         />
 
         <div className="mx-auto max-w-3xl px-5 py-32 text-center">
-          {/* The verse the whole site is named for: from darkness to light. */}
+          {/*
+            Varāhamihira, not the Upaniṣads.
+
+            This closed on "lead me from darkness to light" — a beautiful verse,
+            and one that belongs to everybody. The Bṛhat Saṃhitā verse is the
+            tradition making its own case for itself, from inside a jyotiṣa
+            text, which is a better note for this site to end on than a borrowed
+            general prayer.
+          */}
           <div data-reveal>
-            <Shloka which="jyoti" />
+            <Shloka which="varahamihira" />
+          </div>
+
+          {/*
+            The navagraha, turning, under the verse that argues for reading
+            them. Placed here rather than in the hero because the hero already
+            carries the yantra, and two moving figures in one viewport is the
+            thing that makes a page feel busy rather than alive.
+          */}
+          <div className="mt-16 flex justify-center" data-reveal>
+            <NavagrahaOrbit size={340} className="max-w-full" />
           </div>
 
           <div data-reveal>
@@ -344,8 +378,8 @@ export default async function HomePage() {
             style={{ color: 'var(--text-secondary)' }}
             data-reveal
           >
-            When you want the whole chart read properly, not a paragraph
-            generated from your sun sign.
+            You do not need a reading to use this site. It is here for when the
+            chart on its own stops being enough.
           </p>
 
           <Link
@@ -384,4 +418,3 @@ export default async function HomePage() {
   );
 }
 
-/** A single figure in the proof band. Large numeral, small caption. */

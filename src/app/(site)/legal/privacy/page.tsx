@@ -22,7 +22,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="relative">
-      <div className="mx-auto max-w-2xl px-5 py-16 sm:py-24">
+      <div className="mx-auto max-w-2xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <p className="eyebrow">Privacy</p>
         <h1
           className="font-display mt-5 text-[clamp(2rem,5vw,3rem)] leading-[1.05]"

@@ -64,7 +64,7 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="relative mx-auto max-w-2xl px-5 py-16 sm:py-24">
+      <div className="relative mx-auto max-w-2xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <p className="eyebrow">Questions</p>
         <h1
           className="font-display mt-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.05]"

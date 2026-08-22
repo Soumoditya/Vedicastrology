@@ -64,7 +64,7 @@ export default async function PanchangPage({
     <div className="relative">
       <div className="starfield" aria-hidden />
 
-      <div className="relative mx-auto max-w-5xl px-5 py-12 sm:py-16">
+      <div className="relative mx-auto max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16">
         <header className="mb-9">
           <div className="flex items-center gap-2.5" style={{ color: 'var(--color-gold-500)' }}>
             {/* The swastika belongs here: the panchang is the reckoning of

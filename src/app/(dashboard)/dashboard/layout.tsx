@@ -37,7 +37,7 @@ export default async function DashboardLayout({
         No wrapper of its own.
 
         This had `min-h-screen` and then, after that was removed, its own
-        `max-w-5xl px-5 py-12 sm:py-16` — while the parent layout at
+        `max-w-5xl px-5 pt-10 pb-12 sm:pt-12 sm:pb-16` — while the parent layout at
         `(dashboard)/layout.tsx` already wraps children in exactly that. Two
         identical frames nested inside each other means the padding applies twice,
         which is where the 128px of dead space above "Welcome back" came from. The

@@ -79,7 +79,7 @@ export default async function PostPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <article className="relative mx-auto max-w-3xl px-5 py-16 sm:py-24">
+      <article className="relative mx-auto max-w-3xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-24">
         <Link
           href="/blog"
           className="text-xs transition-colors duration-300"

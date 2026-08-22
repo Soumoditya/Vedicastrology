@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { TOOL_LINKS } from '@/lib/site';
+import { RashiChakra } from '@/components/ornament/RashiChakra';
+import { ToolMark } from '@/components/ornament/ToolMark';
 import { canUseAll } from '@/lib/features/flags';
 import { getT } from '@/lib/i18n/server';
 import { getDefaultChart, withChart } from '@/lib/astro/current-chart';
@@ -40,26 +42,46 @@ export default async function ToolsPage() {
     <div className="relative">
       <div className="starfield" aria-hidden />
 
-      <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-20">
-        <header className="mb-12 max-w-2xl">
-          <p
-            className="text-xs uppercase tracking-[0.28em]"
-            style={{ color: 'var(--color-gold-600)' }}
-          >
-            {t('tools.eyebrow')}
-          </p>
-          <h1
-            className="font-display mt-3 text-4xl sm:text-5xl"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            {t('tools.heading')}
-          </h1>
-          <p
-            className="mt-5 text-base leading-relaxed"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            {t('tools.intro')}
-          </p>
+      <div className="relative mx-auto max-w-5xl px-5 pt-10 pb-16 sm:pt-12 sm:pb-20">
+        {/*
+          The rashi chakra rather than the navagraha orbit.
+
+          Two different figures on two different pages, so the ornament reads as
+          ornament rather than as a logo stamped everywhere. It also happens to
+          be the right one here: this page is the fixed set of instruments, and
+          the chakra is the fixed frame the grahas move against.
+
+          Hidden below `lg`, where the header needs its full width for type.
+        */}
+        <header className="mb-12 flex items-start justify-between gap-10">
+          <div className="max-w-2xl">
+            <p
+              className="text-xs uppercase tracking-[0.28em]"
+              style={{ color: 'var(--color-gold-600)' }}
+            >
+              {t('tools.eyebrow')}
+            </p>
+            <h1
+              className="font-display mt-3 text-4xl sm:text-5xl"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {t('tools.heading')}
+            </h1>
+            <p
+              className="mt-5 text-base leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {t('tools.intro')}
+            </p>
+          </div>
+
+          {/*
+            160, not 200: at 200 the disc was taller than the heading block
+            beside it, so the ornament set the header's height and gave back
+            most of the vertical space this page had just recovered. Decoration
+            does not get to push the content it decorates down the page.
+          */}
+          <RashiChakra size={160} className="hidden shrink-0 self-center lg:block" />
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -80,9 +102,14 @@ export default async function ToolsPage() {
               />
               <div className="flex items-start justify-between gap-3">
                 <p
-                  className="font-quote text-sm italic"
+                  className="font-quote flex items-center gap-2.5 text-sm italic"
                   style={{ color: 'var(--color-gold-600)' }}
                 >
+                  <ToolMark
+                    feature={tool.feature}
+                    size={20}
+                    className="shrink-0 transition-colors duration-300 group-hover:text-[var(--color-gold-300)]"
+                  />
                   {tool.sanskrit}
                 </p>
                 {!access[tool.feature].allowed && (
