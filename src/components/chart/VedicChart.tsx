@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   NORTH_INDIAN,
@@ -46,7 +46,6 @@ export function VedicChart({
   className = '',
 }: VedicChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const uid = useId().replace(/:/g, '');
 
   const geometry: ChartGeometry = useMemo(
     () =>
@@ -77,40 +76,6 @@ export function VedicChart({
             : `Vedic chart, ascendant in ${RASHI_NAMES_EN[data.ascendantRashi]}`
         }
       >
-        <defs>
-          {/*
-            Gold leaf gradient for the frame.
-
-            `userSpaceOnUse` is required, not stylistic. With the default
-            `objectBoundingBox` units, an element whose bounding box has zero
-            width or height is not painted at all, and the four sides of the
-            outer square are axis-aligned, so they are exactly that. Using
-            object bounding box units silently erases the square while leaving
-            the diagonals visible.
-          */}
-          <linearGradient
-            id={`${uid}-gold`}
-            gradientUnits="userSpaceOnUse"
-            x1="0"
-            y1="0"
-            x2="100"
-            y2="100"
-          >
-            <stop offset="0%" stopColor="var(--color-gold-200)" />
-            <stop offset="40%" stopColor="var(--color-gold-500)" />
-            <stop offset="70%" stopColor="var(--color-gold-600)" />
-            <stop offset="100%" stopColor="var(--color-gold-300)" />
-          </linearGradient>
-
-          <filter id={`${uid}-soft`} x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="0.6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
         {/*
           The plate.
 
@@ -153,7 +118,7 @@ export function VedicChart({
                     ? 'color-mix(in oklab, var(--plate-highlight) 55%, transparent)'
                     : 'transparent'
                 }
-                className="transition-[fill] duration-300"
+                className="transition-[fill] duration-150"
                 style={{ transitionTimingFunction: 'var(--ease-out-soft)' }}
               />
             );
@@ -290,7 +255,18 @@ export function VedicChart({
 
         {/* Ascendant marker, a small gold tick on the first house. */}
         {style === 'north-indian' && (
-          <g opacity="0.9" filter={`url(#${uid}-soft)`}>
+          /*
+            No filter on this.
+
+            It carried a `feGaussianBlur` to soften four units of gold. An SVG
+            filter forces the element through a separate raster pass every time
+            the drawing repaints — and this drawing repaints on every hover,
+            because the cell fills transition — so it was an expensive frame,
+            repeatedly, for an effect nobody could name. The `<defs>` block that
+            held it is gone too, along with a gold gradient in it that was
+            referenced by nothing at all.
+          */
+          <g opacity="0.9">
             <path d="M 50 2.5 L 52 6 L 48 6 Z" fill="var(--plate-accent)" />
           </g>
         )}

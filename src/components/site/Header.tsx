@@ -33,11 +33,39 @@ export function Header({
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  /*
+    Read once per frame, not once per scroll event.
+
+    This fired on every scroll event and called `setScrolled` each time. React
+    bails out when the boolean is unchanged, so it was never a re-render storm —
+    but the handler still ran, and dispatching a state update on a sticky header
+    dozens of times a second is work done for nothing on a machine with none to
+    spare. rAF collapses a burst of events into one read, and the guard means
+    React is only told when the answer actually changes: twice per page, not
+    hundreds of times.
+  */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
+    let frame = 0;
+
+    const read = () => {
+      frame = 0;
+      const next = window.scrollY > 12;
+      setScrolled((current) => (current === next ? current : next));
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+
+    // Scheduled, not called: a page can be restored mid-scroll, so the initial
+    // read is real work — but doing it synchronously here sets state during the
+    // effect and cascades a render. One frame later is indistinguishable.
+    frame = requestAnimationFrame(read);
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Close the mobile menu whenever the route changes.
@@ -45,13 +73,14 @@ export function Header({
 
   return (
     <header
-      className="site-header sticky top-0 z-50 transition-all duration-500"
+      className="site-header sticky top-0 z-50 transition-colors duration-300"
       /*
-        The scrolled background lives in the stylesheet rather than here, so it
-        can have a no-backdrop-filter fallback and honour
-        prefers-reduced-transparency. It was 82% opaque with a blur, which
-        leaves 18% of the page showing through: on the yogas page the h1 was
-        legible straight through the nav.
+        The scrolled background lives in the stylesheet rather than here. It was
+        82% opaque with a blur, which leaves 18% of the page showing through: on
+        the yogas page the h1 was legible straight through the nav. It is now
+        solid and unblurred — a sticky element with a backdrop filter re-blurs
+        everything behind it on every scroll frame, which is most of why a long
+        page stuttered on a low-end GPU.
       */
       data-scrolled={scrolled ? 'true' : 'false'}
       style={{ transitionTimingFunction: 'var(--ease-out-soft)' }}

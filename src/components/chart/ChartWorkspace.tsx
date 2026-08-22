@@ -78,8 +78,10 @@ export function ChartWorkspace({
                 aria-pressed={isActive}
                 /* 44px minimum: sixteen of these are a real tap target problem
                    at 30px, and the row wraps rather than scrolling. */
+                /* `transition-colors`, not `transition-all`: sixteen of these
+                   sit in one row and only their colours ever change. */
                 className="numeric grid min-h-11 min-w-11 place-items-center rounded-full border px-3
-                           text-xs font-medium transition-all duration-300"
+                           text-xs font-medium transition-colors duration-300"
                 style={{
                   borderColor: isActive ? 'var(--border-strong)' : 'var(--border-subtle)',
                   background: isActive

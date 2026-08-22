@@ -318,10 +318,18 @@ body::after {
 
    Opaque enough to be a surface. A translucent bar over scrolling text has to
    be *nearly* solid or the text reads through it, and at 82% it did: the
-   heading on a tool page was legible straight through the nav. The blur is an
-   enhancement layered on top, never the thing doing the work, so a browser
-   without backdrop-filter — or a reader who has asked for less transparency —
-   still gets a header they can read.
+   heading on a tool page was legible straight through the nav.
+
+   It is now solid, with no backdrop-filter, and that is a performance decision
+   rather than a taste one. A `position: sticky` element carrying a backdrop
+   filter has to re-blur everything behind it on *every scroll frame*, and on a
+   low-end GPU that alone is enough to make a long page stutter the whole way
+   down — which is exactly what was reported on the chart page. The blur was
+   always described here as an enhancement layered on top, never the thing doing
+   the work; at 94% opacity it was buying almost nothing visible and costing a
+   frame budget. The reduced-transparency and no-backdrop-filter branches are
+   gone with it, since every reader now gets the branch they were falling back
+   to anyway.
    ========================================================================== */
 .site-header {
   background: transparent;
@@ -331,20 +339,6 @@ body::after {
 .site-header[data-scrolled='true'] {
   background: var(--surface);
   border-bottom-color: var(--border-subtle);
-}
-
-@supports (backdrop-filter: blur(1px)) {
-  .site-header[data-scrolled='true'] {
-    background: color-mix(in oklab, var(--surface) 94%, transparent);
-    backdrop-filter: blur(14px) saturate(1.4);
-  }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .site-header[data-scrolled='true'] {
-    background: var(--surface);
-    backdrop-filter: none;
-  }
 }
 
 /* ==========================================================================
@@ -369,10 +363,29 @@ body::after {
   }
 }
 
+/*
+  One screen of sky, not one page of it.
+
+  `inset: 0` made this element as tall as its wrapper, and on a tool result page
+  that wrapper is the whole document — several thousand pixels of twelve stacked
+  radial gradients, of which the browser repaints a fresh strip on every scroll
+  frame. It is decoration at 0.7 opacity and nobody has ever noticed a star four
+  thousand pixels down, so it is capped to a little over a viewport and masked
+  out at its lower edge, which ends it rather than cutting it. Past that there is
+  simply nothing left to paint.
+
+  Safe on the home page, where this sits inside a `min-h-[92vh] overflow-hidden`
+  hero section and was never page-height to begin with.
+*/
 .starfield {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120vh;
   pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
   background-image:
     radial-gradient(1.4px 1.4px at 20% 30%, rgba(255, 246, 224, 0.9), transparent),
     radial-gradient(1px 1px at 75% 15%, rgba(255, 246, 224, 0.6), transparent),
@@ -1336,4 +1349,153 @@ body::after {
 :root:lang(hi) .eyebrow,
 :root:lang(bn) .eyebrow {
   font-size: 0.8125rem;
+}
+
+/* ==========================================================================
+   Orbital ornament
+
+   Decoration that moves, built to the one rule that keeps it free: transform
+   only, declared here rather than driven from JavaScript. A `rotate` on a
+   composited layer is handed to the GPU once and costs nothing per frame,
+   which is the opposite of what the hero figure used to do — a rAF loop
+   writing transforms into an SVG that carried a drop-shadow, re-rasterising
+   the whole thing sixty times a second.
+
+   Two rules follow from that and must not be relaxed:
+     · nothing with a `filter` may sit on or above an animated element. A glow
+       is a radial-gradient circle, never a blur.
+     · `--period` is the only knob. Rings differ in speed, not in mechanism.
+
+   `prefers-reduced-motion` is honoured by the global rule further down, which
+   flattens every animation-duration to near zero — so this stops dead for a
+   reader who has asked for that, and stops correctly, at rest rather than
+   mid-turn.
+   ========================================================================== */
+@keyframes orbit-turn {
+  to { transform: rotate(360deg); }
+}
+
+/* The ring. Origin is the centre of the 400x400 field, not the group's own
+   bounding box, so a graha sitting out at radius 178 sweeps the full circle
+   instead of spinning on the spot. */
+.orbit-ring {
+  /*
+    `50% 50%`, not a pixel pair.
+
+    With `transform-box: view-box` the reference box is the SVG viewport and its
+    origin is the viewBox's own min-x/min-y — so a literal `200px 200px` is 200
+    units from the *corner*, which is only the centre by coincidence and stops
+    being it the moment a viewBox gains a margin or the content sits inside a
+    translate. It did: the orbit's rings are drawn inside a `translate(20 20)`,
+    so every ring was turning about a point 28px up and left of the disc centre
+    and wobbling round it instead of rotating in place. A percentage is the
+    centre by definition, whatever the viewBox is.
+  */
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: orbit-turn var(--period, 60s) linear infinite;
+}
+
+.orbit-ring[data-retrograde='true'] {
+  animation-direction: reverse;
+}
+
+/* A mark that must stay upright turns against its ring at the same rate.
+
+   The origin is given by the caller in viewBox units, deliberately. `fill-box`
+   with `transform-origin: center` reads more naturally and does not work here:
+   the reference box of a `<g>` inside a scaled, translated chain is not the
+   point you meant, and the marks ended up rotating about somewhere outside the
+   figure entirely. An explicit coordinate is unambiguous.
+
+   Only things with a top and a bottom need this. The graha spheres do not —
+   a lit ball looks the same at every angle — so they ride their rings without
+   a counter-rotation at all, which is one fewer animated layer apiece. */
+.orbit-mark {
+  transform-box: view-box;
+  animation: orbit-turn var(--period, 60s) linear infinite reverse;
+}
+
+.orbit-mark[data-retrograde='true'] {
+  animation-direction: normal;
+}
+
+/* The hero figure's two continuous rings.
+
+   These were driven from JavaScript: a rAF loop that never stopped, writing
+   `style.transform` into three groups every frame for the lifetime of the page.
+   They are constant-rate spins, which is the one thing CSS does for free, so
+   they are declared here and the loop now only runs while a pointer is actually
+   moving. */
+@keyframes yantra-turn {
+  to { transform: rotate(360deg); }
+}
+
+.yantra-ring {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: yantra-turn var(--period, 300s) linear infinite;
+}
+
+.yantra-ring[data-reverse='true'] {
+  animation-direction: reverse;
+}
+
+/* ==========================================================================
+   The print route's one piece of furniture
+
+   `/report/print` is a document, not a page of the site, so it has no header
+   and no footer. This strip lets somebody switch between the four grounds
+   without re-entering birth details, and it is the only thing on the route that
+   is not the report. It never reaches paper.
+   ========================================================================== */
+.print-toolbar {
+  position: fixed;
+  z-index: 60;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: #16130c;
+  color: #c9bfa8;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.75rem;
+}
+
+.print-toolbar a {
+  color: #e8c877;
+  text-decoration: none;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #45402f;
+  border-radius: 999px;
+}
+
+.print-toolbar a[data-current='true'] {
+  background: #e8c877;
+  color: #16130c;
+}
+
+.print-toolbar-sep { flex: 1; }
+
+/* The paginated sheets need room to clear the strip. */
+.report-pages { padding-top: 3rem; }
+
+.pagination-status {
+  position: fixed;
+  z-index: 61;
+  left: 50%;
+  top: 40vh;
+  transform: translateX(-50%);
+  max-width: 30rem;
+  padding: 1rem 1.25rem;
+  background: #16130c;
+  color: #e8c877;
+  border-radius: 0.5rem;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.85rem;
+  text-align: center;
 }
