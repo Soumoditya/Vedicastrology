@@ -31,6 +31,32 @@ import type { ReportTheme } from './themes';
 export function pagedCss(theme: ReportTheme, personName: string): string {
   const t = theme;
 
+  /*
+    A ground behind the body text, where the theme has one.
+
+    Fixed to the viewport rather than tiled down the document, so a section that
+    runs to four pages does not carry four copies of the same figure sliding past
+    at different offsets. At six per cent it reads as texture — the page looks
+    printed on something — and every line of type still sits at full contrast
+    against it, which was the condition for putting a picture behind text at all.
+  */
+  const pageGround = t.art
+    ? `
+.rp-doc::before, .pagedjs_page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("${t.art.page}");
+  background-size: cover;
+  background-position: 50% 30%;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+.rp-doc > *, .pagedjs_page > * { position: relative; z-index: 1; }
+`
+    : '';
+
   return `
 :root {
   --rp-paper: ${t.paper};
@@ -130,6 +156,7 @@ html, body {
 
 /* Nothing on screen belongs in the document. */
 .no-print { display: none !important; }
+${pageGround}
 
 /*
   Nothing moves in a printed document.
@@ -327,6 +354,31 @@ html, body {
   color: ${t.coverInk};
   padding: 24mm 20mm;
 }
+/*
+  The photographic plate, anchored to the top.
+
+  These images are 900x1600 and the page is nearer 0.69, so 'cover' has to throw
+  away about eighteen per cent of the height however it is anchored. Centred, it
+  took that out of both ends and cut the subject in half — which is what was
+  reported. All four of these compositions sit in their upper portion, so
+  anchoring to the top trims empty sky instead.
+*/
+.rp-plate-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 12%;
+  z-index: 0;
+}
+.rp-plate[data-art] > *:not(.rp-plate-art) { position: relative; z-index: 1; }
+/* Enough ground behind the type to read against the picture. */
+.rp-plate[data-art] .rp-plate-card {
+  background: rgba(6, 10, 24, 0.72);
+  backdrop-filter: none;
+}
+
 .rp-plate-brand {
   font-size: 8pt;
   letter-spacing: 0.34em;
@@ -440,4 +492,49 @@ export function screenCss(theme: ReportTheme): string {
     // `@page` and its margin boxes, including one level of nesting.
     .replace(/@page[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g, '')
     .replace('html, body {', '.rp-screen {');
+}
+
+/**
+ * The same stylesheet, for the browser's own pagination.
+ *
+ * Derived from the paged one rather than restated, so the two cannot drift.
+ * Two differences, both forced:
+ *
+ *   The `@page` margin boxes go. Chrome has never implemented them, so they are
+ *   dead weight rather than a fallback — this is exactly the gap Paged.js exists
+ *   to fill, and the cost of not using it is that a page number cannot be
+ *   printed. `@page { size; margin }` itself is kept, because that much browsers
+ *   do honour.
+ *
+ *   `.pagedjs_page` rules go too, since there are no such elements here. The
+ *   page ground moves onto the document wrapper instead.
+ *
+ * Everything that does the actual work — a section starting a page, a chart
+ * never being torn, a table head repeating — is plain fragmentation CSS that has
+ * worked in browsers for years.
+ */
+export function printCss(theme: ReportTheme): string {
+  const full = pagedCss(theme, '');
+
+  const withoutMarginBoxes = full.replace(
+    /@page[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g,
+    `@page { size: A4; margin: 16mm 15mm 18mm; }`,
+  );
+
+  return (
+    withoutMarginBoxes.replace('html, body {', '.rp-doc {') +
+    `
+/* On screen this is a preview of the paper, so it reads as sheets. */
+.rp-doc {
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 12mm 15mm;
+}
+
+@media print {
+  .rp-doc { max-width: none; margin: 0; padding: 0; }
+  .print-toolbar { display: none !important; }
+}
+`
+  );
 }

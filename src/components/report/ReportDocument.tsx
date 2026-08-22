@@ -82,10 +82,14 @@ export function ReportDocument({
   return (
     <>
       {/* ============================================================ cover */}
-      <div className="rp-plate">
+      <div className="rp-plate" data-art={theme.art ? 'true' : undefined}>
+        {theme.art && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="rp-plate-art" src={theme.art.cover} alt="" aria-hidden />
+        )}
         <p className="rp-plate-brand">Vedic Astrologey</p>
         <div className="rp-plate-ornament">
-          <RashiChakra size={200} period={0} />
+          {theme.art ? null : <RashiChakra size={200} period={0} />}
         </div>
         <h1 className="rp-plate-title">Complete Vedic Reading</h1>
         <p className="rp-plate-sub">Sampūrṇa Jyotiṣa Phala</p>
@@ -326,7 +330,7 @@ export function ReportDocument({
       </Section>
 
       {/* ================================================== part one plate */}
-      <Divider part="Part one" title="The chart itself" sanskrit="Kuṇḍalī" />
+      <Divider art={theme.art?.dividers[0]} part="Part one" title="The chart itself" sanskrit="Kuṇḍalī" />
 
       {r.charts.map((c) => (
         <ChartPages
@@ -396,7 +400,7 @@ export function ReportDocument({
       </Section>
 
       {/* ================================================== part two plate */}
-      <Divider part="Part two" title="Your life, area by area" sanskrit="Bhāva Phala" />
+      <Divider art={theme.art?.dividers[1]} part="Part two" title="Your life, area by area" sanskrit="Bhāva Phala" />
 
       {r.lifeAreas.map((area) => (
         <Section key={area.key} id={`area-${area.key}`} title={area.title} sanskrit="Bhāva">
@@ -410,7 +414,7 @@ export function ReportDocument({
       ))}
 
       {/* ================================================ part three plate */}
-      <Divider part="Part three" title="Time, and what is running" sanskrit="Daśā · Gochara" />
+      <Divider art={theme.art?.dividers[2]} part="Part three" title="Time, and what is running" sanskrit="Daśā · Gochara" />
 
       <Section id="dasha" title="The periods of your life" sanskrit="Viṁśottarī Daśā">
         <p className="rp-prose">
@@ -607,7 +611,7 @@ export function ReportDocument({
       </Section>
 
       {/* ================================================ part four plate */}
-      <Divider part="Part four" title="What to do about it" sanskrit="Upāya" />
+      <Divider art={theme.art?.dividers[3]} part="Part four" title="What to do about it" sanskrit="Upāya" />
 
       <Section id="remedies" title="Every graha, and what helps it" sanskrit="Graha Vicāra">
         <p className="rp-prose">
@@ -697,9 +701,13 @@ export function ReportDocument({
       </Section>
 
       {/* ======================================================= back plate */}
-      <div className="rp-plate">
+      <div className="rp-plate" data-art={theme.art ? 'true' : undefined}>
+        {theme.art && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="rp-plate-art" src={theme.art.back} alt="" aria-hidden />
+        )}
         <div className="rp-plate-ornament">
-          <NavagrahaOrbit size={190} />
+          {theme.art ? null : <NavagrahaOrbit size={190} />}
         </div>
         <p className="rp-shloka">{SHLOKAS.varahamihira.sanskrit}</p>
         <p className="rp-shloka-tr">{SHLOKAS.varahamihira.translation}</p>
@@ -806,11 +814,17 @@ function ChartPages({
  * each — the "images cut in half" that was reported. An ornament built from the
  * site's own geometry cannot be cropped by arithmetic, and it prints.
  */
-function Divider({ part, title, sanskrit }: { part: string; title: string; sanskrit: string }) {
+function Divider({
+  part, title, sanskrit, art,
+}: { part: string; title: string; sanskrit: string; art?: string }) {
   return (
-    <div className="rp-plate">
+    <div className="rp-plate" data-art={art ? 'true' : undefined}>
+      {art && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="rp-plate-art" src={art} alt="" aria-hidden />
+      )}
       <div className="rp-plate-ornament">
-        <RashiChakra size={170} period={0} />
+        {art ? null : <RashiChakra size={170} period={0} />}
       </div>
       <p className="rp-plate-brand">{part}</p>
       <h2 className="rp-plate-title">{title}</h2>

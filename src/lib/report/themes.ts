@@ -12,12 +12,12 @@ import type { ChartPalette } from '@/lib/chart-render/svgString';
  * work in `svgString.ts`. A plate drawn in gold on midnight is unreadable on
  * ivory; before this it had no way to be told which paper it was sitting on.
  *
- * No ground uses the photographic plates any more, including the dark one. The
- * four `public/report/*.jpg` files are 900×1600 against a page of 0.687, so
- * `object-fit: cover` cropped about eighteen per cent off the top and bottom of
- * every one — the "images cut in half" that was reported. Covers and dividers
- * are drawn from the site's own geometry instead, which cannot be cropped by
- * arithmetic and prints without a colour cartridge.
+ * Night keeps its photographs; the three paper grounds are drawn. The crop that
+ * cut the old covers in half is fixed rather than sidestepped: the plates are
+ * 900×1600 against a page of 0.687, so `object-fit: cover` threw away about
+ * eighteen per cent of the height. They are anchored to the top now, which is
+ * where the composition of all four of these images actually lives, so what gets
+ * trimmed is empty sky rather than the subject.
  */
 
 export type ThemeKey = 'night' | 'ivory' | 'parchment' | 'classical';
@@ -43,6 +43,23 @@ export interface ReportTheme {
   /** Cover and divider ground, where it differs from the page. */
   coverPaper: string;
   coverInk: string;
+  /**
+   * The photographic plates, where a theme has them.
+   *
+   * Only Night does. The paper grounds are drawn, because an engraving prints
+   * and a night sky costs a colour cartridge — but that is a property of the
+   * theme, not a judgement about the art, and removing it from Night was a
+   * mistake I made unasked.
+   *
+   * `page` is the quiet one: laid behind the text of every content page at low
+   * opacity, so a page reads as printed on something rather than on nothing.
+   */
+  art?: {
+    cover: string;
+    dividers: string[];
+    back: string;
+    page: string;
+  };
   chart: ChartPalette;
 }
 
@@ -68,6 +85,25 @@ const THEMES: Record<ThemeKey, ReportTheme> = {
     */
     coverPaper: '#0b1020',
     coverInk: '#f2e6c8',
+    art: {
+      cover: '/report/cover.jpg',
+      // One per part divider, in order. Four parts, and the fourth returns to
+      // the mandala deliberately — it opens the remedies, which is where the
+      // document turns back toward practice.
+      dividers: [
+        '/report/mandala.jpg',
+        '/report/frame.jpg',
+        '/report/om.jpg',
+        '/report/mandala.jpg',
+      ],
+      back: '/report/om.jpg',
+      /*
+        Behind the body text, at a whisper. The brief was a plain image with few
+        objects in it, and the mandala is the closest of the four — one centred
+        figure, no horizon, nothing that competes with a line of type.
+      */
+      page: '/report/mandala.jpg',
+    },
     chart: {
       background: '#0a0a16',
       rule: '#c9a227',

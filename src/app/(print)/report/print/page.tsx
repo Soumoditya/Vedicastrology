@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { buildFullReport } from '@/lib/report/build';
 import { hasBirthQuery, parseBirthQuery } from '@/lib/astro/query';
-import { pagedCss } from '@/lib/report/pagedCss';
+import { pagedCss, printCss } from '@/lib/report/pagedCss';
 import { resolveTheme, THEME_LIST } from '@/lib/report/themes';
 import { getNames } from '@/lib/i18n/server';
 import { gateFor } from '@/components/site/FeatureGate';
@@ -20,14 +20,24 @@ export const dynamic = 'force-dynamic';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /**
- * The report, paginated.
+ * The report, ready to print.
  *
- * A separate route from `/report` on purpose. Fragmenting forty pages costs a
- * second or two of main-thread work, which is a fine price for a document
- * somebody has asked to print and a bad one for a page they only wanted to
- * read. `/report` stays fast and scrollable; this one is the artefact.
+ * This renders immediately. It used to hand the document to Paged.js first, and
+ * that was the wrong default: Paged.js is what makes real page numbers possible,
+ * but it fragments forty pages on the main thread before anything appears, it is
+ * slow on a modest machine, and on this document it has stalled outright. A
+ * button somebody presses to get a PDF cannot begin with a wait of unknown
+ * length that sometimes never ends.
  *
- * Both render the same `ReportDocument`, so the two cannot drift.
+ * So the browser paginates by default. Every section still starts on a new page,
+ * because that is a plain `break-before: page` and browsers have always honoured
+ * it; the art, the themes and the layout are identical. What the browser cannot
+ * do is print a page number, since Chrome has never implemented `@page` margin
+ * boxes — that is the one thing `?paged=1` still buys, for anyone willing to
+ * wait for it.
+ *
+ * Both modes render the same `ReportDocument`, so nothing can drift between
+ * them.
  */
 export default async function ReportPrintPage({ searchParams }: { searchParams: SearchParams }) {
   const gate = await gateFor('full_report', '/report');
@@ -61,6 +71,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
 
   const gender = genderOf(params);
   const auto = params.auto === '1';
+  const paged = params.paged === '1';
 
   // Carry the chart across when switching theme, so comparing four grounds does
   // not mean re-entering the birth details four times.
@@ -93,10 +104,38 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
         <a href={`/report?${carried.toString()}`}>Back to the readable version</a>
       </div>
 
-      <Paginate css={pagedCss(theme, r.displayName ?? 'Vedic Astrologey')} autoPrint={auto}>
-        <ReportDocument r={r} n={n} theme={theme} gender={gender} />
-      </Paginate>
+      {paged ? (
+        <Paginate css={pagedCss(theme, r.displayName ?? 'Vedic Astrologey')} autoPrint={auto}>
+          <ReportDocument r={r} n={n} theme={theme} gender={gender} />
+        </Paginate>
+      ) : (
+        <>
+          <style>{printCss(theme)}</style>
+          <div className="rp-doc">
+            <ReportDocument r={r} n={n} theme={theme} gender={gender} />
+          </div>
+          {auto && <AutoPrint />}
+        </>
+      )}
     </>
+  );
+}
+
+/**
+ * Opens the print dialogue once the document has painted.
+ *
+ * Two frames rather than one: the first lets layout settle, the second lets the
+ * chart plates paint. Printing before that gives a document with gaps where the
+ * charts should be.
+ */
+function AutoPrint() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html:
+          'requestAnimationFrame(function(){requestAnimationFrame(function(){window.print()})})',
+      }}
+    />
   );
 }
 
